@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trabajos Pendientes - Dark Interactive</title>
+  <title>Trabajos Pendientes - Cloud Synced</title>
   <!-- Google Fonts & Material Symbols Rounded -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,38 +91,20 @@
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
-    .glow-slate {
-      filter: drop-shadow(0 0 3px rgba(100, 116, 139, 0.3));
-    }
-    .glow-orange {
-      filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.6));
-    }
-    .glow-yellow {
-      filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.6));
-    }
-    .glow-green {
-      filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6));
-    }
-    .glow-cyan {
-      filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.65));
-    }
+    .glow-slate { filter: drop-shadow(0 0 3px rgba(100, 116, 139, 0.3)); }
+    .glow-orange { filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.6)); }
+    .glow-yellow { filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.6)); }
+    .glow-green { filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6)); }
+    .glow-cyan { filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.65)); }
+
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in {
       animation: fadeInUp 0.35s ease-out forwards;
     }
-    .custom-scroll::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
+    .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.15);
       border-radius: 9999px;
@@ -144,12 +126,18 @@
         <div>
           <h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
             Trabajos Pendientes
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Dark UI</span>
+            <span id="syncBadge" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-white/[0.06] flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Local
+            </span>
           </h1>
           <p class="text-xs text-slate-400">Control de flujo y proyectos</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <button onclick="syncWithCloud(true)" title="Recargar y sincronizar con Google Sheets" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+          <span id="syncIcon" class="material-symbols-rounded text-base text-cyan-400">sync</span>
+          Sincronizar
+        </button>
         <button onclick="openVariantsModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
           <span class="material-symbols-rounded text-base text-slate-400">domain</span>
           Empresas
@@ -174,12 +162,12 @@
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
 
-    <!-- KPI Cards (Actúan como Filtros de Estado con efecto de ampliación) -->
+    <!-- KPI Cards (Filtros de Estado interactivos) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" id="kpiContainer">
       <!-- Injected via JS -->
     </div>
 
-    <!-- Active Filter Indicator (if any) -->
+    <!-- Active Filter Indicator -->
     <div id="activeFilterBadge" class="hidden mb-4 flex items-center gap-2">
       <span class="text-xs text-slate-400">Filtro activo:</span>
       <span id="activeFilterText" class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
@@ -189,7 +177,7 @@
       <button onclick="setStatusFilter('')" class="text-xs text-slate-500 hover:text-slate-300 underline">Quitar filtro</button>
     </div>
 
-    <!-- Search & Filters Toolbar (Sin el listado de estado que ahora está en los KPIs) -->
+    <!-- Search & Filters Toolbar -->
     <div class="glass-panel p-3.5 rounded-2xl mb-5 flex flex-wrap items-center justify-between gap-3 shadow-xl">
       <div class="flex items-center gap-2.5 flex-1 min-w-[220px] bg-white/[0.025] rounded-xl px-3.5 py-2 border border-white/[0.03]">
         <span class="material-symbols-rounded text-slate-400 text-lg">search</span>
@@ -295,7 +283,7 @@
     </div>
   </div>
 
-  <!-- Modal: Gestionar Empresas (Variantes simplificado) -->
+  <!-- Modal: Gestionar Empresas -->
   <div id="variantsModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
     <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
@@ -327,8 +315,13 @@
   </div>
 
   <script>
-    // Configuración con escala cromática fija según porcentaje:
-    // 0% = gris, 25% = naranja, 50% = amarillo, 75% = verde, 100% = cyan
+    // =========================================================================
+    // 🔗 CONFIGURACIÓN DE NUBE (GOOGLE SHEETS / APPS SCRIPT)
+    // Pega aquí el enlace que obtengas al implementar tu Apps Script como Web App:
+    // =========================================================================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMFptlr7vL7LQtMSIUlYIRqndaUjK6tsFsz-swGnFZRIl7wNprsAwP3ganRzw6PYMuQA/exec"; // <-- PEGA AQUÍ TU URL (ej: "https://script.google.com/macros/s/AKfycb.../exec")
+    // =========================================================================
+
     const DEFAULT_CONFIG = {
       companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal"],
       statuses: [
@@ -346,107 +339,126 @@
     };
 
     const INITIAL_TASKS = [
-      {
-        id: "task-1",
-        company: "UNICO",
-        desc: "Crear página de Instagram y armar placas para feed + historias",
-        status: "Aprobado",
-        priority: "Máxima",
-        date: "",
-        details: "Corroborar que el Instagram esté bien",
-        progress: 75
-      },
-      {
-        id: "task-2",
-        company: "Itraco",
-        desc: "Realizar 3 posts sobre el edificio de Las Piedras",
-        status: "En proceso",
-        priority: "Máxima",
-        date: "",
-        details: "Faltan los copys",
-        progress: 25
-      },
-      {
-        id: "task-3",
-        company: "Royal Enfield",
-        desc: "Modificar placas madre con logo de la concesionaria",
-        status: "Chequeo / Entregado",
-        priority: "Máxima",
-        date: "",
-        details: "En espera de respuesta",
-        progress: 50
-      },
-      {
-        id: "task-4",
-        company: "Hotel Bicentenario",
-        desc: "Armar placa individual para el club San Martín",
-        status: "No realizado",
-        priority: "Media",
-        date: "2026-09-01",
-        details: "-",
-        progress: 0
-      },
-      {
-        id: "task-5",
-        company: "Royal Enfield",
-        desc: "Realizar edición de video de quedada",
-        status: "No realizado",
-        priority: "Media",
-        date: "",
-        details: "-",
-        progress: 0
-      },
-      {
-        id: "task-6",
-        company: "Alta Vista",
-        desc: "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
-        status: "No realizado",
-        priority: "Media",
-        date: "",
-        details: "-",
-        progress: 0
-      },
-      {
-        id: "task-7",
-        company: "RevCardinal",
-        desc: "Armar tarjeta de presentación con QR a la página oficial",
-        status: "No realizado",
-        priority: "Mínima",
-        date: "",
-        details: "-",
-        progress: 0
-      }
+      { id: "task-1", company: "UNICO", desc: "Crear página de Instagram y armar placas para feed + historias", status: "Aprobado", priority: "Máxima", date: "", details: "Corroborar que el Instagram esté bien", progress: 75 },
+      { id: "task-2", company: "Itraco", desc: "Realizar 3 posts sobre el edificio de Las Piedras", status: "En proceso", priority: "Máxima", date: "", details: "Faltan los copys", progress: 25 },
+      { id: "task-3", company: "Royal Enfield", desc: "Modificar placas madre con logo de la concesionaria", status: "Chequeo / Entregado", priority: "Máxima", date: "", details: "En espera de respuesta", progress: 50 },
+      { id: "task-4", company: "Hotel Bicentenario", desc: "Armar placa individual para el club San Martín", status: "No realizado", priority: "Media", date: "2026-09-01", details: "-", progress: 0 },
+      { id: "task-5", company: "Royal Enfield", desc: "Realizar edición de video de quedada", status: "No realizado", priority: "Media", date: "", details: "-", progress: 0 },
+      { id: "task-6", company: "Alta Vista", desc: "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)", status: "No realizado", priority: "Media", date: "", details: "-", progress: 0 },
+      { id: "task-7", company: "RevCardinal", desc: "Armar tarjeta de presentación con QR a la página oficial", status: "No realizado", priority: "Mínima", date: "", details: "-", progress: 0 }
     ];
 
-    let config = JSON.parse(localStorage.getItem('tp_config_v2')) || DEFAULT_CONFIG;
-    let tasks = JSON.parse(localStorage.getItem('tp_tasks_v2')) || INITIAL_TASKS;
-    let activeStatusFilter = ""; // Filtro de estado seleccionado desde las tarjetas KPI
+    let config = JSON.parse(localStorage.getItem('tp_config_cloud')) || DEFAULT_CONFIG;
+    let tasks = JSON.parse(localStorage.getItem('tp_tasks_cloud')) || INITIAL_TASKS;
+    let activeStatusFilter = "";
+
+    function updateSyncBadge(status, color, spin = false) {
+      const badge = document.getElementById('syncBadge');
+      const icon = document.getElementById('syncIcon');
+      if (spin) {
+        icon.classList.add('animate-spin');
+      } else {
+        icon.classList.remove('animate-spin');
+      }
+
+      let dotColor = "bg-slate-400";
+      let textColor = "text-slate-400";
+      let borderColor = "border-white/[0.06]";
+
+      if (color === "green") {
+        dotColor = "bg-emerald-400";
+        textColor = "text-emerald-400";
+        borderColor = "border-emerald-500/30";
+      } else if (color === "yellow") {
+        dotColor = "bg-amber-400 animate-ping";
+        textColor = "text-amber-400";
+        borderColor = "border-amber-500/30";
+      } else if (color === "red") {
+        dotColor = "bg-rose-400";
+        textColor = "text-rose-400";
+        borderColor = "border-rose-500/30";
+      }
+
+      badge.className = `text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1`;
+      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span> ${status}`;
+    }
+
+    // Sincronización bidireccional con Google Apps Script
+    async function syncWithCloud(forceFetch = false) {
+      if (!GOOGLE_SCRIPT_URL) {
+        updateSyncBadge("Modo Local", "slate");
+        return;
+      }
+
+      updateSyncBadge("Sincronizando...", "yellow", true);
+
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await response.json();
+
+        if (data && data.tasks && Array.isArray(data.tasks)) {
+          tasks = data.tasks;
+          if (data.companies && Array.isArray(data.companies)) {
+            config.companies = data.companies;
+          }
+          localStorage.setItem('tp_config_cloud', JSON.stringify(config));
+          localStorage.setItem('tp_tasks_cloud', JSON.stringify(tasks));
+          populateDropdowns();
+          renderKPIs();
+          renderTable();
+          updateSyncBadge("Conectado", "green");
+        }
+      } catch (err) {
+        console.warn("Fallo al sincronizar con Google Sheets:", err);
+        updateSyncBadge("Sin conexión", "red");
+      }
+    }
+
+    async function pushToCloud() {
+      if (!GOOGLE_SCRIPT_URL) return;
+
+      updateSyncBadge("Guardando...", "yellow", true);
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "save",
+            tasks: tasks,
+            companies: config.companies
+          })
+        });
+        updateSyncBadge("Guardado", "green");
+      } catch (err) {
+        console.warn("Error al guardar en Google Sheets:", err);
+        updateSyncBadge("Error al guardar", "red");
+      }
+    }
 
     function saveState() {
-      localStorage.setItem('tp_config_v2', JSON.stringify(config));
-      localStorage.setItem('tp_tasks_v2', JSON.stringify(tasks));
+      localStorage.setItem('tp_config_cloud', JSON.stringify(config));
+      localStorage.setItem('tp_tasks_cloud', JSON.stringify(tasks));
       renderKPIs();
       populateDropdowns();
       renderTable();
+      pushToCloud();
     }
 
-    // Regla de colorimetría por porcentaje solicitada:
-    // 0% = gris, 25% = naranja, 50% = amarillo, 75% = verde, 100% = cyan
     function getProgressStyle(percent) {
       if (percent <= 0) {
-        return { stroke: "#64748B", glow: "glow-slate", text: "text-slate-400" }; // gris
+        return { stroke: "#64748B", glow: "glow-slate", text: "text-slate-400" };
       } else if (percent <= 35) {
-        return { stroke: "#F97316", glow: "glow-orange", text: "text-orange-400" }; // 25% naranja
+        return { stroke: "#F97316", glow: "glow-orange", text: "text-orange-400" };
       } else if (percent <= 60) {
-        return { stroke: "#FACC15", glow: "glow-yellow", text: "text-yellow-400" }; // 50% amarillo
+        return { stroke: "#FACC15", glow: "glow-yellow", text: "text-yellow-400" };
       } else if (percent <= 85) {
-        return { stroke: "#22C55E", glow: "glow-green", text: "text-emerald-400" }; // 75% verde
+        return { stroke: "#22C55E", glow: "glow-green", text: "text-emerald-400" };
       } else {
-        return { stroke: "#06B6D4", glow: "glow-cyan", text: "text-cyan-400" }; // 100% cyan
+        return { stroke: "#06B6D4", glow: "glow-cyan", text: "text-cyan-400" };
       }
     }
 
-    // Renderizar Circular Progress SVG
     function renderCircularProgress(percent) {
       const radius = 15;
       const circumference = 2 * Math.PI * radius;
@@ -465,10 +477,9 @@
       `;
     }
 
-    // Filtro por Estado desde los KPIs
     function setStatusFilter(statusKey) {
       if (activeStatusFilter === statusKey) {
-        activeStatusFilter = ""; // toggle off
+        activeStatusFilter = "";
       } else {
         activeStatusFilter = statusKey;
       }
@@ -486,7 +497,6 @@
       renderTable();
     }
 
-    // Renderizar KPIs como botones de filtro interactivos con efecto de ampliación (hover:scale-105)
     function renderKPIs() {
       const total = tasks.length;
       const pendientes = tasks.filter(t => t.status === "No realizado").length;
@@ -550,7 +560,6 @@
       }
     }
 
-    // Renderizar Tabla
     function renderTable() {
       const search = document.getElementById('searchInput').value.toLowerCase();
       const compFilter = document.getElementById('filterCompany').value;
@@ -602,8 +611,6 @@
         if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
         else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
 
-        // Color del badge según porcentaje
-        const pStyle = getProgressStyle(task.progress !== undefined ? task.progress : 0);
         let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
         if (task.progress <= 0) {
           statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
@@ -663,7 +670,6 @@
       }).join('');
     }
 
-    // Click en la fila para abrir edición
     function onRowClick(e, id) {
       editTask(id);
     }
@@ -807,9 +813,11 @@
       event.target.value = "";
     }
 
+    // Inicializar
     populateDropdowns();
     renderKPIs();
     renderTable();
+    syncWithCloud();
   </script>
 </body>
 </html>

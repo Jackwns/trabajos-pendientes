@@ -251,7 +251,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">Estado</label>
-            <select id="taskStatus" required onchange="updateProgressFromStatus()" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+            <select id="taskStatus" required  class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
             </select>
           </div>
           <div>
@@ -260,15 +260,9 @@
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Fecha de Ingreso</label>
-            <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Progreso (%)</label>
-            <input type="number" id="taskProgress" min="0" max="100" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
-          </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Fecha de Ingreso</label>
+          <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">Detalles / Observaciones</label>
@@ -375,15 +369,15 @@
     // 🔥 CONFIGURACIÓN DIRECTA DE FIREBASE FIRESTORE
     // Puedes pegar tus credenciales aquí o ingresarlas desde el botón "Firebase" en la web:
     // =========================================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyBieGuJZLjNOD5x-lT4OApACvKPMnOEm8A",
-  authDomain: "trabajos-pendientes-59380.firebaseapp.com",
-  projectId: "trabajos-pendientes-59380",
-  storageBucket: "trabajos-pendientes-59380.firebasestorage.app",
-  messagingSenderId: "744731878244",
-  appId: "1:744731878244:web:bc518dfe7749852618d071",
-  measurementId: "G-N0274ZSDSB"
-};
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBieGuJZLjNOD5x-lT4OApACvKPMnOEm8A",
+      authDomain: "trabajos-pendientes-59380.firebaseapp.com",
+      projectId: "trabajos-pendientes-59380",
+      storageBucket: "trabajos-pendientes-59380.firebasestorage.app",
+      messagingSenderId: "744731878244",
+      appId: "1:744731878244:web:bc518dfe7749852618d071",
+      measurementId: "G-N0274ZSDSB"
+    };
     // =========================================================================
 
     const DEFAULT_CONFIG = {
@@ -792,12 +786,12 @@ const firebaseConfig = {
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
         document.getElementById('taskDate').value = task.date;
-        document.getElementById('taskProgress').value = task.progress;
+        // progreso automático
         document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
         document.getElementById('taskId').value = "";
-        updateProgressFromStatus();
+        // progreso automático
       }
       document.getElementById('taskModal').classList.remove('hidden');
     }
@@ -814,8 +808,17 @@ const firebaseConfig = {
       const status = document.getElementById('taskStatus').value;
       const priority = document.getElementById('taskPriority').value;
       const date = document.getElementById('taskDate').value;
-      const progress = parseInt(document.getElementById('taskProgress').value) || 0;
       const details = document.getElementById('taskDetails').value;
+
+      // El porcentaje y color se calculan automáticamente según el estado seleccionado:
+      const statusMap = {
+        "No realizado": 0,
+        "En proceso": 25,
+        "Chequeo / Entregado": 50,
+        "Aprobado": 75,
+        "Realizado / Finalizado": 100
+      };
+      const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
       const taskObj = { id, company, desc, status, priority, date, progress, details };
 

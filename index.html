@@ -158,8 +158,8 @@
           <h1 class="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5 truncate">
             <span class="truncate">Trabajos</span>
             <!-- Indicador en Móvil: Solo punto con color / En Desktop: Punto + Texto -->
-            <span id="syncBadge"  title="Estado de sincronización"
-              class=" text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-slate-400 border border-white/[0.06] flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0">
+            <span id="syncBadge" onclick="openFirebaseConfigModal()" title="Estado de sincronización"
+              class="cursor-pointer text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-slate-400 border border-white/[0.06] flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0">
               <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
               <span id="syncText" class="hidden sm:inline">Local</span>
             </span>
@@ -176,7 +176,10 @@
             <span class="material-symbols-rounded text-base text-slate-400">domain</span>
             Empresas
           </button>
-
+          <button onclick="openFirebaseConfigModal()" title="Configuración de Firebase" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+            <span class="material-symbols-rounded text-base text-amber-400">dns</span>
+            Firebase
+          </button>
           <button onclick="exportData()" title="Descargar copia de respaldo JSON" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
             <span class="material-symbols-rounded text-base text-slate-400">download</span>
             Exportar
@@ -413,7 +416,7 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-3 gap-2 mb-2">
+      <div class="grid grid-cols-2 gap-2.5 mb-2">
         <button onclick="closeBottomSheet(); openVariantsModal();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
           <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-cyan-400 flex items-center justify-center shrink-0">
             <span class="material-symbols-rounded text-lg">domain</span>
@@ -424,7 +427,15 @@
           </div>
         </button>
 
-
+        <button onclick="closeBottomSheet(); openFirebaseConfigModal();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded text-lg">dns</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Firebase</div>
+            <div class="text-[10px] text-slate-400">Base de datos</div>
+          </div>
+        </button>
 
         <button onclick="closeBottomSheet(); exportData();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
@@ -621,7 +632,7 @@
         borderColor = "border-rose-500/30";
       }
 
-      badge.className = ` text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0`;
+      badge.className = `cursor-pointer text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0`;
       dot.className = `w-1.5 h-1.5 rounded-full ${dotColor}`;
       text.innerText = status;
     }
@@ -728,7 +739,7 @@
         const activeClass = isActive ? "active-kpi" : "";
         return `
           <div onclick="setStatusFilter('${item.filterKey}')"
-            class="glass-card ${activeClass} p-3 rounded-2xl flex items-center gap-2.5 animate-fade-in  select-none shrink-0 w-36 md:w-auto snap-start"
+            class="glass-card ${activeClass} p-3 rounded-2xl flex items-center gap-2.5 animate-fade-in cursor-pointer select-none shrink-0 w-36 md:w-auto snap-start"
             style="animation-delay: ${idx * 25}ms" title="Filtrar por: ${item.label}">
             <div class="w-8 h-8 rounded-xl bg-white/[0.04] flex items-center justify-center shadow-inner shrink-0">
               <span class="material-symbols-rounded ${item.iconColor} text-base">${item.icon}</span>

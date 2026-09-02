@@ -140,27 +140,27 @@
           <p class="text-xs text-slate-400">Panel en tiempo real con Firestore</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="openFirebaseConfigModal()" title="Conexión de base de datos" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
-          <span class="material-symbols-rounded text-base text-amber-400">dns</span>
-          Firebase
-        </button>
-        <button onclick="openVariantsModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button onclick="openVariantsModal()" title="Gestionar Empresas" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
           <span class="material-symbols-rounded text-base text-slate-400">domain</span>
-          Empresas
+          <span class="hidden sm:inline">Empresas</span>
         </button>
-        <button onclick="exportData()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+        <button onclick="openFirebaseConfigModal()" title="Configuración de Firebase" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+          <span class="material-symbols-rounded text-base text-amber-400">dns</span>
+          <span class="hidden sm:inline">Firebase</span>
+        </button>
+        <button onclick="exportData()" title="Descargar copia de respaldo JSON" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
           <span class="material-symbols-rounded text-base text-slate-400">download</span>
           Exportar
         </button>
-        <button onclick="document.getElementById('importFileInput').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+        <button onclick="document.getElementById('importFileInput').click()" title="Cargar copia de respaldo JSON" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
           <span class="material-symbols-rounded text-base text-slate-400">upload</span>
           Importar
         </button>
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
-        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95">
+        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95">
           <span class="material-symbols-rounded text-base">add</span>
-          Nueva Tarea
+          <span class="hidden xs:inline sm:inline">Nueva</span> Tarea
         </button>
       </div>
     </div>
@@ -198,8 +198,9 @@
       </div>
     </div>
 
-    <!-- Table Container -->
-    <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+    <!-- Tasks View (Desktop Table & Mobile Cards) -->
+    <!-- DESKTOP TABLE (md y superior) -->
+    <div class="hidden md:block glass-panel rounded-2xl overflow-hidden shadow-2xl">
       <div class="overflow-x-auto custom-scroll p-1">
         <table class="w-full text-left border-collapse">
           <thead>
@@ -217,10 +218,24 @@
           <tbody id="tasksTableBody" class="divide-y divide-white/[0.03] text-sm"></tbody>
         </table>
       </div>
-      <div id="emptyState" class="hidden p-14 text-center">
-        <span class="material-symbols-rounded text-slate-600 text-3xl mb-2">inbox</span>
-        <p class="text-slate-500 text-sm">No se encontraron trabajos con los filtros seleccionados.</p>
-      </div>
+    </div>
+
+    <!-- MOBILE CARDS LIST (pantallas de teléfono < md) -->
+    <div id="tasksMobileList" class="md:hidden space-y-3">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden glass-panel rounded-2xl p-12 text-center mt-4">
+      <span class="material-symbols-rounded text-slate-600 text-4xl mb-2">inbox</span>
+      <p class="text-slate-400 text-sm">No se encontraron trabajos con los filtros seleccionados.</p>
+    </div>
+
+    <!-- Floating Action Button (FAB) para móviles -->
+    <div class="md:hidden fixed bottom-6 right-6 z-40">
+      <button onclick="openTaskModal()" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-xl shadow-cyan-500/30 active:scale-90 transition-transform">
+        <span class="material-symbols-rounded text-2xl">add</span>
+      </button>
     </div>
 
   </main>
@@ -721,77 +736,142 @@
       });
 
       const tbody = document.getElementById('tasksTableBody');
+      const mobileList = document.getElementById('tasksMobileList');
       const empty = document.getElementById('emptyState');
 
       if (filtered.length === 0) {
-        tbody.innerHTML = "";
+        if (tbody) tbody.innerHTML = "";
+        if (mobileList) mobileList.innerHTML = "";
         empty.classList.remove('hidden');
         return;
       }
       empty.classList.add('hidden');
 
-      tbody.innerHTML = filtered.map((task, idx) => {
-        let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
-        if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
-        else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
+      // 1. Render para DESKTOP (Tabla tradicional idéntica a la actual)
+      if (tbody) {
+        tbody.innerHTML = filtered.map((task, idx) => {
+          let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+          if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
+          else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
 
-        let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
-        if (task.progress <= 0) {
-          statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
-        } else if (task.progress <= 35) {
-          statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
-        } else if (task.progress <= 60) {
-          statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
-        } else if (task.progress <= 85) {
-          statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-        } else {
-          statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
-        }
+          let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+          if (task.progress <= 0) statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
+          else if (task.progress <= 35) statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
+          else if (task.progress <= 60) statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
+          else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+          else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
 
-        return `
-          <tr onclick="onRowClick(event, '${task.id}')"
-            class="table-row-card group animate-fade-in" style="animation-delay: ${idx * 30}ms"
-            title="Click para editar tarea">
-            <td class="py-3 px-4 text-center">
-              ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
-            </td>
-            <td class="py-3 px-4 font-semibold text-white whitespace-nowrap">
-              <span class="inline-block px-2.5 py-1 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.04]">
-                ${task.company}
-              </span>
-            </td>
-            <td class="py-3 px-4 font-medium text-slate-200 max-w-sm leading-snug">
-              ${task.desc}
-            </td>
-            <td class="py-3 px-4 whitespace-nowrap">
-              <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass}">
-                ${task.status}
-              </span>
-            </td>
-            <td class="py-3 px-4 whitespace-nowrap">
-              <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
-                ${task.priority}
-              </span>
-            </td>
-            <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
-              ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
-            </td>
-            <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
-              ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
-            </td>
-            <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
-              <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center transition-all active:scale-90">
-                  <span class="material-symbols-rounded text-base">edit</span>
-                </button>
-                <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition-all active:scale-90">
-                  <span class="material-symbols-rounded text-base">delete</span>
-                </button>
+          return `
+            <tr onclick="onRowClick(event, '${task.id}')"
+              class="table-row-card group animate-fade-in" style="animation-delay: ${idx * 25}ms"
+              title="Click para editar tarea">
+              <td class="py-3 px-4 text-center">
+                ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
+              </td>
+              <td class="py-3 px-4 font-semibold text-white whitespace-nowrap">
+                <span class="inline-block px-2.5 py-1 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.04]">
+                  ${task.company}
+                </span>
+              </td>
+              <td class="py-3 px-4 font-medium text-slate-200 max-w-sm leading-snug">
+                ${task.desc}
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass}">
+                  ${task.status}
+                </span>
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
+                  ${task.priority}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
+                ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
+              </td>
+              <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
+                ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
+              </td>
+              <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
+                <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                  <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center transition-all active:scale-90">
+                    <span class="material-symbols-rounded text-base">edit</span>
+                  </button>
+                  <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition-all active:scale-90">
+                    <span class="material-symbols-rounded text-base">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // 2. Render para MÓVILES (Tarjetas nativas modernas diseñadas para pantalla táctil)
+      if (mobileList) {
+        mobileList.innerHTML = filtered.map((task, idx) => {
+          let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+          if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
+          else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
+
+          let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+          if (task.progress <= 0) statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
+          else if (task.progress <= 35) statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
+          else if (task.progress <= 60) statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
+          else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+          else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
+
+          return `
+            <div onclick="onRowClick(event, '${task.id}')"
+              class="glass-panel p-4 rounded-2xl animate-fade-in relative overflow-hidden active:scale-[0.98] transition-all"
+              style="animation-delay: ${idx * 25}ms">
+              
+              <!-- Fila Superior: Progreso, Empresa, Prioridad y Acciones -->
+              <div class="flex items-center justify-between gap-2 mb-2.5">
+                <div class="flex items-center gap-2.5">
+                  ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
+                  <div>
+                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-white/[0.06] text-xs font-bold text-white border border-white/[0.05]">
+                      ${task.company}
+                    </span>
+                    <span class="ml-1 inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
+                      ${task.priority}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Botones de Acción táctiles -->
+                <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                  <button onclick="editTask('${task.id}')" class="w-8 h-8 rounded-xl bg-white/[0.03] text-slate-300 hover:text-cyan-400 flex items-center justify-center active:scale-90">
+                    <span class="material-symbols-rounded text-base">edit</span>
+                  </button>
+                  <button onclick="deleteTask('${task.id}')" class="w-8 h-8 rounded-xl bg-white/[0.03] text-slate-400 hover:text-rose-400 flex items-center justify-center active:scale-90">
+                    <span class="material-symbols-rounded text-base">delete</span>
+                  </button>
+                </div>
               </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+
+              <!-- Descripción -->
+              <p class="text-sm font-semibold text-slate-100 mb-3 leading-snug">
+                ${task.desc}
+              </p>
+
+              <!-- Fila Inferior: Estado y Detalles/Fecha -->
+              <div class="flex items-center justify-between text-xs pt-2.5 border-t border-white/[0.04] gap-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusBadgeClass}">
+                  ${task.status}
+                </span>
+
+                <div class="flex items-center gap-3 text-slate-400 text-[11px] truncate">
+                  ${task.date ? `<span class="flex items-center gap-1"><span class="material-symbols-rounded text-xs">calendar_today</span> ${task.date}</span>` : ''}
+                  ${task.details && task.details !== '-' ? `<span class="flex items-center gap-1 truncate max-w-[140px]"><span class="material-symbols-rounded text-xs">chat_bubble_outline</span> ${task.details}</span>` : ''}
+                </div>
+              </div>
+
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function onRowClick(e, id) {

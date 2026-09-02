@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trabajos Pendientes - Dark Interactive</title>
+  <!-- Google Fonts & Material Symbols Rounded -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            dark: {
+              950: '#070A12',
+              900: '#0B0F19',
+              850: '#101726',
+              800: '#162033',
+              700: '#23314D',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      background: radial-gradient(circle at 50% 0%, #111A2E 0%, #070A12 75%);
+      background-attachment: fixed;
+      color: #E2E8F0;
+    }
+    .material-symbols-rounded {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-rounded.filled {
+      font-variation-settings: 'FILL' 1;
+    }
+    .glass-panel {
+      background: rgba(16, 23, 38, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .glass-card {
+      background: rgba(22, 32, 51, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      transform: scale(1.04);
+      background: rgba(28, 41, 65, 0.7);
+      box-shadow: 0 12px 28px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.12);
+      z-index: 10;
+    }
+    .glass-card.active-kpi {
+      background: rgba(28, 41, 65, 0.85);
+      border-color: rgba(6, 182, 212, 0.6);
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
+      transform: scale(1.03);
+    }
+    .table-row-card {
+      transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .table-row-card:hover {
+      transform: scale(1.025);
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 10;
+    }
+    .circle-progress {
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .glow-slate {
+      filter: drop-shadow(0 0 3px rgba(100, 116, 139, 0.3));
+    }
+    .glow-orange {
+      filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.6));
+    }
+    .glow-yellow {
+      filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.6));
+    }
+    .glow-green {
+      filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6));
+    }
+    .glow-cyan {
+      filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.65));
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in {
+      animation: fadeInUp 0.35s ease-out forwards;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans pb-20 selection:bg-cyan-400 selection:text-dark-950">
+
+  <!-- Ambient Glow -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[250px] bg-blue-600/10 blur-[130px] rounded-full pointer-events-none -z-10"></div>
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.05]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-blue-500/25">
+          <span class="material-symbols-rounded filled text-xl">bolt</span>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+            Trabajos Pendientes
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Dark UI</span>
+          </h1>
+          <p class="text-xs text-slate-400">Control de flujo y proyectos</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openVariantsModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+          <span class="material-symbols-rounded text-base text-slate-400">domain</span>
+          Empresas
+        </button>
+        <button onclick="exportData()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+          <span class="material-symbols-rounded text-base text-slate-400">download</span>
+          Exportar
+        </button>
+        <button onclick="document.getElementById('importFileInput').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+          <span class="material-symbols-rounded text-base text-slate-400">upload</span>
+          Importar
+        </button>
+        <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
+        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95">
+          <span class="material-symbols-rounded text-base">add</span>
+          Nueva Tarea
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+    <!-- KPI Cards (Actúan como Filtros de Estado con efecto de ampliación) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" id="kpiContainer">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- Active Filter Indicator (if any) -->
+    <div id="activeFilterBadge" class="hidden mb-4 flex items-center gap-2">
+      <span class="text-xs text-slate-400">Filtro activo:</span>
+      <span id="activeFilterText" class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+        <!-- Text -->
+        <button onclick="setStatusFilter('')" class="ml-1 hover:text-white">✕</button>
+      </span>
+      <button onclick="setStatusFilter('')" class="text-xs text-slate-500 hover:text-slate-300 underline">Quitar filtro</button>
+    </div>
+
+    <!-- Search & Filters Toolbar (Sin el listado de estado que ahora está en los KPIs) -->
+    <div class="glass-panel p-3.5 rounded-2xl mb-5 flex flex-wrap items-center justify-between gap-3 shadow-xl">
+      <div class="flex items-center gap-2.5 flex-1 min-w-[220px] bg-white/[0.025] rounded-xl px-3.5 py-2 border border-white/[0.03]">
+        <span class="material-symbols-rounded text-slate-400 text-lg">search</span>
+        <input type="text" id="searchInput" placeholder="Buscar por cliente, tarea o detalle..." oninput="renderTable()"
+          class="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-500 text-white">
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <select id="filterCompany" onchange="renderTable()" class="text-xs font-medium bg-dark-850/80 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none hover:border-cyan-500/40 transition-colors">
+          <option value="">Todas las empresas</option>
+        </select>
+        <select id="filterPriority" onchange="renderTable()" class="text-xs font-medium bg-dark-850/80 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none hover:border-cyan-500/40 transition-colors">
+          <option value="">Todas las prioridades</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+      <div class="overflow-x-auto custom-scroll p-1">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-white/[0.04] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold">
+              <th class="py-3.5 px-4 w-16 text-center">Progreso</th>
+              <th class="py-3.5 px-4">Empresa</th>
+              <th class="py-3.5 px-4">Descripción del Trabajo</th>
+              <th class="py-3.5 px-4">Estado</th>
+              <th class="py-3.5 px-4">Prioridad</th>
+              <th class="py-3.5 px-4">Fecha Ingreso</th>
+              <th class="py-3.5 px-4">Detalles</th>
+              <th class="py-3.5 px-4 text-center w-24">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tasksTableBody" class="divide-y divide-white/[0.03] text-sm">
+            <!-- Injected via JS -->
+          </tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="hidden p-14 text-center">
+        <span class="material-symbols-rounded text-slate-600 text-3xl mb-2">inbox</span>
+        <p class="text-slate-500 text-sm">No se encontraron trabajos con los filtros seleccionados.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal: Crear / Editar Tarea -->
+  <div id="taskModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-fade-in">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
+        <h3 id="modalTitle" class="text-base font-bold text-white flex items-center gap-2">
+          <span class="material-symbols-rounded text-cyan-400 text-xl">edit_note</span>
+          <span id="modalTitleText">Nueva Tarea</span>
+        </h3>
+        <button onclick="closeTaskModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.05] transition-colors">
+          <span class="material-symbols-rounded text-lg">close</span>
+        </button>
+      </div>
+      <form id="taskForm" onsubmit="saveTask(event)" class="space-y-4">
+        <input type="hidden" id="taskId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Empresa / Cliente</label>
+          <select id="taskCompany" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Descripción del Trabajo</label>
+          <textarea id="taskDesc" required rows="2" placeholder="Ej: Crear página de Instagram..." class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors placeholder:text-slate-600"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Estado</label>
+            <select id="taskStatus" required onchange="updateProgressFromStatus()" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Prioridad</label>
+            <select id="taskPriority" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Fecha de Ingreso</label>
+            <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Progreso (%)</label>
+            <input type="number" id="taskProgress" min="0" max="100" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Detalles / Observaciones</label>
+          <input type="text" id="taskDetails" placeholder="Ej: Faltan los copys, en espera de respuesta..." class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors placeholder:text-slate-600">
+        </div>
+        <div class="pt-4 flex justify-end gap-2.5 border-t border-white/[0.06]">
+          <button type="button" onclick="closeTaskModal()" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors">Cancelar</button>
+          <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all active:scale-95">
+            <span class="material-symbols-rounded text-base">check</span>
+            Guardar Tarea
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Gestionar Empresas (Variantes simplificado) -->
+  <div id="variantsModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span class="material-symbols-rounded text-cyan-400 text-xl">domain</span>
+          Empresas / Clientes
+        </h3>
+        <button onclick="closeVariantsModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.05] transition-colors">
+          <span class="material-symbols-rounded text-lg">close</span>
+        </button>
+      </div>
+
+      <div class="mb-6">
+        <p class="text-xs text-slate-400 mb-3">Agrega o elimina empresas disponibles para asignar en las tareas:</p>
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="newCompanyName" placeholder="Nombre de nueva empresa..." class="flex-1 text-xs border border-white/[0.08] rounded-xl px-3.5 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400">
+          <button onclick="addCompany()" class="inline-flex items-center gap-1 px-3.5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all">
+            <span class="material-symbols-rounded text-base">add</span>
+            Añadir
+          </button>
+        </div>
+        <div id="companiesList" class="flex flex-wrap gap-2 max-h-56 overflow-y-auto custom-scroll p-1"></div>
+      </div>
+
+      <div class="pt-4 flex justify-end border-t border-white/[0.06]">
+        <button onclick="closeVariantsModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl transition-colors">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuración con escala cromática fija según porcentaje:
+    // 0% = gris, 25% = naranja, 50% = amarillo, 75% = verde, 100% = cyan
+    const DEFAULT_CONFIG = {
+      companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal"],
+      statuses: [
+        { name: "No realizado", percent: 0 },
+        { name: "En proceso", percent: 25 },
+        { name: "Chequeo / Entregado", percent: 50 },
+        { name: "Aprobado", percent: 75 },
+        { name: "Realizado / Finalizado", percent: 100 }
+      ],
+      priorities: [
+        { name: "Máxima", color: "rose", weight: 3 },
+        { name: "Media", color: "amber", weight: 2 },
+        { name: "Mínima", color: "slate", weight: 1 }
+      ]
+    };
+
+    const INITIAL_TASKS = [
+      {
+        id: "task-1",
+        company: "UNICO",
+        desc: "Crear página de Instagram y armar placas para feed + historias",
+        status: "Aprobado",
+        priority: "Máxima",
+        date: "",
+        details: "Corroborar que el Instagram esté bien",
+        progress: 75
+      },
+      {
+        id: "task-2",
+        company: "Itraco",
+        desc: "Realizar 3 posts sobre el edificio de Las Piedras",
+        status: "En proceso",
+        priority: "Máxima",
+        date: "",
+        details: "Faltan los copys",
+        progress: 25
+      },
+      {
+        id: "task-3",
+        company: "Royal Enfield",
+        desc: "Modificar placas madre con logo de la concesionaria",
+        status: "Chequeo / Entregado",
+        priority: "Máxima",
+        date: "",
+        details: "En espera de respuesta",
+        progress: 50
+      },
+      {
+        id: "task-4",
+        company: "Hotel Bicentenario",
+        desc: "Armar placa individual para el club San Martín",
+        status: "No realizado",
+        priority: "Media",
+        date: "2026-09-01",
+        details: "-",
+        progress: 0
+      },
+      {
+        id: "task-5",
+        company: "Royal Enfield",
+        desc: "Realizar edición de video de quedada",
+        status: "No realizado",
+        priority: "Media",
+        date: "",
+        details: "-",
+        progress: 0
+      },
+      {
+        id: "task-6",
+        company: "Alta Vista",
+        desc: "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
+        status: "No realizado",
+        priority: "Media",
+        date: "",
+        details: "-",
+        progress: 0
+      },
+      {
+        id: "task-7",
+        company: "RevCardinal",
+        desc: "Armar tarjeta de presentación con QR a la página oficial",
+        status: "No realizado",
+        priority: "Mínima",
+        date: "",
+        details: "-",
+        progress: 0
+      }
+    ];
+
+    let config = JSON.parse(localStorage.getItem('tp_config_v2')) || DEFAULT_CONFIG;
+    let tasks = JSON.parse(localStorage.getItem('tp_tasks_v2')) || INITIAL_TASKS;
+    let activeStatusFilter = ""; // Filtro de estado seleccionado desde las tarjetas KPI
+
+    function saveState() {
+      localStorage.setItem('tp_config_v2', JSON.stringify(config));
+      localStorage.setItem('tp_tasks_v2', JSON.stringify(tasks));
+      renderKPIs();
+      populateDropdowns();
+      renderTable();
+    }
+
+    // Regla de colorimetría por porcentaje solicitada:
+    // 0% = gris, 25% = naranja, 50% = amarillo, 75% = verde, 100% = cyan
+    function getProgressStyle(percent) {
+      if (percent <= 0) {
+        return { stroke: "#64748B", glow: "glow-slate", text: "text-slate-400" }; // gris
+      } else if (percent <= 35) {
+        return { stroke: "#F97316", glow: "glow-orange", text: "text-orange-400" }; // 25% naranja
+      } else if (percent <= 60) {
+        return { stroke: "#FACC15", glow: "glow-yellow", text: "text-yellow-400" }; // 50% amarillo
+      } else if (percent <= 85) {
+        return { stroke: "#22C55E", glow: "glow-green", text: "text-emerald-400" }; // 75% verde
+      } else {
+        return { stroke: "#06B6D4", glow: "glow-cyan", text: "text-cyan-400" }; // 100% cyan
+      }
+    }
+
+    // Renderizar Circular Progress SVG
+    function renderCircularProgress(percent) {
+      const radius = 15;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference - (percent / 100) * circumference;
+      const style = getProgressStyle(percent);
+
+      return `
+        <div class="relative w-10 h-10 flex items-center justify-center">
+          <svg class="w-10 h-10 circle-progress ${style.glow}" viewBox="0 0 38 38">
+            <circle cx="19" cy="19" r="${radius}" fill="transparent" stroke="rgba(255, 255, 255, 0.07)" stroke-width="3" />
+            <circle cx="19" cy="19" r="${radius}" fill="transparent" stroke="${style.stroke}" stroke-width="3"
+              stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round" class="transition-all duration-500 ease-out" />
+          </svg>
+          <span class="absolute text-[10px] font-extrabold ${style.text} tracking-tighter">${percent}%</span>
+        </div>
+      `;
+    }
+
+    // Filtro por Estado desde los KPIs
+    function setStatusFilter(statusKey) {
+      if (activeStatusFilter === statusKey) {
+        activeStatusFilter = ""; // toggle off
+      } else {
+        activeStatusFilter = statusKey;
+      }
+
+      const badge = document.getElementById('activeFilterBadge');
+      const text = document.getElementById('activeFilterText');
+      if (activeStatusFilter) {
+        badge.classList.remove('hidden');
+        text.innerHTML = `${activeStatusFilter} <button onclick="setStatusFilter('')" class="ml-1 hover:text-white">✕</button>`;
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      renderKPIs();
+      renderTable();
+    }
+
+    // Renderizar KPIs como botones de filtro interactivos con efecto de ampliación (hover:scale-105)
+    function renderKPIs() {
+      const total = tasks.length;
+      const pendientes = tasks.filter(t => t.status === "No realizado").length;
+      const enProceso = tasks.filter(t => t.status === "En proceso").length;
+      const entregados = tasks.filter(t => t.status === "Chequeo / Entregado").length;
+      const aprobados = tasks.filter(t => t.status === "Aprobado" || t.status === "Realizado / Finalizado").length;
+
+      const items = [
+        { label: "Total Trabajos", filterKey: "", value: total, icon: "assignment", iconColor: "text-slate-300", text: "text-white" },
+        { label: "Pendientes", filterKey: "No realizado", value: pendientes, icon: "hourglass_empty", iconColor: "text-slate-400", text: "text-slate-300" },
+        { label: "En Proceso", filterKey: "En proceso", value: enProceso, icon: "autorenew", iconColor: "text-orange-400", text: "text-orange-400" },
+        { label: "Entregados", filterKey: "Chequeo / Entregado", value: entregados, icon: "mark_email_read", iconColor: "text-yellow-400", text: "text-yellow-400" },
+        { label: "Aprobados / Listos", filterKey: "Aprobado", value: aprobados, icon: "task_alt", iconColor: "text-cyan-400", text: "text-cyan-400" }
+      ];
+
+      const html = items.map((item, idx) => {
+        const isActive = activeStatusFilter === item.filterKey;
+        const activeClass = isActive ? "active-kpi" : "";
+        return `
+          <div onclick="setStatusFilter('${item.filterKey}')"
+            class="glass-card ${activeClass} p-3.5 rounded-2xl flex items-center gap-3 animate-fade-in cursor-pointer select-none"
+            style="animation-delay: ${idx * 40}ms" title="Filtrar por: ${item.label}">
+            <div class="w-9 h-9 rounded-xl bg-white/[0.04] flex items-center justify-center shadow-inner">
+              <span class="material-symbols-rounded ${item.iconColor} text-lg">${item.icon}</span>
+            </div>
+            <div>
+              <div class="text-xl font-extrabold ${item.text} tracking-tight">${item.value}</div>
+              <div class="text-[11px] text-slate-400 font-medium">${item.label}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('kpiContainer').innerHTML = html;
+    }
+
+    function populateDropdowns() {
+      const filterComp = document.getElementById('filterCompany');
+      filterComp.innerHTML = '<option value="">Todas las empresas</option>' + 
+        config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      const filterPrio = document.getElementById('filterPriority');
+      filterPrio.innerHTML = '<option value="">Todas las prioridades</option>' + 
+        config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+
+      const taskComp = document.getElementById('taskCompany');
+      taskComp.innerHTML = config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      const taskStat = document.getElementById('taskStatus');
+      taskStat.innerHTML = config.statuses.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+
+      const taskPrio = document.getElementById('taskPriority');
+      taskPrio.innerHTML = config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+    }
+
+    function updateProgressFromStatus() {
+      const currentStatus = document.getElementById('taskStatus').value;
+      const found = config.statuses.find(s => s.name === currentStatus);
+      if (found) {
+        document.getElementById('taskProgress').value = found.percent;
+      }
+    }
+
+    // Renderizar Tabla
+    function renderTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const compFilter = document.getElementById('filterCompany').value;
+      const prioFilter = document.getElementById('filterPriority').value;
+
+      let filtered = tasks.filter(t => {
+        const matchesSearch = t.company.toLowerCase().includes(search) || 
+                              t.desc.toLowerCase().includes(search) || 
+                              (t.details && t.details.toLowerCase().includes(search));
+        const matchesComp = !compFilter || t.company === compFilter;
+        const matchesPrio = !prioFilter || t.priority === prioFilter;
+        
+        let matchesStatus = true;
+        if (activeStatusFilter) {
+          if (activeStatusFilter === "Aprobado") {
+            matchesStatus = t.status === "Aprobado" || t.status === "Realizado / Finalizado";
+          } else {
+            matchesStatus = t.status === activeStatusFilter;
+          }
+        }
+
+        return matchesSearch && matchesComp && matchesPrio && matchesStatus;
+      });
+
+      filtered.sort((a, b) => {
+        const isDoneA = a.status.includes("Finalizado") || a.status.includes("Realizado");
+        const isDoneB = b.status.includes("Finalizado") || b.status.includes("Realizado");
+        if (isDoneA && !isDoneB) return 1;
+        if (!isDoneA && isDoneB) return -1;
+
+        const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
+        const wA = prioWeights[a.priority] || 0;
+        const wB = prioWeights[b.priority] || 0;
+        return wB - wA;
+      });
+
+      const tbody = document.getElementById('tasksTableBody');
+      const empty = document.getElementById('emptyState');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = "";
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      tbody.innerHTML = filtered.map((task, idx) => {
+        let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+        if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
+        else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
+
+        // Color del badge según porcentaje
+        const pStyle = getProgressStyle(task.progress !== undefined ? task.progress : 0);
+        let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+        if (task.progress <= 0) {
+          statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
+        } else if (task.progress <= 35) {
+          statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
+        } else if (task.progress <= 60) {
+          statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
+        } else if (task.progress <= 85) {
+          statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+        } else {
+          statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
+        }
+
+        return `
+          <tr onclick="onRowClick(event, '${task.id}')"
+            class="table-row-card group animate-fade-in" style="animation-delay: ${idx * 30}ms"
+            title="Click para editar tarea">
+            <td class="py-3 px-4 text-center">
+              ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
+            </td>
+            <td class="py-3 px-4 font-semibold text-white whitespace-nowrap">
+              <span class="inline-block px-2.5 py-1 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.04]">
+                ${task.company}
+              </span>
+            </td>
+            <td class="py-3 px-4 font-medium text-slate-200 max-w-sm leading-snug">
+              ${task.desc}
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap">
+              <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass}">
+                ${task.status}
+              </span>
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap">
+              <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
+                ${task.priority}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
+              ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
+            </td>
+            <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
+              ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
+              <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center transition-all active:scale-90">
+                  <span class="material-symbols-rounded text-base">edit</span>
+                </button>
+                <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition-all active:scale-90">
+                  <span class="material-symbols-rounded text-base">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Click en la fila para abrir edición
+    function onRowClick(e, id) {
+      editTask(id);
+    }
+
+    function openTaskModal(task = null) {
+      document.getElementById('taskForm').reset();
+      if (task) {
+        document.getElementById('modalTitleText').innerText = "Editar Tarea";
+        document.getElementById('taskId').value = task.id;
+        document.getElementById('taskCompany').value = task.company;
+        document.getElementById('taskDesc').value = task.desc;
+        document.getElementById('taskStatus').value = task.status;
+        document.getElementById('taskPriority').value = task.priority;
+        document.getElementById('taskDate').value = task.date;
+        document.getElementById('taskProgress').value = task.progress;
+        document.getElementById('taskDetails').value = task.details || "";
+      } else {
+        document.getElementById('modalTitleText').innerText = "Nueva Tarea";
+        document.getElementById('taskId').value = "";
+        updateProgressFromStatus();
+      }
+      document.getElementById('taskModal').classList.remove('hidden');
+    }
+
+    function closeTaskModal() {
+      document.getElementById('taskModal').classList.add('hidden');
+    }
+
+    function saveTask(e) {
+      e.preventDefault();
+      const id = document.getElementById('taskId').value;
+      const company = document.getElementById('taskCompany').value;
+      const desc = document.getElementById('taskDesc').value;
+      const status = document.getElementById('taskStatus').value;
+      const priority = document.getElementById('taskPriority').value;
+      const date = document.getElementById('taskDate').value;
+      const progress = parseInt(document.getElementById('taskProgress').value) || 0;
+      const details = document.getElementById('taskDetails').value;
+
+      if (id) {
+        const index = tasks.findIndex(t => t.id === id);
+        if (index !== -1) {
+          tasks[index] = { id, company, desc, status, priority, date, progress, details };
+        }
+      } else {
+        const newTask = {
+          id: "task-" + Date.now(),
+          company, desc, status, priority, date, progress, details
+        };
+        tasks.unshift(newTask);
+      }
+
+      closeTaskModal();
+      saveState();
+    }
+
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) openTaskModal(task);
+    }
+
+    function deleteTask(id) {
+      if (confirm("¿Eliminar este trabajo de la lista?")) {
+        tasks = tasks.filter(t => t.id !== id);
+        saveState();
+      }
+    }
+
+    function openVariantsModal() {
+      renderVariantsUI();
+      document.getElementById('variantsModal').classList.remove('hidden');
+    }
+
+    function closeVariantsModal() {
+      document.getElementById('variantsModal').classList.add('hidden');
+    }
+
+    function renderVariantsUI() {
+      const compList = document.getElementById('companiesList');
+      compList.innerHTML = config.companies.map(c => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.05]">
+          ${c}
+          <button onclick="removeCompany('${c}')" class="text-slate-500 hover:text-rose-400 flex items-center justify-center ml-0.5">
+            <span class="material-symbols-rounded text-sm">close</span>
+          </button>
+        </span>
+      `).join('');
+    }
+
+    function addCompany() {
+      const nameInput = document.getElementById('newCompanyName');
+      const name = nameInput.value.trim();
+      if (name && !config.companies.includes(name)) {
+        config.companies.push(name);
+        nameInput.value = "";
+        saveState();
+        renderVariantsUI();
+      }
+    }
+
+    function removeCompany(name) {
+      if (config.companies.length <= 1) {
+        alert("Debe quedar al menos una empresa.");
+        return;
+      }
+      config.companies = config.companies.filter(c => c !== name);
+      saveState();
+      renderVariantsUI();
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, tasks }, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `trabajos_pendientes_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.tasks && imported.config) {
+            tasks = imported.tasks;
+            config = imported.config;
+            saveState();
+            alert("¡Datos y empresas importados exitosamente!");
+          } else {
+            alert("El archivo no tiene el formato esperado.");
+          }
+        } catch (err) {
+          alert("Error al leer el archivo JSON.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    populateDropdowns();
+    renderKPIs();
+    renderTable();
+  </script>
+</body>
+</html>

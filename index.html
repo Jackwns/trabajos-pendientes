@@ -2,8 +2,8 @@
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trabajos Pendientes - Realtime Firestore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Trabajos Pendientes - Cloud Edition</title>
   
   <!-- Google Fonts & Material Symbols Rounded -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   
-  <!-- Firebase SDK (Compat Version - Fast & Zero Build) -->
+  <!-- Firebase SDK (Compat Version) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
@@ -42,6 +42,11 @@
     :root {
       color-scheme: dark;
     }
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+      width: 100%;
+    }
     body {
       background: radial-gradient(circle at 50% 0%, #111A2E 0%, #070A12 75%);
       background-attachment: fixed;
@@ -59,37 +64,37 @@
       font-variation-settings: 'FILL' 1;
     }
     .glass-panel {
-      background: rgba(16, 23, 38, 0.7);
+      background: rgba(16, 23, 38, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
     .glass-card {
-      background: rgba(22, 32, 51, 0.5);
+      background: rgba(22, 32, 51, 0.55);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.04);
       transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .glass-card:hover {
-      transform: scale(1.04);
-      background: rgba(28, 41, 65, 0.7);
-      box-shadow: 0 12px 28px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.12);
+      transform: scale(1.03);
+      background: rgba(28, 41, 65, 0.75);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.1);
       z-index: 10;
     }
     .glass-card.active-kpi {
-      background: rgba(28, 41, 65, 0.85);
+      background: rgba(28, 41, 65, 0.9);
       border-color: rgba(6, 182, 212, 0.6);
       box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
       transform: scale(1.03);
     }
     .table-row-card {
-      transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, box-shadow 0.2s;
       cursor: pointer;
     }
     .table-row-card:hover {
-      transform: scale(1.025);
+      transform: scale(1.015);
       background: rgba(255, 255, 255, 0.045);
-      box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.6);
       position: relative;
       z-index: 10;
     }
@@ -107,143 +112,164 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .animate-fade-in {
-      animation: fadeInUp 0.35s ease-out forwards;
+    @keyframes slideUpSheet {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
     }
-    .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+    .animate-fade-in {
+      animation: fadeInUp 0.3s ease-out forwards;
+    }
+    .animate-slide-up {
+      animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .custom-scroll::-webkit-scrollbar { height: 5px; width: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.15);
       border-radius: 9999px;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
 <body class="min-h-screen font-sans pb-20 selection:bg-cyan-400 selection:text-dark-950">
 
-  <!-- Ambient Glow -->
-  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[250px] bg-blue-600/10 blur-[130px] rounded-full pointer-events-none -z-10"></div>
+  <!-- Ambient Glow (Bounded to prevent viewport stretching) -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[90vw] max-w-[600px] h-[220px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
 
   <!-- Navbar -->
-  <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.05]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/25">
-          <span class="material-symbols-rounded filled text-xl">local_fire_department</span>
+  <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.05] w-full">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      
+      <!-- Left: Logo, Title & Status Dot -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
+          <span class="material-symbols-rounded filled text-lg sm:text-xl">bolt</span>
         </div>
-        <div>
-          <h1 class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            Trabajos Pendientes
-            <span id="syncBadge" onclick="openFirebaseConfigModal()" title="Configurar conexión Firebase"
-              class="cursor-pointer text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-dark-850 text-slate-400 border border-white/[0.06] flex items-center gap-1 hover:border-cyan-400/40 transition-colors">
-              <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Local
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-1.5 truncate">
+            <span class="truncate">Trabajos</span>
+            <!-- Indicador en Móvil: Solo punto con color / En Desktop: Punto + Texto -->
+            <span id="syncBadge" onclick="openFirebaseConfigModal()" title="Estado de sincronización"
+              class="cursor-pointer text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-slate-400 border border-white/[0.06] flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0">
+              <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+              <span id="syncText" class="hidden sm:inline">Local</span>
             </span>
           </h1>
-          <p class="text-xs text-slate-400">Panel en tiempo real con Firestore</p>
+          <p class="text-[11px] text-slate-400 truncate hidden xs:block">Control de flujo y proyectos</p>
         </div>
       </div>
-      <div class="flex items-center gap-1.5 sm:gap-2">
-        <button onclick="openVariantsModal()" title="Gestionar Empresas" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
-          <span class="material-symbols-rounded text-base text-slate-400">domain</span>
-          <span class="hidden sm:inline">Empresas</span>
-        </button>
-        <button onclick="openFirebaseConfigModal()" title="Configuración de Firebase" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
-          <span class="material-symbols-rounded text-base text-amber-400">dns</span>
-          <span class="hidden sm:inline">Firebase</span>
-        </button>
-        <button onclick="exportData()" title="Descargar copia de respaldo JSON" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
-          <span class="material-symbols-rounded text-base text-slate-400">download</span>
-          Exportar
-        </button>
-        <button onclick="document.getElementById('importFileInput').click()" title="Cargar copia de respaldo JSON" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
-          <span class="material-symbols-rounded text-base text-slate-400">upload</span>
-          Importar
-        </button>
+
+      <!-- Right: Desktop Actions vs Mobile 3-line Menu -->
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Desktop Buttons (hidden on mobile) -->
+        <div class="hidden md:flex items-center gap-1.5">
+          <button onclick="openVariantsModal()" title="Gestionar Empresas" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+            <span class="material-symbols-rounded text-base text-slate-400">domain</span>
+            Empresas
+          </button>
+          <button onclick="openFirebaseConfigModal()" title="Configuración de Firebase" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+            <span class="material-symbols-rounded text-base text-amber-400">dns</span>
+            Firebase
+          </button>
+          <button onclick="exportData()" title="Descargar copia de respaldo JSON" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+            <span class="material-symbols-rounded text-base text-slate-400">download</span>
+            Exportar
+          </button>
+          <button onclick="document.getElementById('importFileInput').click()" title="Cargar copia de respaldo JSON" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+            <span class="material-symbols-rounded text-base text-slate-400">upload</span>
+            Importar
+          </button>
+        </div>
+
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
-        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95">
+
+        <!-- Botón + Nueva Tarea -->
+        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95 shrink-0">
           <span class="material-symbols-rounded text-base">add</span>
-          <span class="hidden xs:inline sm:inline">Nueva</span> Tarea
+          <span class="hidden sm:inline">Nueva</span> Tarea
+        </button>
+
+        <!-- Botón Móvil: Menú 3 Líneas (Hamburguesa) -->
+        <button onclick="openBottomSheet()" title="Más opciones" class="md:hidden w-9 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white flex items-center justify-center border border-white/[0.05] active:scale-95 transition-all">
+          <span class="material-symbols-rounded text-xl">menu</span>
         </button>
       </div>
+
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-4 sm:mt-6 w-full">
 
-    <!-- KPI Cards (Filtros de Estado interactivos) -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-6" id="kpiContainer"></div>
+    <!-- KPI Cards: Carrusel Deslizable en Móvil / Grid en Desktop -->
+    <div class="mb-4">
+      <div id="kpiContainer" class="flex md:grid md:grid-cols-6 gap-2 sm:gap-2.5 overflow-x-auto custom-scroll pb-1.5 no-scrollbar snap-x snap-mandatory">
+        <!-- Injected via JS -->
+      </div>
+    </div>
 
     <!-- Active Filter Indicator -->
-    <div id="activeFilterBadge" class="hidden mb-4 flex items-center gap-2">
+    <div id="activeFilterBadge" class="hidden mb-3.5 flex items-center gap-2">
       <span class="text-xs text-slate-400">Filtro activo:</span>
-      <span id="activeFilterText" class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+      <span id="activeFilterText" class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
         <button onclick="setStatusFilter('')" class="ml-1 hover:text-white">✕</button>
       </span>
       <button onclick="setStatusFilter('')" class="text-xs text-slate-500 hover:text-slate-300 underline">Quitar filtro</button>
     </div>
 
     <!-- Search & Filters Toolbar -->
-    <div class="glass-panel p-3.5 rounded-2xl mb-5 flex flex-wrap items-center justify-between gap-3 shadow-xl">
-      <div class="flex items-center gap-2.5 flex-1 min-w-[220px] bg-white/[0.025] rounded-xl px-3.5 py-2 border border-white/[0.03]">
+    <div class="glass-panel p-3 rounded-2xl mb-4 sm:mb-5 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2 flex-1 bg-white/[0.025] rounded-xl px-3 py-2 border border-white/[0.03]">
         <span class="material-symbols-rounded text-slate-400 text-lg">search</span>
         <input type="text" id="searchInput" placeholder="Buscar por cliente, tarea o detalle..." oninput="renderTable()"
           class="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-500 text-white">
       </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <select id="filterCompany" onchange="renderTable()" class="text-xs font-medium bg-dark-850/80 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none hover:border-cyan-500/40 transition-colors">
+      <div class="flex items-center gap-2">
+        <select id="filterCompany" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850/80 border border-white/[0.06] rounded-xl px-2.5 py-2 text-slate-300 outline-none hover:border-cyan-500/40 transition-colors">
           <option value="">Todas las empresas</option>
         </select>
-        <select id="filterPriority" onchange="renderTable()" class="text-xs font-medium bg-dark-850/80 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none hover:border-cyan-500/40 transition-colors">
+        <select id="filterPriority" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850/80 border border-white/[0.06] rounded-xl px-2.5 py-2 text-slate-300 outline-none hover:border-cyan-500/40 transition-colors">
           <option value="">Todas las prioridades</option>
         </select>
       </div>
     </div>
 
-    <!-- Tasks View (Desktop Table & Mobile Cards) -->
-    <!-- DESKTOP TABLE (md y superior) -->
-    <div class="hidden md:block glass-panel rounded-2xl overflow-hidden shadow-2xl">
-      <div class="overflow-x-auto custom-scroll p-1">
-        <table class="w-full text-left border-collapse">
+    <!-- Table Container con Scroll Horizontal Encapsulado -->
+    <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl w-full">
+      <div class="overflow-x-auto custom-scroll w-full">
+        <table class="w-full text-left border-collapse min-w-[760px]">
           <thead>
-            <tr class="border-b border-white/[0.04] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold">
-              <th class="py-3.5 px-4 w-16 text-center">Progreso</th>
-              <th class="py-3.5 px-4">Empresa</th>
-              <th class="py-3.5 px-4">Descripción del Trabajo</th>
-              <th class="py-3.5 px-4">Estado</th>
-              <th class="py-3.5 px-4">Prioridad</th>
-              <th class="py-3.5 px-4">Fecha Ingreso</th>
-              <th class="py-3.5 px-4">Detalles</th>
-              <th class="py-3.5 px-4 text-center w-24">Acciones</th>
+            <tr class="border-b border-white/[0.04] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold select-none">
+              <th class="py-3 px-3.5 w-16 text-center">Progreso</th>
+              <th class="py-3 px-3.5">Empresa</th>
+              <th class="py-3 px-3.5">Descripción del Trabajo</th>
+              <th class="py-3 px-3.5">Estado</th>
+              <th class="py-3 px-3.5">Prioridad</th>
+              <th class="py-3 px-3.5">Fecha Ingreso</th>
+              <th class="py-3 px-3.5">Detalles</th>
+              <th class="py-3 px-3.5 text-center w-24">Acciones</th>
             </tr>
           </thead>
           <tbody id="tasksTableBody" class="divide-y divide-white/[0.03] text-sm"></tbody>
         </table>
       </div>
-    </div>
-
-    <!-- MOBILE CARDS LIST (pantallas de teléfono < md) -->
-    <div id="tasksMobileList" class="md:hidden space-y-3">
-      <!-- Injected via JS -->
-    </div>
-
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden glass-panel rounded-2xl p-12 text-center mt-4">
-      <span class="material-symbols-rounded text-slate-600 text-4xl mb-2">inbox</span>
-      <p class="text-slate-400 text-sm">No se encontraron trabajos con los filtros seleccionados.</p>
-    </div>
-
-    <!-- Floating Action Button (FAB) para móviles -->
-    <div class="md:hidden fixed bottom-6 right-6 z-40">
-      <button onclick="openTaskModal()" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center shadow-xl shadow-cyan-500/30 active:scale-90 transition-transform">
-        <span class="material-symbols-rounded text-2xl">add</span>
-      </button>
+      <div id="emptyState" class="hidden p-12 text-center">
+        <span class="material-symbols-rounded text-slate-600 text-3xl mb-2">inbox</span>
+        <p class="text-slate-500 text-sm">No se encontraron trabajos con los filtros seleccionados.</p>
+      </div>
     </div>
 
   </main>
 
   <!-- Modal: Crear / Editar Tarea -->
-  <div id="taskModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-fade-in">
-      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
+  <div id="taskModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4 transition-all duration-300">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-fade-in max-h-[92vh] overflow-y-auto custom-scroll">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
         <h3 id="modalTitle" class="text-base font-bold text-white flex items-center gap-2">
           <span class="material-symbols-rounded text-cyan-400 text-xl">edit_note</span>
           <span id="modalTitleText">Nueva Tarea</span>
@@ -252,7 +278,7 @@
           <span class="material-symbols-rounded text-lg">close</span>
         </button>
       </div>
-      <form id="taskForm" onsubmit="saveTask(event)" class="space-y-4">
+      <form id="taskForm" onsubmit="saveTask(event)" class="space-y-3.5">
         <input type="hidden" id="taskId">
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">Empresa / Cliente</label>
@@ -263,10 +289,10 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">Descripción del Trabajo</label>
           <textarea id="taskDesc" required rows="2" placeholder="Ej: Crear página de Instagram..." class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors placeholder:text-slate-600"></textarea>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">Estado</label>
-            <select id="taskStatus" required  class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
+            <select id="taskStatus" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors">
             </select>
           </div>
           <div>
@@ -283,7 +309,7 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1.5">Detalles / Observaciones</label>
           <input type="text" id="taskDetails" placeholder="Ej: Faltan los copys, en espera de respuesta..." class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 transition-colors placeholder:text-slate-600">
         </div>
-        <div class="pt-4 flex justify-end gap-2.5 border-t border-white/[0.06]">
+        <div class="pt-3 flex justify-end gap-2 border-t border-white/[0.06]">
           <button type="button" onclick="closeTaskModal()" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl transition-colors">Cancelar</button>
           <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all active:scale-95">
             <span class="material-symbols-rounded text-base">check</span>
@@ -295,9 +321,9 @@
   </div>
 
   <!-- Modal: Gestionar Empresas -->
-  <div id="variantsModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-fade-in">
-      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
+  <div id="variantsModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4 transition-all duration-300">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl animate-fade-in">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <span class="material-symbols-rounded text-cyan-400 text-xl">domain</span>
           Empresas / Clientes
@@ -306,28 +332,26 @@
           <span class="material-symbols-rounded text-lg">close</span>
         </button>
       </div>
-
-      <div class="mb-6">
+      <div class="mb-5">
         <p class="text-xs text-slate-400 mb-3">Agrega o elimina empresas disponibles para asignar en las tareas:</p>
-        <div class="flex gap-2 mb-4">
+        <div class="flex gap-2 mb-3.5">
           <input type="text" id="newCompanyName" placeholder="Nombre de nueva empresa..." class="flex-1 text-xs border border-white/[0.08] rounded-xl px-3.5 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400">
           <button onclick="addCompany()" class="inline-flex items-center gap-1 px-3.5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all">
             <span class="material-symbols-rounded text-base">add</span>
             Añadir
           </button>
         </div>
-        <div id="companiesList" class="flex flex-wrap gap-2 max-h-56 overflow-y-auto custom-scroll p-1"></div>
+        <div id="companiesList" class="flex flex-wrap gap-2 max-h-52 overflow-y-auto custom-scroll p-1"></div>
       </div>
-
-      <div class="pt-4 flex justify-end border-t border-white/[0.06]">
+      <div class="pt-3 flex justify-end border-t border-white/[0.06]">
         <button onclick="closeVariantsModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl transition-colors">Cerrar</button>
       </div>
     </div>
   </div>
 
   <!-- Modal: Conexión Firebase Firestore -->
-  <div id="firebaseModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-fade-in">
+  <div id="firebaseModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4 transition-all duration-300">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl animate-fade-in max-h-[92vh] overflow-y-auto custom-scroll">
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <span class="material-symbols-rounded text-amber-400 text-xl">local_fire_department</span>
@@ -337,38 +361,32 @@
           <span class="material-symbols-rounded text-lg">close</span>
         </button>
       </div>
-
-      <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-        Pega a continuación las credenciales de tu proyecto de Firebase (o edita la variable <code class="text-cyan-400 bg-white/[0.05] px-1 py-0.5 rounded">firebaseConfig</code> en el código):
-      </p>
-
-      <div class="space-y-2.5 mb-5 text-xs">
+      <div class="space-y-2.5 mb-4 text-xs">
         <div>
           <label class="block text-slate-400 mb-1 font-semibold">apiKey</label>
-          <input type="text" id="fbApiKey" placeholder="AIzaSy..." class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
+          <input type="text" id="fbApiKey" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-slate-400 mb-1 font-semibold">projectId</label>
-            <input type="text" id="fbProjectId" placeholder="mi-proyecto-123" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
+            <input type="text" id="fbProjectId" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
           </div>
           <div>
             <label class="block text-slate-400 mb-1 font-semibold">authDomain</label>
-            <input type="text" id="fbAuthDomain" placeholder="mi-proyecto-123.firebaseapp.com" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
+            <input type="text" id="fbAuthDomain" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-slate-400 mb-1 font-semibold">appId</label>
-            <input type="text" id="fbAppId" placeholder="1:123456:web:..." class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
+            <input type="text" id="fbAppId" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
           </div>
           <div>
             <label class="block text-slate-400 mb-1 font-semibold">storageBucket</label>
-            <input type="text" id="fbStorageBucket" placeholder="mi-proyecto-123.appspot.com" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
+            <input type="text" id="fbStorageBucket" class="w-full bg-dark-850 border border-white/[0.08] rounded-xl px-3 py-2 text-white outline-none focus:border-cyan-400">
           </div>
         </div>
       </div>
-
       <div class="flex justify-between items-center pt-3 border-t border-white/[0.06]">
         <button onclick="clearFirebaseConfig()" class="text-xs text-rose-400 hover:underline">Desconectar</button>
         <div class="flex gap-2">
@@ -379,10 +397,69 @@
     </div>
   </div>
 
+  <!-- Panel Móvil de 3 Líneas: Bottom Sheet -->
+  <div id="bottomSheetModal" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-end justify-center hidden transition-all duration-300" onclick="closeBottomSheet(event)">
+    <div class="bg-dark-900 border-t border-white/[0.1] rounded-t-3xl w-full max-w-lg p-5 shadow-2xl animate-slide-up relative" onclick="event.stopPropagation()">
+      <div class="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-4"></div>
+      
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span class="material-symbols-rounded text-cyan-400 text-lg">apps</span>
+          Menú de Opciones
+        </h3>
+        <button onclick="closeBottomSheet()" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white">
+          <span class="material-symbols-rounded text-lg">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 mb-2">
+        <button onclick="closeBottomSheet(); openVariantsModal();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-cyan-400 flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded text-lg">domain</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Empresas</div>
+            <div class="text-[10px] text-slate-400">Gestionar clientes</div>
+          </div>
+        </button>
+
+        <button onclick="closeBottomSheet(); openFirebaseConfigModal();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded text-lg">dns</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Firebase</div>
+            <div class="text-[10px] text-slate-400">Base de datos</div>
+          </div>
+        </button>
+
+        <button onclick="closeBottomSheet(); exportData();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded text-lg">download</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Exportar</div>
+            <div class="text-[10px] text-slate-400">Copia JSON</div>
+          </div>
+        </button>
+
+        <button onclick="closeBottomSheet(); document.getElementById('importFileInput').click();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded text-lg">upload</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Importar</div>
+            <div class="text-[10px] text-slate-400">Restaurar JSON</div>
+          </div>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <script>
     // =========================================================================
     // 🔥 CONFIGURACIÓN DIRECTA DE FIREBASE FIRESTORE
-    // Puedes pegar tus credenciales aquí o ingresarlas desde el botón "Firebase" en la web:
     // =========================================================================
     const DEFAULT_FIREBASE_CONFIG = {
       apiKey: "AIzaSyBieGuJZLjNOD5x-lT4OApACvKPMnOEm8A",
@@ -427,6 +504,19 @@
     let db = null;
     let unsubscribeFirestore = null;
 
+    function sanitizeTask(t) {
+      return {
+        id: String(t.id || ("task-" + Date.now())),
+        company: String(t.company || "").trim(),
+        desc: String(t.desc || "").trim(),
+        status: String(t.status || "No realizado").trim(),
+        priority: String(t.priority || "Media").trim(),
+        date: String(t.date || "").trim(),
+        details: String(t.details || "-").trim(),
+        progress: Number(t.progress) || 0
+      };
+    }
+
     // Inicializar Firebase Firestore
     function initFirebase() {
       let savedCfg = JSON.parse(localStorage.getItem('tp_fb_config'));
@@ -450,13 +540,12 @@
       }
     }
 
-    // Escucha en Tiempo Real (WebSockets nativos de Firestore)
+    // Escucha en Tiempo Real
     function listenToFirestore() {
       if (!db) return;
 
       if (unsubscribeFirestore) unsubscribeFirestore();
 
-      // Escuchar cambios en la colección de tareas
       unsubscribeFirestore = db.collection("tasks").onSnapshot((snapshot) => {
         if (snapshot.empty) {
           if (tasks.length > 0) {
@@ -488,7 +577,6 @@
         }
       });
 
-      // Escuchar configuración de empresas
       db.collection("settings").doc("companies").onSnapshot((doc) => {
         if (doc.exists && doc.data().list) {
           config.companies = doc.data().list;
@@ -505,25 +593,29 @@
         const batch = db.batch();
         tasks.forEach((t) => {
           const ref = db.collection("tasks").doc(t.id);
-          batch.set(ref, t);
+          batch.set(ref, sanitizeTask(t));
         });
         const compRef = db.collection("settings").doc("companies");
         batch.set(compRef, { list: config.companies });
         await batch.commit();
         updateSyncBadge("Tiempo Real", "green");
       } catch (e) {
-        console.warn("Error al inicializar datos en Firestore:", e);
+        console.warn("Error al inicializar Firestore:", e);
       }
     }
 
+    // Actualiza el indicador: En móvil solo muestra el punto con su color
     function updateSyncBadge(status, color) {
       const badge = document.getElementById('syncBadge');
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncText');
+
       let dotColor = "bg-slate-400";
       let textColor = "text-slate-400";
       let borderColor = "border-white/[0.06]";
 
       if (color === "green") {
-        dotColor = "bg-emerald-400";
+        dotColor = "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]";
         textColor = "text-emerald-400";
         borderColor = "border-emerald-500/30";
       } else if (color === "yellow") {
@@ -536,24 +628,11 @@
         borderColor = "border-rose-500/30";
       }
 
-      badge.className = `cursor-pointer text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1 hover:border-cyan-400/40 transition-colors`;
-      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span> ${status}`;
+      badge.className = `cursor-pointer text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0`;
+      dot.className = `w-1.5 h-1.5 rounded-full ${dotColor}`;
+      text.innerText = status;
     }
 
-    function sanitizeTask(t) {
-      return {
-        id: String(t.id || ("task-" + Date.now())),
-        company: String(t.company || "").trim(),
-        desc: String(t.desc || "").trim(),
-        status: String(t.status || "No realizado").trim(),
-        priority: String(t.priority || "Media").trim(),
-        date: String(t.date || "").trim(),
-        details: String(t.details || "-").trim(),
-        progress: Number(t.progress) || 0
-      };
-    }
-
-    // Guardar / Actualizar Tarea Atómicamente en Firestore
     async function saveTaskToCloud(task) {
       if (db) {
         try {
@@ -561,25 +640,20 @@
           await db.collection("tasks").doc(cleanTask.id).set(cleanTask);
         } catch (e) {
           console.error("Error al escribir tarea en Firestore:", e);
-          if (e.code === "permission-denied") {
-            alert("Error de permisos en Firebase. Verifica que en Firebase Console -> Firestore Database -> Reglas tengas: allow read, write: if true;");
-          }
         }
       }
     }
 
-    // Eliminar Tarea Atómicamente
     async function deleteTaskFromCloud(taskId) {
       if (db) {
         try {
           await db.collection("tasks").doc(taskId).delete();
         } catch (e) {
-          console.warn("Error al eliminar tarea en Firestore:", e);
+          console.error("Error al eliminar tarea en Firestore:", e);
         }
       }
     }
 
-    // Guardar Empresas
     async function saveCompaniesToCloud() {
       if (db) {
         try {
@@ -613,7 +687,7 @@
       const style = getProgressStyle(percent);
 
       return `
-        <div class="relative w-10 h-10 flex items-center justify-center">
+        <div class="relative w-10 h-10 flex items-center justify-center shrink-0">
           <svg class="w-10 h-10 circle-progress ${style.glow}" viewBox="0 0 38 38">
             <circle cx="19" cy="19" r="${radius}" fill="transparent" stroke="rgba(255, 255, 255, 0.07)" stroke-width="3" />
             <circle cx="19" cy="19" r="${radius}" fill="transparent" stroke="${style.stroke}" stroke-width="3"
@@ -638,6 +712,7 @@
       renderTable();
     }
 
+    // Renderizar KPIs: Carrusel suave en móvil y Grid en Desktop
     function renderKPIs() {
       const total = tasks.length;
       const pendientes = tasks.filter(t => t.status === "No realizado").length;
@@ -660,14 +735,14 @@
         const activeClass = isActive ? "active-kpi" : "";
         return `
           <div onclick="setStatusFilter('${item.filterKey}')"
-            class="glass-card ${activeClass} p-3.5 rounded-2xl flex items-center gap-3 animate-fade-in cursor-pointer select-none"
-            style="animation-delay: ${idx * 40}ms" title="Filtrar por: ${item.label}">
-            <div class="w-9 h-9 rounded-xl bg-white/[0.04] flex items-center justify-center shadow-inner">
-              <span class="material-symbols-rounded ${item.iconColor} text-lg">${item.icon}</span>
+            class="glass-card ${activeClass} p-3 rounded-2xl flex items-center gap-2.5 animate-fade-in cursor-pointer select-none shrink-0 w-36 md:w-auto snap-start"
+            style="animation-delay: ${idx * 25}ms" title="Filtrar por: ${item.label}">
+            <div class="w-8 h-8 rounded-xl bg-white/[0.04] flex items-center justify-center shadow-inner shrink-0">
+              <span class="material-symbols-rounded ${item.iconColor} text-base">${item.icon}</span>
             </div>
-            <div>
-              <div class="text-xl font-extrabold ${item.text} tracking-tight">${item.value}</div>
-              <div class="text-[11px] text-slate-400 font-medium">${item.label}</div>
+            <div class="min-w-0">
+              <div class="text-lg font-extrabold ${item.text} tracking-tight leading-none">${item.value}</div>
+              <div class="text-[10px] text-slate-400 font-medium truncate mt-0.5">${item.label}</div>
             </div>
           </div>
         `;
@@ -693,14 +768,6 @@
 
       const taskPrio = document.getElementById('taskPriority');
       taskPrio.innerHTML = config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-    }
-
-    function updateProgressFromStatus() {
-      const currentStatus = document.getElementById('taskStatus').value;
-      const found = config.statuses.find(s => s.name === currentStatus);
-      if (found) {
-        document.getElementById('taskProgress').value = found.percent;
-      }
     }
 
     function renderTable() {
@@ -736,142 +803,71 @@
       });
 
       const tbody = document.getElementById('tasksTableBody');
-      const mobileList = document.getElementById('tasksMobileList');
       const empty = document.getElementById('emptyState');
 
       if (filtered.length === 0) {
         if (tbody) tbody.innerHTML = "";
-        if (mobileList) mobileList.innerHTML = "";
         empty.classList.remove('hidden');
         return;
       }
       empty.classList.add('hidden');
 
-      // 1. Render para DESKTOP (Tabla tradicional idéntica a la actual)
-      if (tbody) {
-        tbody.innerHTML = filtered.map((task, idx) => {
-          let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
-          if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
-          else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
+      tbody.innerHTML = filtered.map((task, idx) => {
+        let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+        if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
+        else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
 
-          let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
-          if (task.progress <= 0) statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
-          else if (task.progress <= 35) statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
-          else if (task.progress <= 60) statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
-          else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-          else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
+        let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
+        if (task.progress <= 0) statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
+        else if (task.progress <= 35) statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
+        else if (task.progress <= 60) statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
+        else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+        else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
 
-          return `
-            <tr onclick="onRowClick(event, '${task.id}')"
-              class="table-row-card group animate-fade-in" style="animation-delay: ${idx * 25}ms"
-              title="Click para editar tarea">
-              <td class="py-3 px-4 text-center">
-                ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
-              </td>
-              <td class="py-3 px-4 font-semibold text-white whitespace-nowrap">
-                <span class="inline-block px-2.5 py-1 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.04]">
-                  ${task.company}
-                </span>
-              </td>
-              <td class="py-3 px-4 font-medium text-slate-200 max-w-sm leading-snug">
-                ${task.desc}
-              </td>
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass}">
-                  ${task.status}
-                </span>
-              </td>
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
-                  ${task.priority}
-                </span>
-              </td>
-              <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
-                ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
-              </td>
-              <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
-                ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
-              </td>
-              <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
-                <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                  <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center transition-all active:scale-90">
-                    <span class="material-symbols-rounded text-base">edit</span>
-                  </button>
-                  <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition-all active:scale-90">
-                    <span class="material-symbols-rounded text-base">delete</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      }
-
-      // 2. Render para MÓVILES (Tarjetas nativas modernas diseñadas para pantalla táctil)
-      if (mobileList) {
-        mobileList.innerHTML = filtered.map((task, idx) => {
-          let prioClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
-          if (task.priority === "Máxima") prioClass = "bg-rose-500/10 text-rose-400 border border-rose-500/30";
-          else if (task.priority === "Media") prioClass = "bg-amber-500/10 text-amber-400 border border-amber-500/30";
-
-          let statusBadgeClass = "bg-slate-800/60 text-slate-300 border border-slate-700/40";
-          if (task.progress <= 0) statusBadgeClass = "bg-slate-500/10 text-slate-400 border border-slate-500/20";
-          else if (task.progress <= 35) statusBadgeClass = "bg-orange-500/10 text-orange-400 border border-orange-500/30";
-          else if (task.progress <= 60) statusBadgeClass = "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30";
-          else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-          else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
-
-          return `
-            <div onclick="onRowClick(event, '${task.id}')"
-              class="glass-panel p-4 rounded-2xl animate-fade-in relative overflow-hidden active:scale-[0.98] transition-all"
-              style="animation-delay: ${idx * 25}ms">
-              
-              <!-- Fila Superior: Progreso, Empresa, Prioridad y Acciones -->
-              <div class="flex items-center justify-between gap-2 mb-2.5">
-                <div class="flex items-center gap-2.5">
-                  ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
-                  <div>
-                    <span class="inline-block px-2.5 py-0.5 rounded-lg bg-white/[0.06] text-xs font-bold text-white border border-white/[0.05]">
-                      ${task.company}
-                    </span>
-                    <span class="ml-1 inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
-                      ${task.priority}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Botones de Acción táctiles -->
-                <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-                  <button onclick="editTask('${task.id}')" class="w-8 h-8 rounded-xl bg-white/[0.03] text-slate-300 hover:text-cyan-400 flex items-center justify-center active:scale-90">
-                    <span class="material-symbols-rounded text-base">edit</span>
-                  </button>
-                  <button onclick="deleteTask('${task.id}')" class="w-8 h-8 rounded-xl bg-white/[0.03] text-slate-400 hover:text-rose-400 flex items-center justify-center active:scale-90">
-                    <span class="material-symbols-rounded text-base">delete</span>
-                  </button>
-                </div>
+        return `
+          <tr onclick="onRowClick(event, '${task.id}')"
+            class="table-row-card group animate-fade-in" style="animation-delay: ${idx * 25}ms"
+            title="Click para editar tarea">
+            <td class="py-3 px-3.5 text-center">
+              ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
+            </td>
+            <td class="py-3 px-3.5 font-semibold text-white whitespace-nowrap">
+              <span class="inline-block px-2.5 py-1 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.04]">
+                ${task.company}
+              </span>
+            </td>
+            <td class="py-3 px-3.5 font-medium text-slate-200 max-w-sm leading-snug">
+              ${task.desc}
+            </td>
+            <td class="py-3 px-3.5 whitespace-nowrap">
+              <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${statusBadgeClass}">
+                ${task.status}
+              </span>
+            </td>
+            <td class="py-3 px-3.5 whitespace-nowrap">
+              <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${prioClass}">
+                ${task.priority}
+              </span>
+            </td>
+            <td class="py-3 px-3.5 text-xs text-slate-400 whitespace-nowrap">
+              ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
+            </td>
+            <td class="py-3 px-3.5 text-xs text-slate-400 max-w-xs truncate">
+              ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
+            </td>
+            <td class="py-3 px-3.5 text-center whitespace-nowrap" onclick="event.stopPropagation()">
+              <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center transition-all active:scale-90">
+                  <span class="material-symbols-rounded text-base">edit</span>
+                </button>
+                <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center transition-all active:scale-90">
+                  <span class="material-symbols-rounded text-base">delete</span>
+                </button>
               </div>
-
-              <!-- Descripción -->
-              <p class="text-sm font-semibold text-slate-100 mb-3 leading-snug">
-                ${task.desc}
-              </p>
-
-              <!-- Fila Inferior: Estado y Detalles/Fecha -->
-              <div class="flex items-center justify-between text-xs pt-2.5 border-t border-white/[0.04] gap-2">
-                <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusBadgeClass}">
-                  ${task.status}
-                </span>
-
-                <div class="flex items-center gap-3 text-slate-400 text-[11px] truncate">
-                  ${task.date ? `<span class="flex items-center gap-1"><span class="material-symbols-rounded text-xs">calendar_today</span> ${task.date}</span>` : ''}
-                  ${task.details && task.details !== '-' ? `<span class="flex items-center gap-1 truncate max-w-[140px]"><span class="material-symbols-rounded text-xs">chat_bubble_outline</span> ${task.details}</span>` : ''}
-                </div>
-              </div>
-
-            </div>
-          `;
-        }).join('');
-      }
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function onRowClick(e, id) {
@@ -888,12 +884,10 @@
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
         document.getElementById('taskDate').value = task.date;
-        // progreso automático
         document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
         document.getElementById('taskId').value = "";
-        // progreso automático
       }
       document.getElementById('taskModal').classList.remove('hidden');
     }
@@ -912,7 +906,6 @@
       const date = document.getElementById('taskDate').value;
       const details = document.getElementById('taskDetails').value;
 
-      // El porcentaje y color se calculan automáticamente según el estado seleccionado:
       const statusMap = {
         "No realizado": 0,
         "En proceso": 25,
@@ -922,7 +915,7 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const taskObj = { id, company, desc, status, priority, date, progress, details };
+      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details });
 
       const index = tasks.findIndex(t => t.id === id);
       if (index !== -1) {
@@ -993,7 +986,6 @@
       await saveCompaniesToCloud();
     }
 
-    // Modal Configuración Firebase
     function openFirebaseConfigModal() {
       const saved = JSON.parse(localStorage.getItem('tp_fb_config')) || DEFAULT_FIREBASE_CONFIG;
       document.getElementById('fbApiKey').value = saved.apiKey || "";
@@ -1037,6 +1029,15 @@
       }
     }
 
+    // Funciones del Menú 3 Líneas (Bottom Sheet en Móvil)
+    function openBottomSheet() {
+      document.getElementById('bottomSheetModal').classList.remove('hidden');
+    }
+
+    function closeBottomSheet(e) {
+      document.getElementById('bottomSheetModal').classList.add('hidden');
+    }
+
     function exportData() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, tasks }, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -1061,7 +1062,7 @@
             if (db) {
               await seedInitialFirestore();
             }
-            alert("¡Datos y empresas importados exitosamente!");
+            alert("¡Datos importados exitosamente!");
           } else {
             alert("El archivo no tiene el formato esperado.");
           }

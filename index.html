@@ -170,7 +170,7 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
 
     <!-- KPI Cards (Filtros de Estado interactivos) -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" id="kpiContainer"></div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mb-6" id="kpiContainer"></div>
 
     <!-- Active Filter Indicator -->
     <div id="activeFilterBadge" class="hidden mb-4 flex items-center gap-2">
@@ -443,27 +443,34 @@
 
       // Escuchar cambios en la colección de tareas
       unsubscribeFirestore = db.collection("tasks").onSnapshot((snapshot) => {
-        if (snapshot.empty && tasks.length > 0) {
-          // Si la nube está vacía por primera vez, subir las tareas iniciales
-          seedInitialFirestore();
+        if (snapshot.empty) {
+          if (tasks.length > 0) {
+            seedInitialFirestore();
+          }
+          updateSyncBadge("Tiempo Real", "green");
           return;
         }
 
         const cloudTasks = [];
         snapshot.forEach((doc) => {
-          cloudTasks.push(doc.data());
+          const d = doc.data();
+          if (d && d.desc) {
+            cloudTasks.push(sanitizeTask(d));
+          }
         });
 
-        if (cloudTasks.length > 0) {
-          tasks = cloudTasks;
-          localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
-          renderKPIs();
-          renderTable();
-        }
+        tasks = cloudTasks;
+        localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
+        renderKPIs();
+        renderTable();
         updateSyncBadge("Tiempo Real", "green");
       }, (err) => {
-        console.warn("Fallo de Firestore:", err);
-        updateSyncBadge("Sin conexión", "red");
+        console.error("Fallo de Firestore:", err);
+        if (err.code === "permission-denied") {
+          updateSyncBadge("Permiso Denegado", "red");
+        } else {
+          updateSyncBadge("Sin conexión", "red");
+        }
       });
 
       // Escuchar configuración de empresas
@@ -518,13 +525,30 @@
       badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span> ${status}`;
     }
 
-    // Guardar / Actualizar Tarea Atómicamente
+    function sanitizeTask(t) {
+      return {
+        id: String(t.id || ("task-" + Date.now())),
+        company: String(t.company || "").trim(),
+        desc: String(t.desc || "").trim(),
+        status: String(t.status || "No realizado").trim(),
+        priority: String(t.priority || "Media").trim(),
+        date: String(t.date || "").trim(),
+        details: String(t.details || "-").trim(),
+        progress: Number(t.progress) || 0
+      };
+    }
+
+    // Guardar / Actualizar Tarea Atómicamente en Firestore
     async function saveTaskToCloud(task) {
       if (db) {
         try {
-          await db.collection("tasks").doc(task.id).set(task);
+          const cleanTask = sanitizeTask(task);
+          await db.collection("tasks").doc(cleanTask.id).set(cleanTask);
         } catch (e) {
-          console.warn("Error al escribir tarea en Firestore:", e);
+          console.error("Error al escribir tarea en Firestore:", e);
+          if (e.code === "permission-denied") {
+            alert("Error de permisos en Firebase. Verifica que en Firebase Console -> Firestore Database -> Reglas tengas: allow read, write: if true;");
+          }
         }
       }
     }
@@ -604,14 +628,16 @@
       const pendientes = tasks.filter(t => t.status === "No realizado").length;
       const enProceso = tasks.filter(t => t.status === "En proceso").length;
       const entregados = tasks.filter(t => t.status === "Chequeo / Entregado").length;
-      const aprobados = tasks.filter(t => t.status === "Aprobado" || t.status === "Realizado / Finalizado").length;
+      const aprobados = tasks.filter(t => t.status === "Aprobado").length;
+      const completados = tasks.filter(t => t.status === "Realizado / Finalizado").length;
 
       const items = [
-        { label: "Total Trabajos", filterKey: "", value: total, icon: "assignment", iconColor: "text-slate-300", text: "text-white" },
+        { label: "Total", filterKey: "", value: total, icon: "assignment", iconColor: "text-slate-300", text: "text-white" },
         { label: "Pendientes", filterKey: "No realizado", value: pendientes, icon: "hourglass_empty", iconColor: "text-slate-400", text: "text-slate-300" },
         { label: "En Proceso", filterKey: "En proceso", value: enProceso, icon: "autorenew", iconColor: "text-orange-400", text: "text-orange-400" },
         { label: "Entregados", filterKey: "Chequeo / Entregado", value: entregados, icon: "mark_email_read", iconColor: "text-yellow-400", text: "text-yellow-400" },
-        { label: "Aprobados / Listos", filterKey: "Aprobado", value: aprobados, icon: "task_alt", iconColor: "text-cyan-400", text: "text-cyan-400" }
+        { label: "Aprobados", filterKey: "Aprobado", value: aprobados, icon: "thumb_up", iconColor: "text-emerald-400", text: "text-emerald-400" },
+        { label: "Completados", filterKey: "Realizado / Finalizado", value: completados, icon: "check_circle", iconColor: "text-cyan-400", text: "text-cyan-400" }
       ];
 
       const html = items.map((item, idx) => {
@@ -676,11 +702,7 @@
         
         let matchesStatus = true;
         if (activeStatusFilter) {
-          if (activeStatusFilter === "Aprobado") {
-            matchesStatus = t.status === "Aprobado" || t.status === "Realizado / Finalizado";
-          } else {
-            matchesStatus = t.status === activeStatusFilter;
-          }
+          matchesStatus = (t.status === activeStatusFilter);
         }
 
         return matchesSearch && matchesComp && matchesPrio && matchesStatus;

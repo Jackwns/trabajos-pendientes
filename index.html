@@ -168,22 +168,19 @@
 </head>
 <body class="min-h-screen font-sans pb-20 selection:bg-cyan-400 selection:text-dark-950">
 
-  <!-- Fondo de Esferas Fluidas con Blur Sutil & Efecto Cursor Interactivo (Z-Index Corregido) -->
+  <!-- Fondo de Esferas Fluidas con Repulsión al Cursor (Hover Repel) -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none z-0 select-none">
-    <!-- Esfera 1: Púrpura / Índigo Vibrante (Flotación orgánica) -->
-    <div class="absolute w-[550px] h-[550px] rounded-full bg-gradient-to-tr from-purple-700/35 via-violet-600/30 to-indigo-600/25 blur-[110px] animate-float-slow"
-      style="top: -10%; left: 5%;"></div>
+    <!-- Esfera 1: Púrpura / Violeta Vibrante -->
+    <div id="orb1" class="absolute w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-purple-700/35 via-violet-600/30 to-indigo-600/25 blur-[110px] will-change-transform"></div>
 
-    <!-- Esfera 2: Celeste / Cyan Neón (Flotación en contracorriente) -->
-    <div class="absolute w-[620px] h-[620px] rounded-full bg-gradient-to-br from-cyan-600/35 via-blue-600/30 to-sky-500/25 blur-[120px] animate-float-reverse"
-      style="bottom: -8%; right: 2%;"></div>
+    <!-- Esfera 2: Celeste / Cyan Neón -->
+    <div id="orb2" class="absolute w-[580px] h-[580px] rounded-full bg-gradient-to-br from-cyan-600/35 via-blue-600/30 to-sky-500/25 blur-[120px] will-change-transform"></div>
 
-    <!-- Esfera 3: Acento Magenta / Violeta Centro -->
-    <div class="absolute w-[450px] h-[450px] rounded-full bg-gradient-to-r from-fuchsia-700/25 via-purple-600/25 to-cyan-600/20 blur-[100px] animate-float-mid"
-      style="top: 35%; left: 40%;"></div>
+    <!-- Esfera 3: Índigo / Púrpura Profundo -->
+    <div id="orb3" class="absolute w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-indigo-700/30 via-purple-700/25 to-violet-800/20 blur-[105px] will-change-transform"></div>
 
-    <!-- Esfera Interactiva que sigue al cursor suavemente con brillo perceptible -->
-    <div id="cursorGlow" class="fixed w-[440px] h-[440px] rounded-full bg-gradient-to-tr from-cyan-400/35 via-sky-500/30 to-purple-500/30 blur-[90px] opacity-0 transition-opacity duration-700 will-change-transform pointer-events-none"></div>
+    <!-- Esfera 4: Cyan / Azul Profundo -->
+    <div id="orb4" class="absolute w-[520px] h-[520px] rounded-full bg-gradient-to-bl from-sky-600/30 via-cyan-700/25 to-blue-800/20 blur-[115px] will-change-transform"></div>
   </div>
 
   <!-- Navbar -->
@@ -1016,34 +1013,86 @@
       event.target.value = "";
     }
 
-    // Efecto de Seguimiento Fluido del Cursor (Glow Blur)
-    (function initCursorGlow() {
-      const glow = document.getElementById('cursorGlow');
-      if (!glow || !window.matchMedia('(pointer: fine)').matches) return;
+    // Sistema Algorítmico de Esferas Fluidas con Repulsión al Cursor (Hover Repel)
+    (function initFloatingRepelOrbs() {
+      const orbElements = [
+        document.getElementById('orb1'),
+        document.getElementById('orb2'),
+        document.getElementById('orb3'),
+        document.getElementById('orb4')
+      ];
 
-      let mouseX = window.innerWidth / 2;
-      let mouseY = window.innerHeight / 2;
-      let curX = mouseX;
-      let curY = mouseY;
-      let visible = false;
+      if (!orbElements[0]) return;
+
+      const orbs = [
+        { el: orbElements[0], relX: 0.2, relY: 0.22, rx: 160, ry: 120, speed: 0.00032, phase: 0, size: 520, curX: 0, curY: 0 },
+        { el: orbElements[1], relX: 0.8, relY: 0.78, rx: 190, ry: 140, speed: 0.00028, phase: 2.4, size: 580, curX: 0, curY: 0 },
+        { el: orbElements[2], relX: 0.35, relY: 0.82, rx: 150, ry: 110, speed: 0.00036, phase: 4.1, size: 480, curX: 0, curY: 0 },
+        { el: orbElements[3], relX: 0.75, relY: 0.18, rx: 170, ry: 130, speed: 0.0003, phase: 1.5, size: 520, curX: 0, curY: 0 }
+      ];
+
+      let mouseX = -9999;
+      let mouseY = -9999;
 
       window.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-        if (!visible) {
-          visible = true;
-          glow.style.opacity = '1';
-        }
       });
 
-      function loop() {
-        // Desplazamiento perezoso y orgánico con inercia (velocidad 0.04)
-        curX += (mouseX - curX) * 0.045;
-        curY += (mouseY - curY) * 0.045;
-        glow.style.transform = `translate3d(${curX - 230}px, ${curY - 230}px, 0)`;
-        requestAnimationFrame(loop);
+      window.addEventListener('mouseleave', () => {
+        mouseX = -9999;
+        mouseY = -9999;
+      });
+
+      // Posiciones iniciales
+      const initW = window.innerWidth;
+      const initH = window.innerHeight;
+      orbs.forEach(o => {
+        o.curX = initW * o.relX;
+        o.curY = initH * o.relY;
+      });
+
+      function animate(t) {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const repelRadius = 380; // Radio de influencia del cursor
+
+        for (let i = 0; i < orbs.length; i++) {
+          const o = orbs[i];
+          const baseX = width * o.relX;
+          const baseY = height * o.relY;
+
+          // Órbita algorítmica lenta y orgánica (movimiento perpetuo suave como agua)
+          const targetX = baseX + Math.cos(t * o.speed + o.phase) * o.rx + Math.sin(t * o.speed * 0.7) * 35;
+          const targetY = baseY + Math.sin(t * o.speed + o.phase) * o.ry + Math.cos(t * o.speed * 0.5) * 35;
+
+          // Repulsión con el cursor: el mouse aleja a las esferas suavemente
+          let repelX = 0;
+          let repelY = 0;
+          const dx = o.curX - mouseX;
+          const dy = o.curY - mouseY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < repelRadius && dist > 0) {
+            const force = (1 - dist / repelRadius) * 220; // Fuerza de empuje proporcional
+            repelX = (dx / dist) * force;
+            repelY = (dy / dist) * force;
+          }
+
+          const finalTargetX = targetX + repelX;
+          const finalTargetY = targetY + repelY;
+
+          // Inercia fluida (damping 0.04)
+          o.curX += (finalTargetX - o.curX) * 0.04;
+          o.curY += (finalTargetY - o.curY) * 0.04;
+
+          o.el.style.transform = `translate3d(${o.curX - o.size / 2}px, ${o.curY - o.size / 2}px, 0)`;
+        }
+
+        requestAnimationFrame(animate);
       }
-      loop();
+
+      requestAnimationFrame(animate);
     })();
 
     // Arranque

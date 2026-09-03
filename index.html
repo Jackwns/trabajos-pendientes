@@ -183,6 +183,12 @@
     <div id="orb4" class="absolute w-[620px] h-[620px] rounded-full bg-gradient-to-bl from-sky-600/35 via-cyan-700/30 to-blue-800/25 blur-[210px] will-change-transform"></div>
   </div>
 
+  <!-- Toast Notification Flotante -->
+  <div id="toastNotification" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border border-cyan-500/40 text-white text-xs px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2">
+    <span id="toastIcon" class="material-symbols-rounded text-cyan-400 text-base">cloud_done</span>
+    <span id="toastMsg" class="font-semibold">Nube sincronizada con éxito</span>
+  </div>
+
   <!-- Navbar -->
   <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.05] w-full relative">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
@@ -210,6 +216,10 @@
       <div class="flex items-center gap-2 shrink-0">
         <!-- Desktop Buttons (hidden on mobile) -->
         <div class="hidden md:flex items-center gap-1.5">
+          <button onclick="manualSyncCloud(true)" title="Forzar sincronización y respaldo en la nube" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
+            <span id="syncBtnIcon" class="material-symbols-rounded text-base text-cyan-400">cloud_sync</span>
+            Sincronizar
+          </button>
           <button onclick="openVariantsModal()" title="Gestionar Empresas" class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl transition-all border border-white/[0.04] active:scale-95">
             <span class="material-symbols-rounded text-base text-slate-400">domain</span>
             Empresas
@@ -231,6 +241,11 @@
         <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-95 shrink-0">
           <span class="material-symbols-rounded text-base">add</span>
           <span class="hidden sm:inline">Nueva</span> Tarea
+        </button>
+
+        <!-- Botón Móvil: Sincronizar Rápido -->
+        <button onclick="manualSyncCloud(true)" title="Sincronizar con la nube" class="md:hidden w-9 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-cyan-400 flex items-center justify-center border border-white/[0.05] active:scale-95 transition-all">
+          <span id="syncMobileIcon" class="material-symbols-rounded text-lg">cloud_sync</span>
         </button>
 
         <!-- Botón Móvil: Menú 3 Líneas (Hamburguesa) -->
@@ -403,7 +418,17 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-3 gap-2 mb-2">
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <button onclick="closeBottomSheet(); manualSyncCloud(true);" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0">
+            <span class="material-symbols-rounded text-lg">cloud_sync</span>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Sincronizar</div>
+            <div class="text-[10px] text-slate-400">Subir/Bajar nube</div>
+          </div>
+        </button>
+
         <button onclick="closeBottomSheet(); openVariantsModal();" class="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] text-left">
           <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-cyan-400 flex items-center justify-center shrink-0">
             <span class="material-symbols-rounded text-lg">domain</span>
@@ -1094,6 +1119,88 @@
 
       requestAnimationFrame(animate);
     })();
+
+    // Toast Notificación
+    function showToast(msg, iconName = 'cloud_done', isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+      if (!toast) return;
+
+      toastMsg.innerText = msg;
+      toastIcon.innerText = iconName;
+      toastIcon.className = `material-symbols-rounded text-base ${isError ? 'text-rose-400' : 'text-cyan-400'}`;
+      toast.className = `fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border ${isError ? 'border-rose-500/40' : 'border-cyan-500/40'} text-white text-xs px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-100 pointer-events-auto translate-y-0`;
+
+      setTimeout(() => {
+        toast.className = `fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border border-cyan-500/40 text-white text-xs px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2`;
+      }, 3000);
+    }
+
+    // Sincronización Manual y Respaldo Bidireccional Nube / Local
+    async function manualSyncCloud(notify = true) {
+      if (!db) {
+        showToast("Firebase no está conectado aún", "error", true);
+        return;
+      }
+
+      const syncBtnIcon = document.getElementById('syncBtnIcon');
+      const syncMobileIcon = document.getElementById('syncMobileIcon');
+      if (syncBtnIcon) syncBtnIcon.classList.add('animate-spin');
+      if (syncMobileIcon) syncMobileIcon.classList.add('animate-spin');
+
+      updateSyncBadge("Sincronizando...", "yellow");
+
+      try {
+        // 1. Respaldar tareas locales a la nube (para no perder nada)
+        const batch = db.batch();
+        tasks.forEach(t => {
+          const ref = db.collection("tasks").doc(t.id);
+          batch.set(ref, sanitizeTask(t), { merge: true });
+        });
+        const compRef = db.collection("settings").doc("companies");
+        batch.set(compRef, { list: config.companies }, { merge: true });
+        await batch.commit();
+
+        // 2. Traer el snapshot más reciente de la nube
+        const snapshot = await db.collection("tasks").get();
+        const cloudTasks = [];
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          if (d && d.desc) {
+            cloudTasks.push(sanitizeTask(d));
+          }
+        });
+
+        if (cloudTasks.length > 0) {
+          tasks = cloudTasks;
+          localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
+          renderKPIs();
+          renderTable();
+        }
+
+        updateSyncBadge("Tiempo Real", "green");
+        if (notify) {
+          showToast("¡Nube actualizada y sincronizada!", "cloud_done");
+        }
+      } catch (err) {
+        console.error("Error al sincronizar:", err);
+        updateSyncBadge("Error al sincronizar", "red");
+        if (notify) {
+          showToast("Error al conectar con la nube", "cloud_off", true);
+        }
+      } finally {
+        if (syncBtnIcon) syncBtnIcon.classList.remove('animate-spin');
+        if (syncMobileIcon) syncMobileIcon.classList.remove('animate-spin');
+      }
+    }
+
+    // Auto-sincronizar cuando el teléfono desbloquea la pantalla o vuelve a la pestaña
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && db) {
+        manualSyncCloud(false);
+      }
+    });
 
     // Arranque
     populateDropdowns();

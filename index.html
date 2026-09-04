@@ -493,11 +493,117 @@
       ]
     };
 
-    // Cero tareas residuales o mock en el código: la nube es la única verdad
-    let config = DEFAULT_CONFIG;
-    let tasks = [];
+    // Datos reales restaurados desde tu respaldo JSON:
+    const INITIAL_SAVED_DATA = {
+      "config": {
+            "companies": [
+                  "UNICO",
+                  "Itraco",
+                  "Royal Enfield",
+                  "Alta Vista",
+                  "Hotel Bicentenario",
+                  "RevCardinal",
+                  "Bmw"
+            ]
+      },
+      "tasks": [
+            {
+                  "id": "task-1",
+                  "company": "UNICO",
+                  "desc": "Crear página de Facebook e Instagram y armar placas para feed + historias",
+                  "status": "Aprobado",
+                  "priority": "Máxima",
+                  "date": "",
+                  "details": "Terminar de Postear por Facebook",
+                  "progress": 75,
+                  "updatedAt": 1788526382133
+            },
+            {
+                  "id": "task-1788369200849",
+                  "company": "Royal Enfield",
+                  "desc": "Crear placa para contratacion de administrativo",
+                  "status": "Realizado / Finalizado",
+                  "priority": "Máxima",
+                  "date": "2026-09-02",
+                  "details": "-",
+                  "progress": 100,
+                  "updatedAt": 1788525676222
+            },
+            {
+                  "id": "task-2",
+                  "company": "Itraco",
+                  "desc": "Realizar 3 posts sobre el edificio de Las Piedras",
+                  "status": "Realizado / Finalizado",
+                  "priority": "Máxima",
+                  "date": "",
+                  "details": "Falta corroborar copies",
+                  "progress": 100,
+                  "updatedAt": 1788526335985
+            },
+            {
+                  "id": "task-3",
+                  "company": "Royal Enfield",
+                  "desc": "Modificar placas madre con logo de la concesionaria",
+                  "status": "Realizado / Finalizado",
+                  "priority": "Máxima",
+                  "date": "",
+                  "details": "En espera de respuesta",
+                  "progress": 100,
+                  "updatedAt": 1788526328059
+            },
+            {
+                  "id": "task-4",
+                  "company": "Hotel Bicentenario",
+                  "desc": "Armar placa individual para el club San Martín",
+                  "status": "Chequeo / Entregado",
+                  "priority": "Media",
+                  "date": "2026-09-01",
+                  "details": "-",
+                  "progress": 50,
+                  "updatedAt": 1788526319217
+            },
+            {
+                  "id": "task-5",
+                  "company": "Royal Enfield",
+                  "desc": "Realizar edición de video de quedada",
+                  "status": "En proceso",
+                  "priority": "Media",
+                  "date": "",
+                  "details": "-",
+                  "progress": 25,
+                  "updatedAt": 1788525676222
+            },
+            {
+                  "id": "task-6",
+                  "company": "Alta Vista",
+                  "desc": "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
+                  "status": "Realizado / Finalizado",
+                  "priority": "Media",
+                  "date": "",
+                  "details": "-",
+                  "progress": 100,
+                  "updatedAt": 1788526314869
+            },
+            {
+                  "id": "task-7",
+                  "company": "RevCardinal",
+                  "desc": "Armar tarjeta de presentación con QR a la página oficial",
+                  "status": "No realizado",
+                  "priority": "Mínima",
+                  "date": "",
+                  "details": "-",
+                  "progress": 0,
+                  "updatedAt": 1788525676222
+            }
+      ]
+};
+
+    let config = {
+      ...DEFAULT_CONFIG,
+      companies: INITIAL_SAVED_DATA.config.companies
+    };
+    let tasks = INITIAL_SAVED_DATA.tasks;
     let activeStatusFilter = "";
-    let isInitialLoad = true;
 
     function sanitizeTask(t) {
       return {
@@ -553,10 +659,8 @@
         const res = await fetch(FIRESTORE_ENDPOINT, { cache: 'no-store' });
         
         if (res.status === 404) {
-          // Documento inicial vacío en Firestore
-          tasks = [];
-          renderTable();
-          renderKPIs();
+          // Si el documento en la nube aún no existe, subimos tus datos reales inmediatamente
+          await saveToCloud();
           updateSyncBadge("En línea", "green");
           return;
         }
@@ -979,19 +1083,22 @@
       reader.onload = async function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (imported.tasks && imported.config) {
-            tasks = imported.tasks;
-            config = imported.config;
-            // estado sincronizado en saveToCloud
-            if (db) {
-              await seedInitialFirestore();
+          if (imported.tasks && Array.isArray(imported.tasks)) {
+            tasks = imported.tasks.map(sanitizeTask);
+            if (imported.config && Array.isArray(imported.config.companies)) {
+              config.companies = imported.config.companies;
             }
-            alert("¡Datos importados exitosamente!");
+            populateDropdowns();
+            renderTable();
+            renderKPIs();
+            await saveToCloud();
+            alert("¡Datos importados y subidos a la nube con éxito!");
           } else {
-            alert("El archivo no tiene el formato esperado.");
+            alert("El archivo no contiene una lista de tareas válida.");
           }
         } catch (err) {
-          alert("Error al leer el archivo JSON.");
+          console.error("Fallo al importar:", err);
+          alert("Error al procesar el archivo: " + err.message);
         }
       };
       reader.readAsText(file);

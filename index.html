@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Trabajos Pendientes</title>
   
+  <!-- Evitar que el navegador guarde versiones viejas del HTML en caché -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <!-- Favicon: Rayo blanco con fondo celeste vibrante SVG incrustado -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230284C7%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2338BDF8%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22url%28%23bg%29%22/%3E%3Cpath%20d%3D%22M35%2010%20L20%2033%20L31%2033%20L28%2054%20L44%2029%20L33%2029%20Z%22%20fill%3D%22%23FFFFFF%22/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230284C7%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2338BDF8%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22url%28%23bg%29%22/%3E%3Cpath%20d%3D%22M35%2010%20L20%2033%20L31%2033%20L28%2054%20L44%2029%20L33%2029%20Z%22%20fill%3D%22%23FFFFFF%22/%3E%3C/svg%3E">
@@ -522,12 +527,13 @@
         priority: String(t.priority || "Media").trim(),
         date: String(t.date || "").trim(),
         details: String(t.details || "-").trim(),
-        progress: Number(t.progress) || 0
+        progress: Number(t.progress) || 0,
+        updatedAt: t.updatedAt || Date.now()
       };
     }
 
-    // Inicializar Firebase Firestore (Fijado internamente con credenciales pre-configuradas)
-    function initFirebase() {
+    // Inicializar Firebase Firestore con Persistencia Nativa Multi-Pestaña y Offline
+    async function initFirebase() {
       const fbConfig = DEFAULT_FIREBASE_CONFIG;
 
       if (!fbConfig.apiKey || !fbConfig.projectId) {
@@ -540,6 +546,19 @@
           firebase.initializeApp(fbConfig);
         }
         db = firebase.firestore();
+
+        // Activar persistencia en disco (IndexedDB) para que NUNCA se pierdan cambios
+        try {
+          await db.enablePersistence({ synchronizeTabs: true });
+          console.log("Persistencia nativa offline y multi-pestaña activada.");
+        } catch (persError) {
+          if (persError.code === 'failed-precondition') {
+            console.warn("Múltiples pestañas abiertas simultáneamente sin soporte de sincronización.");
+          } else if (persError.code === 'unimplemented') {
+            console.warn("El navegador no soporta persistencia IndexedDB.");
+          }
+        }
+
         updateSyncBadge("Conectando...", "yellow");
         listenToFirestore();
       } catch (err) {
@@ -554,15 +573,7 @@
 
       if (unsubscribeFirestore) unsubscribeFirestore();
 
-      unsubscribeFirestore = db.collection("tasks").onSnapshot((snapshot) => {
-        if (snapshot.empty) {
-          if (tasks.length > 0) {
-            seedInitialFirestore();
-          }
-          updateSyncBadge("Tiempo Real", "green");
-          return;
-        }
-
+      unsubscribeFirestore = db.collection("tasks").onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
         const cloudTasks = [];
         snapshot.forEach((doc) => {
           const d = doc.data();
@@ -571,11 +582,30 @@
           }
         });
 
-        tasks = cloudTasks;
-        localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
-        renderKPIs();
-        renderTable();
-        updateSyncBadge("Tiempo Real", "green");
+        // Si la nube tiene tareas, ellas son la verdad absoluta compartida
+        if (!snapshot.empty) {
+          tasks = cloudTasks;
+          localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
+          renderKPIs();
+          renderTable();
+        } else if (tasks.length > 0 && !localStorage.getItem('tp_seeded_once')) {
+          // Solo si la base de datos es 100% virgen por primera vez se suben las tareas
+          localStorage.setItem('tp_seeded_once', 'true');
+          seedInitialFirestore();
+        } else {
+          tasks = [];
+          localStorage.setItem('tp_tasks_fs', JSON.stringify([]));
+          renderKPIs();
+          renderTable();
+        }
+
+        // Si los cambios provienen de la memoria local pendiente de subir:
+        const hasPendingWrites = snapshot.metadata.hasPendingWrites;
+        if (hasPendingWrites) {
+          updateSyncBadge("Guardando...", "yellow");
+        } else {
+          updateSyncBadge("Tiempo Real", "green");
+        }
       }, (err) => {
         console.error("Fallo de Firestore:", err);
         if (err.code === "permission-denied") {
@@ -1027,16 +1057,36 @@
       reader.onload = async function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (imported.tasks && imported.config) {
+          if (imported.tasks && Array.isArray(imported.tasks)) {
             tasks = imported.tasks;
-            config = imported.config;
-            saveState();
-            if (db) {
-              await seedInitialFirestore();
+            if (imported.config && imported.config.companies) {
+              config.companies = imported.config.companies;
             }
-            alert("¡Datos importados exitosamente!");
+            saveState();
+
+            // Sincronizar y reemplazar la nube con los datos importados
+            if (db) {
+              updateSyncBadge("Subiendo...", "yellow");
+              try {
+                const snap = await db.collection("tasks").get();
+                const batch = db.batch();
+                snap.forEach(doc => batch.delete(doc.ref));
+                tasks.forEach(t => {
+                  const ref = db.collection("tasks").doc(t.id);
+                  batch.set(ref, sanitizeTask(t));
+                });
+                const compRef = db.collection("settings").doc("companies");
+                batch.set(compRef, { list: config.companies });
+                await batch.commit();
+                updateSyncBadge("Tiempo Real", "green");
+                showToast("¡Nube actualizada con los datos importados!", "cloud_done");
+              } catch (cloudErr) {
+                console.warn("Fallo al actualizar nube tras importar:", cloudErr);
+              }
+            }
+            alert("¡Datos importados y respaldados en la nube exitosamente!");
           } else {
-            alert("El archivo no tiene el formato esperado.");
+            alert("El archivo no contiene un formato de tareas válido.");
           }
         } catch (err) {
           alert("Error al leer el archivo JSON.");
@@ -1203,7 +1253,10 @@
       }
     }
 
-    // Auto-sincronizar cuando el teléfono desbloquea la pantalla o vuelve a la pestaña
+    // Auto-sincronizar cuando vuelves a la pestaña, desbloqueas el teléfono o enfocas la ventana
+    window.addEventListener('focus', () => {
+      if (db) manualSyncCloud(false);
+    });
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && db) {
         manualSyncCloud(false);

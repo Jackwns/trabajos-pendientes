@@ -163,6 +163,48 @@
       transform: scale(1.1);
     }
 
+
+    /* Animación de entrada moderna estilo Netflix */
+    @keyframes netflixEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.92) translateY(12px);
+        filter: blur(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+      }
+    }
+    .animate-netflix {
+      animation: netflixEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Animación corta y fluida para apertura de ventanas modales */
+    @keyframes modalShortPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .animate-modal-pop {
+      animation: modalShortPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Animación fluida de despliegue inferior para el cajón móvil */
+    @keyframes drawerSlideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .animate-drawer {
+      animation: drawerSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
   </style>
 </head>
 <body class="selection:bg-cyan-500 selection:text-black">
@@ -184,13 +226,13 @@
   <!-- 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)                      -->
   <!-- ===================================================================== -->
   <div id="netflixScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-500">
-    <div class="max-w-4xl w-full text-center py-8">
+    <div class="max-w-4xl w-full text-center py-8 animate-netflix">
       
       <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white items-center justify-center shadow-2xl shadow-cyan-500/30 mb-5">
         <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
 
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">¿Quién está usando TaskFlow?</h1>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">TaskFlow</h1>
       <p class="text-xs sm:text-sm text-slate-400 mb-10">Selecciona tu perfil para ingresar</p>
 
       <!-- Contenedor dinámico de burbujas de perfiles -->
@@ -342,11 +384,10 @@
 
   </main>
 
-  <!-- MÓVIL: BOTÓN ANCHO CON FLECHA ABAJO DEL TODO (DRAWER HANDLE) -->
+  <!-- MÓVIL: BOTÓN ANCHO ESTÁTICO CON FLECHA ABAJO DEL TODO -->
   <div class="md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-40 pb-2 pt-1 px-4">
-    <button onclick="openBottomSheet()" class="flex items-center justify-center gap-1.5 w-32 h-8 rounded-full bg-dark-900/90 border border-white/10 backdrop-blur-md text-slate-300 hover:text-white shadow-xl active:scale-95 transition-all">
-      <svg class="w-3.5 h-3.5 stroke-current -mt-0.5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
-      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Menú</span>
+    <button onclick="openBottomSheet()" title="Opciones" class="flex items-center justify-center w-28 h-6 rounded-full bg-dark-900/90 border border-white/10 backdrop-blur-md text-slate-300 hover:text-white shadow-xl active:scale-95 transition-all">
+      <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
     </button>
   </div>
 
@@ -417,7 +458,7 @@
 
   <!-- BOTTOM SHEET MÓVIL (3 LÍNEAS) -->
   <div id="bottomSheetModal" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-end justify-center hidden" onclick="closeBottomSheet()">
-    <div class="bg-dark-900 border-t border-white/[0.1] rounded-t-3xl w-full max-w-lg p-5 shadow-2xl" onclick="event.stopPropagation()">
+    <div class="bg-dark-900 border-t border-white/[0.1] rounded-t-3xl w-full max-w-lg p-5 shadow-2xl animate-drawer" onclick="event.stopPropagation()">
       <div class="w-12 h-1 rounded-full bg-white/20 mx-auto mb-4"></div>
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
         <h3 class="text-sm font-bold text-white">Menú de Opciones</h3>
@@ -465,7 +506,7 @@
   <!-- 🔐 MODAL: CONTRASEÑA DE PERFIL (NETFLIX LOGIN)                         -->
   <!-- ===================================================================== -->
   <div id="profilePasswordModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-modal-pop">
       <div id="passModalAvatar" class="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden border-2 border-white/20"></div>
       <h3 id="passModalName" class="text-lg font-bold text-white mb-1">Nombre</h3>
       <p id="passModalRole" class="text-xs text-slate-400 mb-4">Rol</p>
@@ -496,7 +537,7 @@
   <!-- ➕ MODAL: AGREGAR NUEVO USUARIO (BURBUJA GRIS +)                      -->
   <!-- ===================================================================== -->
   <div id="createUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-modal-pop">
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
         <h3 class="text-base font-bold text-white">Nuevo Perfil</h3>
         <button onclick="closeCreateUserModal()" class="text-slate-400 hover:text-white p-1">✕</button>
@@ -533,7 +574,7 @@
   <!-- ⚙️ MODAL: PERFIL DE USUARIO & CONFIGURACIÓN PERSONAL                 -->
   <!-- ===================================================================== -->
   <div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scroll">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-modal-pop max-h-[92vh] overflow-y-auto custom-scroll">
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
         <h3 class="text-base font-bold text-white">Mi Perfil</h3>
         <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white p-1">✕</button>
@@ -818,6 +859,7 @@
 
     let currentUserId = localStorage.getItem('taskflow_current_user') || null;
     let selectedProfileForLogin = null;
+    let selectedDevUserId = "patricio";
     let tasks = [];
     let activeStatusFilter = "";
 
@@ -1009,25 +1051,90 @@
       document.getElementById('appMainView').classList.remove('hidden');
 
       // Actualizar Barra Superior
-      document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
       document.getElementById('navbarAvatarContainer').innerHTML = renderUserAvatarHtml(currentUser);
       document.getElementById('navbarUserBtn').title = `${currentUser.name} (${currentUser.role}) - Mi Perfil`;
 
-      const devBtn = document.getElementById('devPanelBtn');
-      if (currentUser.isDeveloper) {
-        devBtn.classList.remove('hidden');
-      } else {
-        devBtn.classList.add('hidden');
-      }
+      const devBar = document.getElementById('devViewerBar');
 
-      if (!tasksByProfile[currentUser.id]) {
-        tasksByProfile[currentUser.id] = [];
+      if (currentUser.isDeveloper) {
+        // Modo Developer: Activar barra de visor debajo del navbar
+        devBar.classList.remove('hidden');
+        if (!selectedDevUserId || !profiles.find(p => p.id === selectedDevUserId)) {
+          selectedDevUserId = "patricio";
+        }
+        renderDevViewerBubbles();
+
+        const inspectedUser = profiles.find(p => p.id === selectedDevUserId) || currentUser;
+        document.getElementById('subHeaderUserRole').innerText = `Developer • Viendo a ${inspectedUser.name}`;
+
+        if (!tasksByProfile[selectedDevUserId]) {
+          tasksByProfile[selectedDevUserId] = [];
+        }
+        tasks = tasksByProfile[selectedDevUserId];
+      } else {
+        // Modo Usuario Normal: Ocultar barra de visor
+        devBar.classList.add('hidden');
+        document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
+
+        if (!tasksByProfile[currentUser.id]) {
+          tasksByProfile[currentUser.id] = [];
+        }
+        tasks = tasksByProfile[currentUser.id];
       }
-      tasks = tasksByProfile[currentUser.id];
 
       populateDropdowns();
       renderKPIs();
       renderTable();
+    }
+
+    // Renderizar selector horizontal de burbujas para el Developer (Debajo del Navbar)
+    function renderDevViewerBubbles() {
+      const container = document.getElementById('devViewerBubbles');
+      if (!container) return;
+
+      // Mostrar todos los perfiles de usuarios (excepto developer)
+      const userProfiles = profiles.filter(p => !p.isDeveloper);
+
+      container.innerHTML = userProfiles.map(p => {
+        const isSelected = (p.id === selectedDevUserId);
+        const activeClass = isSelected 
+          ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-105" 
+          : "bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]";
+
+        return `
+          <div onclick="selectDevInspectedUser('${p.id}')"
+            class="flex items-center gap-2 px-2.5 py-1 rounded-xl border transition-all cursor-pointer select-none shrink-0 ${activeClass}">
+            <div class="w-6 h-6 rounded-full overflow-hidden shrink-0 border border-white/20">
+              ${renderUserAvatarHtml(p)}
+            </div>
+            <div class="text-xs font-bold whitespace-nowrap">${p.name}</div>
+            ${p.resetRequested ? `
+              <button onclick="event.stopPropagation(); devApproveReset('${p.id}');"
+                class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-500 text-white hover:bg-rose-600 transition-colors animate-pulse"
+                title="Click para resetear clave a 12345678">
+                Reset
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectDevInspectedUser(userId) {
+      selectedDevUserId = userId;
+      const inspectedUser = profiles.find(p => p.id === selectedDevUserId);
+      if (inspectedUser) {
+        document.getElementById('subHeaderUserRole').innerText = `Developer • Viendo a ${inspectedUser.name}`;
+      }
+      if (!tasksByProfile[selectedDevUserId]) {
+        tasksByProfile[selectedDevUserId] = [];
+      }
+      tasks = tasksByProfile[selectedDevUserId];
+      populateDropdowns();
+      renderKPIs();
+      renderTable();
+      renderDevViewerBubbles();
+      showToast(`Viendo tareas de ${inspectedUser ? inspectedUser.name : ''}`);
     }
 
     function logoutProfile() {
@@ -1330,8 +1437,9 @@
     async function saveToCloud() {
       updateSyncBadge("Guardando...", "yellow");
 
-      if (currentUserId) {
-        tasksByProfile[currentUserId] = tasks;
+      const targetSaveId = (currentUserId === 'developer' && selectedDevUserId) ? selectedDevUserId : currentUserId;
+      if (targetSaveId) {
+        tasksByProfile[targetSaveId] = tasks;
       }
       saveProfilesState();
 

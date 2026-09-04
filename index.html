@@ -226,10 +226,10 @@
 
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
 
-        <!-- Botón + Nueva Tarea -->
-        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0">
+        <!-- Botón + Nueva Tarea (En móvil solo el icono +, en PC con texto completo) -->
+        <button onclick="openTaskModal()" title="Nueva Tarea" class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0 active:scale-95">
           <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          <span class="hidden sm:inline">Nueva</span> Tarea
+          <span class="hidden sm:inline">Nueva Tarea</span>
         </button>
 
         <!-- Móvil: Sincronizar rápido y Menú 3 líneas -->

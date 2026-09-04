@@ -273,7 +273,7 @@
     </header>
 
     <!-- CONSOLA DE OBSERVACIÓN PARA VIEWER (Carrusel de Supervisión Premium) -->
-    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-3 px-3 sm:px-6 lg:px-8 w-full z-20 shadow-2xl relative overflow-hidden">
+    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2.5 px-3 sm:px-6 lg:px-8 w-full z-20 shadow-2xl relative">
       <!-- Línea sutil de acento luminoso superior -->
       <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/30 to-transparent pointer-events-none"></div>
 
@@ -290,9 +290,9 @@
           <span class="text-xs text-slate-400 font-medium hidden sm:inline">Supervisión de equipos en vivo:</span>
         </div>
 
-        <!-- Carrusel deslizable táctil en móvil y desktop -->
-        <div class="relative w-full md:w-auto overflow-hidden">
-          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-1 px-1 snap-x snap-mandatory -mx-1 sm:mx-0">
+        <!-- Carrusel deslizable táctil en móvil y desktop con holgura completa -->
+        <div class="relative w-full md:w-auto">
+          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-2 px-3 sm:px-1 snap-x snap-mandatory scroll-smooth">
             <!-- Inyectado vía JS con tarjetas enriquecidas de cada miembro -->
           </div>
         </div>
@@ -840,8 +840,8 @@
         const userTaskCount = allMasterTasks.filter(t => (t.userId || 'patricio') === p.id).length;
 
         const activeClasses = isSelected
-          ? "bg-gradient-to-r from-emerald-500/15 via-cyan-500/10 to-emerald-500/5 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.25)] scale-[1.02] ring-1 ring-emerald-400/50"
-          : "bg-white/[0.025] hover:bg-white/[0.055] border-white/[0.07] hover:border-emerald-500/30 text-slate-300 hover:text-white";
+          ? "bg-gradient-to-r from-emerald-500/20 via-cyan-500/10 to-emerald-500/5 border-emerald-400 shadow-[0_0_18px_rgba(16,185,129,0.3)] ring-1 ring-emerald-400/40"
+          : "bg-dark-850/70 hover:bg-dark-800/90 border-white/[0.08] hover:border-emerald-500/30 text-slate-300 hover:text-white";
 
         const badgeClasses = isSelected
           ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 font-extrabold"
@@ -849,16 +849,16 @@
 
         return `
           <div onclick="selectObservedUser('${p.id}')"
-            class="flex items-center gap-3 p-2 sm:p-2.5 pr-3.5 rounded-2xl border transition-all duration-200 cursor-pointer select-none shrink-0 snap-start active:scale-95 ${activeClasses}"
+            class="flex items-center gap-3 p-2 sm:p-2.5 pr-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none shrink-0 snap-start active:scale-95 first:ml-0.5 last:mr-1 ${activeClasses}"
             title="Ver tablero de ${p.name} (${userTaskCount} trabajos)">
             
-            <!-- Avatar circular con borde de estado -->
-            <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'border-white/15'} shadow-md flex items-center justify-center">
+            <!-- Avatar circular con borde de estado sin desbordamiento -->
+            <div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'border-white/15'} shadow-md flex items-center justify-center">
               ${renderUserAvatarHtml(p, 'w-full h-full rounded-full')}
             </div>
 
             <!-- Nombre, Rol e Indicador en Vivo -->
-            <div class="text-left min-w-0 pr-1">
+            <div class="text-left min-w-0 pr-0.5">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs sm:text-sm font-extrabold text-white truncate leading-tight tracking-tight">${p.name}</span>
                 ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0"></span>' : ''}

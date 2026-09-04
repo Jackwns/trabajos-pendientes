@@ -1932,9 +1932,11 @@
       if (name && !config.companies.includes(name)) {
         config.companies.push(name);
         nameInput.value = "";
+        saveLocalState();
         renderVariantsUI();
         populateDropdowns();
         await saveToCloud();
+        showToast(`Empresa "${name}" agregada`);
       }
     }
 

@@ -177,7 +177,7 @@
   <!-- ===================================================================== -->
   <!-- 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)                      -->
   <!-- ===================================================================== -->
-  <div id="netflixScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-500">
+  <div id="netflixScreen" style="display: none;" class="fixed inset-0 z-50 items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-300 pointer-events-none">
     <div class="max-w-4xl w-full text-center py-8 animate-netflix">
       
       <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white items-center justify-center shadow-2xl shadow-cyan-500/30 mb-5">
@@ -218,640 +218,6 @@
                 <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
                 <span id="syncText" class="hidden sm:inline">En línea</span>
               </button>
-
-              <!-- Ojo de Presencia en Vivo -->
-              <span id="presenceBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 shrink-0 select-none" title="Dispositivos conectados en vivo">
-                <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
-              </span>
-            </div>
-            <p id="subHeaderUserRole" class="text-[11px] text-slate-400 truncate hidden sm:block">Patricio • Art Director</p>
-          </div>
-        </div>
-
-        <!-- Right: Acciones y Avatar -->
-        <div class="flex items-center gap-2 shrink-0">
-          
-          <div class="hidden md:flex items-center gap-1.5">
-            <button onclick="manualSync()" title="Forzar sincronización inmediata" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-              Sincronizar
-            </button>
-            <button onclick="openVariantsModal()" id="variantsBtn" title="Gestionar Empresas" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-              Empresas
-            </button>
-            <button id="exportBtn" onclick="exportData()" title="Descargar respaldo JSON" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              Exportar
-            </button>
-            <button id="importBtn" onclick="document.getElementById('importFileInput').click()" title="Cargar respaldo JSON" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-              Importar
-            </button>
-          </div>
-
-          <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
-
-          <!-- Botón + Nueva Tarea (Completamente Oculto en modo Viewer) -->
-          <button id="newTaskBtn" onclick="openTaskModal()" title="Nueva Tarea" class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0 active:scale-95">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            <span class="hidden sm:inline">Nueva Tarea</span>
-          </button>
-
-          <!-- BURBUJA DE PERFIL ARRIBA A LA DERECHA -->
-          <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all overflow-hidden shrink-0 active:scale-95 shadow-md">
-            <div id="navbarAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden"></div>
-          </button>
-
-        </div>
-
-      </div>
-    </header>
-
-    <!-- CONSOLA DE OBSERVACIÓN PARA VIEWER (Carrusel de Supervisión Premium) -->
-    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2.5 px-3 sm:px-6 lg:px-8 w-full z-20 shadow-2xl relative">
-      <!-- Línea sutil de acento luminoso superior -->
-      <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/30 to-transparent pointer-events-none"></div>
-
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-        <!-- Badge y etiqueta del Visor -->
-        <div class="flex items-center justify-between md:justify-start gap-2.5 shrink-0">
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 shadow-inner">
-            <svg class="w-4 h-4 text-emerald-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400">Consola Viewer</span>
-          </div>
-          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Supervisión de equipos en vivo:</span>
-        </div>
-
-        <!-- Carrusel deslizable táctil en móvil y desktop con holgura completa -->
-        <div class="relative w-full md:w-auto">
-          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-2 px-3 sm:px-1 snap-x snap-mandatory scroll-smooth">
-            <!-- Inyectado vía JS con tarjetas enriquecidas de cada miembro -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-5 relative z-10 w-full flex-1 pb-24 md:pb-12">
-
-      <!-- KPI CARDS -->
-      <div class="mb-4 pt-2">
-        <div id="kpiContainer" class="flex md:grid md:grid-cols-6 gap-2 sm:gap-2.5 overflow-x-auto custom-scroll pt-2 pb-2.5 px-1 no-scrollbar snap-x snap-mandatory"></div>
-      </div>
-
-      <!-- Indicador de Filtro Activo -->
-      <div id="activeFilterBadge" class="hidden mb-3.5 flex items-center gap-2">
-        <span class="text-xs text-slate-400">Filtrando por:</span>
-        <span id="activeFilterText" class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-          <button onclick="setStatusFilter('')" class="ml-1 hover:text-white">✕</button>
-        </span>
-        <button onclick="setStatusFilter('')" class="text-xs text-slate-500 hover:text-slate-300 underline">Limpiar</button>
-      </div>
-
-      <!-- Barra de Búsqueda y Filtros -->
-      <div class="glass-panel p-3 rounded-2xl mb-4 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        <div class="flex items-center gap-2 flex-1 bg-white/[0.025] rounded-xl px-3 py-2 border border-white/[0.04]">
-          <svg class="w-4 h-4 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="searchInput" placeholder="Buscar por cliente, descripción o detalles..." oninput="renderTable()"
-            class="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-500 text-white">
-        </div>
-        <div class="flex items-center gap-2">
-          <select id="filterCompany" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-            <option value="">Todas las empresas</option>
-          </select>
-          <select id="filterPriority" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-            <option value="">Todas las prioridades</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- TABLA CON SCROLL HORIZONTAL ENCAPSULADO -->
-      <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl w-full">
-        <div class="overflow-x-auto custom-scroll w-full">
-          <table class="w-full text-left border-collapse min-w-[780px]">
-            <thead>
-              <tr class="border-b border-white/[0.05] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold select-none">
-                <th class="py-3.5 px-4 w-16 text-center">Progreso</th>
-                <th class="py-3.5 px-4">Empresa</th>
-                <th class="py-3.5 px-4">Descripción del Trabajo</th>
-                <th class="py-3.5 px-4">Estado</th>
-                <th class="py-3.5 px-4 text-center">Prioridad</th>
-                <th class="py-3.5 px-4">Fecha Ingreso</th>
-                <th class="py-3.5 px-4">Detalles</th>
-                <th id="thActions" class="py-3.5 px-4 text-center w-24">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="tasksTableBody" class="divide-y di  <style>
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; min-height: 100vh;
-      overflow-x: hidden;
-      background-color: #070A12;
-      color: #E2E8F0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    .fluid-bg-container {
-      position: fixed; inset: 0; overflow: hidden;
-      pointer-events: none; z-index: 0;
-    }
-    .orb {
-      position: absolute; border-radius: 9999px;
-      will-change: transform; pointer-events: none;
-    }
-    .orb-purple {
-      width: 580px; height: 580px;
-      background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(109, 40, 217, 0.25) 50%, transparent 75%);
-      filter: blur(140px); top: -100px; left: -50px;
-      animation: floatA 24s ease-in-out infinite alternate;
-    }
-    .orb-cyan {
-      width: 620px; height: 620px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.45) 0%, rgba(2, 132, 199, 0.25) 50%, transparent 75%);
-      filter: blur(150px); bottom: -120px; right: -80px;
-      animation: floatB 28s ease-in-out infinite alternate;
-    }
-    .orb-indigo {
-      width: 480px; height: 480px;
-      background: radial-gradient(circle, rgba(79, 70, 229, 0.35) 0%, rgba(124, 58, 237, 0.2) 50%, transparent 75%);
-      filter: blur(130px); top: 40%; left: 35%;
-      animation: floatC 20s ease-in-out infinite alternate;
-    }
-    @keyframes floatA {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(120px, 80px) scale(1.1); }
-      100% { transform: translate(-60px, 140px) scale(0.95); }
-    }
-    @keyframes floatB {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(-140px, -90px) scale(1.08); }
-      100% { transform: translate(70px, -130px) scale(0.92); }
-    }
-    @keyframes floatC {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(-80px, 60px) scale(1.12); }
-      100% { transform: translate(90px, -50px) scale(0.9); }
-    }
-
-    .glass-panel {
-      background: rgba(16, 23, 38, 0.82);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .glass-card {
-      background: rgba(22, 32, 51, 0.65);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .glass-card:hover {
-      background: rgba(28, 41, 65, 0.85);
-      transform: translateY(-2px);
-      border-color: rgba(6, 182, 212, 0.3);
-    }
-    .glass-card.active-kpi {
-      background: rgba(28, 41, 65, 0.95);
-      border-color: rgba(6, 182, 212, 0.7);
-      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
-    }
-    .table-row-card {
-      transition: background 0.15s, transform 0.15s;
-    }
-    .table-row-card.interactive:hover {
-      background: rgba(255, 255, 255, 0.04);
-      cursor: pointer;
-      transform: scale(1.008);
-    }
-    .circle-progress {
-      transform: rotate(-90deg);
-      transform-origin: 50% 50%;
-    }
-    .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 9999px;
-    }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    @keyframes netflixEntrance {
-      0% { opacity: 0; transform: scale(0.92) translateY(12px); filter: blur(10px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-    }
-    .animate-netflix {
-      animation: netflixEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes modalShortPop {
-      0% { opacity: 0; transform: scale(0.95) translateY(8px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .animate-modal-pop {
-      animation: modalShortPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes drawerSlideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .animate-drawer {
-      animation: drawerSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .netflix-bubble {
-      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .netflix-bubble:hover {
-      transform: scale(1.1);
-    }
-  </style>
-</head>
-<body class="selection:bg-cyan-500 selection:text-black">
-
-  <!-- FONDO DE ESFERAS FLUIDAS -->
-  <div class="fluid-bg-container">
-    <div class="orb orb-purple"></div>
-    <div class="orb orb-cyan"></div>
-    <div class="orb orb-indigo"></div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border border-cyan-500/40 text-white text-xs px-4 py-2 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2">
-    <span id="toastText">Sincronizado</span>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)                      -->
-  <!-- ===================================================================== -->
-  <div id="netflixScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-500">
-    <div class="max-w-4xl w-full text-center py-8 animate-netflix">
-      
-      <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white items-center justify-center shadow-2xl shadow-cyan-500/30 mb-5">
-        <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">TaskFlow</h1>
-      <p class="text-xs sm:text-sm text-slate-400 mb-10">Selecciona tu perfil para ingresar</p>
-
-      <!-- Burbujas de perfiles -->
-      <div id="netflixProfilesContainer" class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 max-w-3xl mx-auto"></div>
-
-      <div class="mt-12">
-        <p class="text-[11px] text-slate-500">TaskFlow Workspace • Sincronización en tiempo real</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 💻 APLICACIÓN PRINCIPAL (TASKFLOW)                                   -->
-  <!-- ===================================================================== -->
-  <div id="appMainView" class="hidden min-h-screen flex flex-col">
-
-    <!-- HEADER NAVBAR -->
-    <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.06] w-full">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
-        
-        <!-- Left: Logo, TaskFlow, Estado y Presencia -->
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
-            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-base font-bold text-white tracking-tight truncate">TaskFlow</span>
-              
-              <span id="syncBadge" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shrink-0">
-                <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                <span id="syncText" class="hidden sm:inline">En línea</span>
-              </span>
-
-              <!-- Ojo de Presencia en Vivo -->
-              <span id="presenceBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 shrink-0 select-none" title="Dispositivos conectados en vivo">
-                <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
-              </span>
-            </div>
-            <p id="subHeaderUserRole" class="text-[11px] text-slate-400 truncate hidden sm:block">Patricio • Art Director</p>
-          </div>
-        </div>
-
-        <!-- Right: Acciones y Avatar -->
-        <div class="flex items-center gap-2 shrink-0">
-          
-          <div class="hidden md:flex items-center gap-1.5">
-            <button onclick="manualSync()" title="Forzar sincronización inmediata" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-              Sincronizar
-            </button>
-            <button onclick="openVariantsModal()" id="variantsBtn" title="Gestionar Empresas" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-              Empresas
-            </button>
-            <button id="exportBtn" onclick="exportData()" title="Descargar respaldo JSON" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-              Exportar
-            </button>
-            <button id="importBtn" onclick="document.getElementById('importFileInput').click()" title="Cargar respaldo JSON" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-xl border border-white/[0.06] transition-all">
-              <svg class="w-3.5 h-3.5 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-              Importar
-            </button>
-          </div>
-
-          <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
-
-          <!-- Botón + Nueva Tarea (Completamente Oculto en modo Viewer) -->
-          <button id="newTaskBtn" onclick="openTaskModal()" title="Nueva Tarea" class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0 active:scale-95">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            <span class="hidden sm:inline">Nueva Tarea</span>
-          </button>
-
-          <!-- BURBUJA DE PERFIL ARRIBA A LA DERECHA -->
-          <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all overflow-hidden shrink-0 active:scale-95 shadow-md">
-            <div id="navbarAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden"></div>
-          </button>
-
-        </div>
-
-      </div>
-    </header>
-
-    <!-- CONSOLA DE OBSERVACIÓN PARA VIEWER (Carrusel de Supervisión Premium) -->
-    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2.5 px-3 sm:px-6 lg:px-8 w-full z-20 shadow-2xl relative">
-      <!-- Línea sutil de acento luminoso superior -->
-      <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/30 to-transparent pointer-events-none"></div>
-
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-        <!-- Badge y etiqueta del Visor -->
-        <div class="flex items-center justify-between md:justify-start gap-2.5 shrink-0">
-          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 shadow-inner">
-            <svg class="w-4 h-4 text-emerald-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400">Consola Viewer</span>
-          </div>
-          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Supervisión de equipos en vivo:</span>
-        </div>
-
-        <!-- Carrusel deslizable táctil en móvil y desktop con holgura completa -->
-        <div class="relative w-full md:w-auto">
-          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-2 px-3 sm:px-1 snap-x snap-mandatory scroll-smooth">
-            <!-- Inyectado vía JS con tarjetas enriquecidas de cada miembro -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-5 relative z-10 w-full flex-1 pb-24 md:pb-12">
-
-      <!-- KPI CARDS -->
-      <div class="mb-4 pt-2">
-        <div id="kpiContainer" class="flex md:grid md:grid-cols-6 gap-2 sm:gap-2.5 overflow-x-auto custom-scroll pt-2 pb-2.5 px-1 no-scrollbar snap-x snap-mandatory"></div>
-      </div>
-
-      <!-- Indicador de Filtro Activo -->
-      <div id="activeFilterBadge" class="hidden mb-3.5 flex items-center gap-2">
-        <span class="text-xs text-slate-400">Filtrando por:</span>
-        <span id="activeFilterText" class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-          <button onclick="setStatusFilter('')" class="ml-1 hover:text-white">✕</button>
-        </span>
-        <button onclick="setStatusFilter('')" class="text-xs text-slate-500 hover:text-slate-300 underline">Limpiar</button>
-      </div>
-
-      <!-- Barra de Búsqueda y Filtros -->
-      <div class="glass-panel p-3 rounded-2xl mb-4 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-        <div class="flex items-center gap-2 flex-1 bg-white/[0.025] rounded-xl px-3 py-2 border border-white/[0.04]">
-          <svg class="w-4 h-4 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          <input type="text" id="searchInput" placeholder="Buscar por cliente, descripción o detalles..." oninput="renderTable()"
-            class="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-500 text-white">
-        </div>
-        <div class="flex items-center gap-2">
-          <select id="filterCompany" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-            <option value="">Todas las empresas</option>
-          </select>
-          <select id="filterPriority" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-            <option value="">Todas las prioridades</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- TABLA CON SCROLL HORIZONTAL ENCAPSULADO -->
-      <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl w-full">
-        <div class="overflow-x-auto custom-scroll w-full">
-          <table class="w-full text-left border-collapse min-w-[780px]">
-            <thead>
-              <tr class="border-b border-white/[0.05] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold select-none">
-                <th class="py-3.5 px-4 w-16 text-center">Progreso</th>
-                <th class="py-3.5 px-4">Empresa</th>
-                <th class="py-3.5 px-4">Descripción del Trabajo</th>
-                <th class="py-3.5 px-4">Estado</th>
-                <th class="py-3.5 px-4 text-center">Prioridad</th>
-                <th class="py-3.5 px-4">Fecha Ingreso</th>
-                <th class="py-3.5 px-4">Detalles</th>
-                <th id="thActions" class="py-3.5 px-4 text-center w-24">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="tasksTableBody" class="divide-y divide-white/[0.03] text-sm"></tbody>
-          </table>
-        </div>
-        <div id="emptyState" class="hidden p-14 text-center">
-         <style>
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; min-height: 100vh;
-      overflow-x: hidden;
-      background-color: #070A12;
-      color: #E2E8F0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    .fluid-bg-container {
-      position: fixed; inset: 0; overflow: hidden;
-      pointer-events: none; z-index: 0;
-    }
-    .orb {
-      position: absolute; border-radius: 9999px;
-      will-change: transform; pointer-events: none;
-    }
-    .orb-purple {
-      width: 580px; height: 580px;
-      background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, rgba(109, 40, 217, 0.25) 50%, transparent 75%);
-      filter: blur(140px); top: -100px; left: -50px;
-      animation: floatA 24s ease-in-out infinite alternate;
-    }
-    .orb-cyan {
-      width: 620px; height: 620px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.45) 0%, rgba(2, 132, 199, 0.25) 50%, transparent 75%);
-      filter: blur(150px); bottom: -120px; right: -80px;
-      animation: floatB 28s ease-in-out infinite alternate;
-    }
-    .orb-indigo {
-      width: 480px; height: 480px;
-      background: radial-gradient(circle, rgba(79, 70, 229, 0.35) 0%, rgba(124, 58, 237, 0.2) 50%, transparent 75%);
-      filter: blur(130px); top: 40%; left: 35%;
-      animation: floatC 20s ease-in-out infinite alternate;
-    }
-    @keyframes floatA {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(120px, 80px) scale(1.1); }
-      100% { transform: translate(-60px, 140px) scale(0.95); }
-    }
-    @keyframes floatB {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(-140px, -90px) scale(1.08); }
-      100% { transform: translate(70px, -130px) scale(0.92); }
-    }
-    @keyframes floatC {
-      0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(-80px, 60px) scale(1.12); }
-      100% { transform: translate(90px, -50px) scale(0.9); }
-    }
-
-    .glass-panel {
-      background: rgba(16, 23, 38, 0.82);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .glass-card {
-      background: rgba(22, 32, 51, 0.65);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .glass-card:hover {
-      background: rgba(28, 41, 65, 0.85);
-      transform: translateY(-2px);
-      border-color: rgba(6, 182, 212, 0.3);
-    }
-    .glass-card.active-kpi {
-      background: rgba(28, 41, 65, 0.95);
-      border-color: rgba(6, 182, 212, 0.7);
-      box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
-    }
-    .table-row-card {
-      transition: background 0.15s, transform 0.15s;
-    }
-    .table-row-card.interactive:hover {
-      background: rgba(255, 255, 255, 0.04);
-      cursor: pointer;
-      transform: scale(1.008);
-    }
-    .circle-progress {
-      transform: rotate(-90deg);
-      transform-origin: 50% 50%;
-    }
-    .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 9999px;
-    }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    @keyframes netflixEntrance {
-      0% { opacity: 0; transform: scale(0.92) translateY(12px); filter: blur(10px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-    }
-    .animate-netflix {
-      animation: netflixEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes modalShortPop {
-      0% { opacity: 0; transform: scale(0.95) translateY(8px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .animate-modal-pop {
-      animation: modalShortPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes drawerSlideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .animate-drawer {
-      animation: drawerSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .netflix-bubble {
-      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .netflix-bubble:hover {
-      transform: scale(1.1);
-    }
-  </style>
-</head>
-<body class="selection:bg-cyan-500 selection:text-black">
-
-  <!-- FONDO DE ESFERAS FLUIDAS -->
-  <div class="fluid-bg-container">
-    <div class="orb orb-purple"></div>
-    <div class="orb orb-cyan"></div>
-    <div class="orb orb-indigo"></div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border border-cyan-500/40 text-white text-xs px-4 py-2 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2">
-    <span id="toastText">Sincronizado</span>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)                      -->
-  <!-- ===================================================================== -->
-  <div id="netflixScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-500">
-    <div class="max-w-4xl w-full text-center py-8 animate-netflix">
-      
-      <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white items-center justify-center shadow-2xl shadow-cyan-500/30 mb-5">
-        <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">TaskFlow</h1>
-      <p class="text-xs sm:text-sm text-slate-400 mb-10">Selecciona tu perfil para ingresar</p>
-
-      <!-- Burbujas de perfiles -->
-      <div id="netflixProfilesContainer" class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 max-w-3xl mx-auto"></div>
-
-      <div class="mt-12">
-        <p class="text-[11px] text-slate-500">TaskFlow Workspace • Sincronización en tiempo real</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 💻 APLICACIÓN PRINCIPAL (TASKFLOW)                                   -->
-  <!-- ===================================================================== -->
-  <div id="appMainView" class="hidden min-h-screen flex flex-col">
-
-    <!-- HEADER NAVBAR -->
-    <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.06] w-full">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
-        
-        <!-- Left: Logo, TaskFlow, Estado y Presencia -->
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
-            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-base font-bold text-white tracking-tight truncate">TaskFlow</span>
-              
-              <span id="syncBadge" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shrink-0">
-                <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                <span id="syncText" class="hidden sm:inline">En línea</span>
-              </span>
 
               <!-- Ojo de Presencia en Vivo -->
               <span id="presenceBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 shrink-0 select-none" title="Dispositivos conectados en vivo">
@@ -1471,7 +837,7 @@
         const isSelected = (p.id === selectedObservedUserId);
         
         // Contar tareas pendientes: suma desde Pendiente hasta Revisión/Chequeo (Pendiente, Proceso, Revisión)
-        const userPendingCount = allMasterTasks.filter(t => {
+        const userPendingCount = tasks.filter(t => {
           const matchUser = (t.userId || 'patricio') === p.id;
           const status = normalizeStatus(t.status);
           const isPending = (status === "Pendiente" || status === "Proceso" || status === "Revisión");
@@ -1532,26 +898,15 @@
       renderViewerProfilesSelector();
 
       // Cargar tareas del usuario seleccionado
-      filterTasksForActiveView();
-      populateDropdowns();
+            populateDropdowns();
       renderKPIs();
       renderTable();
       showToast(`Observando tareas de ${targetUser ? targetUser.name : ''}`);
     }
 
     // Tareas maestras completas y filtrado según vista activa
-    let allMasterTasks = tasks;
-    function filterTasksForActiveView() {
-      const currentUser = profiles.find(p => p.id === currentUserId);
-      if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) {
-        // En modo Viewer: filtrar por el usuario observado (por defecto Patricio)
-        tasks = allMasterTasks.filter(t => (t.userId || 'patricio') === selectedObservedUserId);
-      } else {
-        // En modo normal: tareas de Patricio u otro usuario
-        const uid = currentUser ? currentUser.id : 'patricio';
-        tasks = allMasterTasks.filter(t => (t.userId || 'patricio') === uid);
-      }
-    }
+    // Lista única compartida de tareas
+// Vista unificada de tareas compartida
 
     let activeStatusFilter = "";
 
@@ -1748,9 +1103,18 @@
     // 🚀 INICIALIZACIÓN DE SESIÓN Y VISTA VIEWER
     // =========================================================================
     function initUserSession() {
+      const netflixEl = document.getElementById('netflixScreen');
+      const appEl = document.getElementById('appMainView');
+
       if (!currentUserId) {
-        document.getElementById('netflixScreen').classList.remove('hidden');
-        document.getElementById('appMainView').classList.add('hidden');
+        // Mostrar pantalla de Netflix y bloquear app principal
+        if (netflixEl) {
+          netflixEl.style.display = 'flex';
+          netflixEl.classList.remove('pointer-events-none');
+        }
+        if (appEl) {
+          appEl.style.display = 'none';
+        }
         renderNetflixScreen();
         return;
       }
@@ -1765,9 +1129,14 @@
         }
       }
 
-      // Mostrar App principal
-      document.getElementById('netflixScreen').classList.add('hidden');
-      document.getElementById('appMainView').classList.remove('hidden');
+      // Desactivar y ocultar totalmente la pantalla de Netflix para liberar todos los clics y visualización
+      if (netflixEl) {
+        netflixEl.style.display = 'none';
+        netflixEl.classList.add('pointer-events-none');
+      }
+      if (appEl) {
+        appEl.style.display = 'flex';
+      }
 
       // Barra Superior
       document.getElementById('navbarAvatarContainer').innerHTML = renderUserAvatarHtml(currentUser);
@@ -1817,8 +1186,7 @@
         document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
       }
 
-      filterTasksForActiveView();
-
+      
       populateDropdowns();
       renderKPIs();
       renderTable();
@@ -1828,7 +1196,16 @@
       currentUserId = null;
       localStorage.removeItem('taskflow_current_user');
       closeUserProfileModal();
-      initUserSession();
+      const netflixEl = document.getElementById('netflixScreen');
+      const appEl = document.getElementById('appMainView');
+      if (netflixEl) {
+        netflixEl.style.display = 'flex';
+        netflixEl.classList.remove('pointer-events-none');
+      }
+      if (appEl) {
+        appEl.style.display = 'none';
+      }
+      renderNetflixScreen();
     }
 
     // =========================================================================
@@ -2014,9 +1391,14 @@
     async function loadFromCloud(silent = false) {
       if (!silent) updateSyncBadge("Sincronizando...", "yellow");
       try {
-        // Petición con parámetro único ?nocache para anular cualquier caché del navegador
-        const url = `${FIRESTORE_ENDPOINT}?nocache=${Date.now()}`;
-        const res = await fetch(url, { cache: 'no-store' });
+        // Petición limpia directa a Firestore (sin parámetros no soportados que causan error 400)
+        const res = await fetch(FIRESTORE_ENDPOINT, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
         
         if (res.status === 404) {
           await saveToCloud();
@@ -2037,19 +1419,20 @@
           }
 
           if (cloudTasks.length > 0) {
-            const currentSig = JSON.stringify(allMasterTasks);
+            const currentSig = JSON.stringify(tasks);
             const newSig = JSON.stringify(cloudTasks);
             if (currentSig !== newSig) {
-              allMasterTasks = cloudTasks;
-              filterTasksForActiveView();
-              populateDropdowns();
+              tasks = cloudTasks;
+                            populateDropdowns();
               renderKPIs();
               renderTable();
+              if (document.getElementById('viewerProfilesSelector')) {
+                renderViewerProfilesSelector();
+              }
             }
-          } else if (allMasterTasks.length === 0) {
-            allMasterTasks = PATRICIO_INITIAL_TASKS.map(sanitizeTask);
-            filterTasksForActiveView();
-            populateDropdowns();
+          } else if (tasks.length === 0) {
+            tasks = PATRICIO_INITIAL_TASKS.map(sanitizeTask);
+                        populateDropdowns();
             renderKPIs();
             renderTable();
           }
@@ -2070,8 +1453,8 @@
           updateSyncBadge("En línea", "green");
         }
       } catch (err) {
-        console.warn("Aviso nube:", err);
-        updateSyncBadge("En línea", "green");
+        console.error("Fallo de sincronización nube:", err);
+        updateSyncBadge("Sin conexión", "red");
       }
     }
 
@@ -2086,13 +1469,13 @@
 
       try {
         const payloadString = JSON.stringify({
-          tasks: allMasterTasks,
+          tasks: tasks,
           profiles: profiles,
           companies: config.companies,
           updatedAt: Date.now()
         });
 
-        const url = `${FIRESTORE_ENDPOINT}?updateMask.fieldPaths=payload`;
+        const url = FIRESTORE_ENDPOINT;
         const res = await fetch(url, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -2116,8 +1499,12 @@
 
     async function manualSync() {
       showToast("Sincronizando con la nube...");
-      await loadFromCloud(false);
-      showToast("¡Datos sincronizados!");
+      try {
+        await loadFromCloud(false);
+        showToast("¡Datos sincronizados!");
+      } catch (e) {
+        alert("Error de conexión con la nube: " + e.message);
+      }
     }
 
     // Heartbeat de Presencia (Ojo)
@@ -2125,7 +1512,7 @@
       try {
         const now = Date.now();
         let sessions = {};
-        const res = await fetch(`${PRESENCE_ENDPOINT}?nocache=${now}`, { cache: 'no-store' });
+        const res = await fetch(PRESENCE_ENDPOINT, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
         if (res.ok) {
           const data = await res.json();
           if (data.fields && data.fields.sessions && data.fields.sessions.stringValue) {
@@ -2489,15 +1876,14 @@
       const authorId = (currentUserId && currentUserId !== 'viewer') ? currentUserId : 'patricio';
       const taskWithUser = { ...taskObj, userId: authorId };
 
-      const masterIdx = allMasterTasks.findIndex(t => t.id === id);
+      const masterIdx = tasks.findIndex(t => t.id === id);
       if (masterIdx !== -1) {
-        allMasterTasks[masterIdx] = taskWithUser;
+        tasks[masterIdx] = taskWithUser;
       } else {
-        allMasterTasks.unshift(taskWithUser);
+        tasks.unshift(taskWithUser);
       }
 
-      filterTasksForActiveView();
-      closeTaskModal();
+            closeTaskModal();
       populateDropdowns();
       renderKPIs();
       renderTable();
@@ -2514,9 +1900,8 @@
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
 
       if (confirm("¿Eliminar este trabajo?")) {
-        allMasterTasks = allMasterTasks.filter(t => t.id !== id);
-        filterTasksForActiveView();
-        renderKPIs();
+        tasks = tasks.filter(t => t.id !== id);
+                renderKPIs();
         renderTable();
         await saveToCloud();
       }
@@ -2627,7 +2012,7 @@
     // Auto-polling en tiempo real cada 6 segundos para sincronización instantánea entre dispositivos
     setInterval(() => {
       if (!document.hidden) loadFromCloud(true);
-    }, 6000);
+    }, 4000);
 
     // Heartbeat de presencia cada 25 segundos
     setInterval(updatePresence, 25000);

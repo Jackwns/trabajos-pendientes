@@ -247,9 +247,9 @@
   <!-- CONTENIDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-5 relative z-10 w-full">
 
-    <!-- KPI CARDS (Filtros de estado en una fila deslizable en móvil y grid en desktop) -->
-    <div class="mb-4">
-      <div id="kpiContainer" class="flex md:grid md:grid-cols-6 gap-2 sm:gap-2.5 overflow-x-auto custom-scroll pb-1.5 no-scrollbar snap-x snap-mandatory"></div>
+    <!-- KPI CARDS (Con padding superior para evitar cortes al animar o hover) -->
+    <div class="mb-4 pt-2">
+      <div id="kpiContainer" class="flex md:grid md:grid-cols-6 gap-2 sm:gap-2.5 overflow-x-auto custom-scroll pt-2 pb-2.5 px-1 no-scrollbar snap-x snap-mandatory"></div>
     </div>
 
     <!-- Indicador de Filtro Activo -->
@@ -398,6 +398,10 @@
     // =========================================================================
     const FIREBASE_PROJECT_ID = "trabajos-pendientes-59380";
     const FIRESTORE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/main`;
+    const PRESENCE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/presence`;
+    
+    // Identificador único de este dispositivo / pestaña
+    const SESSION_ID = "device_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now();
 
     const DEFAULT_CONFIG = {
       companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal", "Bmw"],
@@ -913,6 +917,57 @@
     renderKPIs();
     renderTable();
     loadFromCloud();
+    updatePresence();
+
+    // Sistema de Detección de Dispositivos Conectados en Vivo (Ojo)
+    async function updatePresence() {
+      try {
+        const now = Date.now();
+        let sessions = {};
+
+        // Leer sesiones activas de Firestore
+        const res = await fetch(PRESENCE_ENDPOINT, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.fields && data.fields.sessions && data.fields.sessions.stringValue) {
+            try {
+              sessions = JSON.parse(data.fields.sessions.stringValue);
+            } catch(e) {}
+          }
+        }
+
+        // Descartar dispositivos que no hayan respondido en los últimos 40 segundos
+        const active = {};
+        for (const [id, lastSeen] of Object.entries(sessions)) {
+          if (now - lastSeen < 40000) {
+            active[id] = lastSeen;
+          }
+        }
+        active[SESSION_ID] = now;
+
+        // Actualizar el número en pantalla
+        const count = Math.max(1, Object.keys(active).length);
+        const countEl = document.getElementById('presenceCount');
+        if (countEl) countEl.innerText = count;
+
+        // Guardar estado en Firestore
+        await fetch(`${PRESENCE_ENDPOINT}?updateMask.fieldPaths=sessions`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              sessions: { stringValue: JSON.stringify(active) }
+            }
+          })
+        });
+      } catch (err) {
+        console.warn("Aviso presencia:", err);
+      }
+    }
+
+    // Emitir latido cada 15 segundos y al enfocar la ventana
+    setInterval(updatePresence, 15000);
+    window.addEventListener('focus', updatePresence);
 
     // Auto-sincronizar al volver a enfocar la pestaña
     window.addEventListener('focus', () => loadFromCloud(true));

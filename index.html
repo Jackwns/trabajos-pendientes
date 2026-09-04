@@ -836,21 +836,34 @@
       container.innerHTML = observableProfiles.map(p => {
         const isSelected = (p.id === selectedObservedUserId);
         
-        // Contar cuántas tareas tiene este perfil en la lista maestra
-        const userTaskCount = allMasterTasks.filter(t => (t.userId || 'patricio') === p.id).length;
+        // Contar tareas pendientes: suma desde Pendiente hasta Revisión/Chequeo (Pendiente, Proceso, Revisión)
+        const userPendingCount = allMasterTasks.filter(t => {
+          const matchUser = (t.userId || 'patricio') === p.id;
+          const status = normalizeStatus(t.status);
+          const isPending = (status === "Pendiente" || status === "Proceso" || status === "Revisión");
+          return matchUser && isPending;
+        }).length;
 
         const activeClasses = isSelected
           ? "bg-gradient-to-r from-emerald-500/20 via-cyan-500/10 to-emerald-500/5 border-emerald-400 shadow-[0_0_18px_rgba(16,185,129,0.3)] ring-1 ring-emerald-400/40"
           : "bg-dark-850/70 hover:bg-dark-800/90 border-white/[0.08] hover:border-emerald-500/30 text-slate-300 hover:text-white";
 
-        const badgeClasses = isSelected
-          ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 font-extrabold"
-          : "bg-white/[0.05] text-slate-400 border border-white/[0.06]";
+        // Estilos del contenedor: cuando haya 0 pendientes en celeste/cyan, de lo contrario verde esmeralda
+        let badgeClasses = "";
+        if (userPendingCount === 0) {
+          badgeClasses = isSelected
+            ? "bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.35)] font-extrabold"
+            : "bg-cyan-500/15 text-cyan-300/90 border border-cyan-400/30 font-bold";
+        } else {
+          badgeClasses = isSelected
+            ? "bg-emerald-400/25 text-emerald-300 border border-emerald-400/40 shadow-[0_0_10px_rgba(16,185,129,0.3)] font-extrabold"
+            : "bg-emerald-500/15 text-emerald-400/90 border border-emerald-500/25 font-semibold";
+        }
 
         return `
           <div onclick="selectObservedUser('${p.id}')"
             class="flex items-center gap-3 p-2 sm:p-2.5 pr-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none shrink-0 snap-start active:scale-95 first:ml-0.5 last:mr-1 ${activeClasses}"
-            title="Ver tablero de ${p.name} (${userTaskCount} trabajos)">
+            title="Ver tablero de ${p.name} (${userPendingCount} pendientes)">
             
             <!-- Avatar circular con borde de estado sin desbordamiento -->
             <div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'border-white/15'} shadow-md flex items-center justify-center">
@@ -866,10 +879,10 @@
               <div class="text-[10px] sm:text-[11px] text-slate-400 truncate leading-tight mt-0.5">${p.role || 'Miembro'}</div>
             </div>
 
-            <!-- Contador de Trabajos -->
+            <!-- Contenedor de Tareas Pendientes (Celeste si 0, Verde si > 0) -->
             <div class="shrink-0 ml-auto pl-1">
               <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] ${badgeClasses}">
-                ${userTaskCount} ${userTaskCount === 1 ? 'tarea' : 'tareas'}
+                ${userPendingCount} ${userPendingCount === 1 ? 'pendiente' : 'pendientes'}
               </span>
             </div>
 

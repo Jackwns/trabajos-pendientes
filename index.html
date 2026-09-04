@@ -476,6 +476,10 @@
     // =========================================================================
     const FIREBASE_PROJECT_ID = "trabajos-pendientes-59380";
     const FIRESTORE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/main`;
+    const PRESENCE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/presence`;
+
+    // Identificador único de sesión por pestaña / dispositivo
+    const SESSION_ID = "sess_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now();
 
     const DEFAULT_CONFIG = {
       companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal"],
@@ -1238,6 +1242,58 @@
       }
     }
 
+    // Sistema de Presencia en Tiempo Real (Dispositivos Conectados)
+    async function updatePresenceHeartbeat() {
+      try {
+        const now = Date.now();
+        let sessions = {};
+
+        // 1. Leer sesiones activas
+        const res = await fetch(PRESENCE_ENDPOINT, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.fields && data.fields.activeSessions && data.fields.activeSessions.stringValue) {
+            try {
+              sessions = JSON.parse(data.fields.activeSessions.stringValue);
+            } catch(e) {}
+          }
+        }
+
+        // 2. Limpiar sesiones inactivas (más de 45 segundos sin responder)
+        const cleaned = {};
+        for (const [sid, lastSeen] of Object.entries(sessions)) {
+          if (now - lastSeen < 45000) {
+            cleaned[sid] = lastSeen;
+          }
+        }
+        cleaned[SESSION_ID] = now;
+
+        // 3. Contar dispositivos activos
+        const activeCount = Math.max(1, Object.keys(cleaned).length);
+        const countEl = document.getElementById('presenceCount');
+        if (countEl) countEl.innerText = activeCount;
+
+        // 4. Actualizar presencia en Firestore
+        await fetch(`${PRESENCE_ENDPOINT}?updateMask.fieldPaths=activeSessions`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              activeSessions: { stringValue: JSON.stringify(cleaned) }
+            }
+          })
+        });
+      } catch (err) {
+        // En caso de fallo de red, mantener en 1
+        const countEl = document.getElementById('presenceCount');
+        if (countEl) countEl.innerText = "1";
+      }
+    }
+
+    // Enviar latido de presencia cada 25 segundos y al enfocar pestaña
+    setInterval(updatePresenceHeartbeat, 25000);
+    window.addEventListener('focus', updatePresenceHeartbeat);
+
     // Sincronización silenciosa solo al volver a la pestaña o desbloquear el dispositivo
     window.addEventListener('focus', () => {
       loadFromCloud(true);
@@ -1254,6 +1310,7 @@
     renderKPIs();
     renderTable();
     loadFromCloud();
+    updatePresenceHeartbeat();
   </script>
 </body>
 </html>

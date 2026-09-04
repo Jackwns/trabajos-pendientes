@@ -154,6 +154,15 @@
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Burbujas Netflix */
+    .netflix-bubble {
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .netflix-bubble:hover {
+      transform: scale(1.1);
+    }
+
   </style>
 </head>
 <body class="selection:bg-cyan-500 selection:text-black">
@@ -169,6 +178,32 @@
   <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border border-cyan-500/40 text-white text-xs px-4 py-2 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2">
     <span id="toastText">Sincronizado</span>
   </div>
+
+
+  <!-- ===================================================================== -->
+  <!-- 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)                      -->
+  <!-- ===================================================================== -->
+  <div id="netflixScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-500">
+    <div class="max-w-4xl w-full text-center py-8">
+      
+      <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white items-center justify-center shadow-2xl shadow-cyan-500/30 mb-5">
+        <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">¿Quién está usando TaskFlow?</h1>
+      <p class="text-xs sm:text-sm text-slate-400 mb-10">Selecciona tu perfil para ingresar</p>
+
+      <!-- Contenedor dinámico de burbujas de perfiles -->
+      <div id="netflixProfilesContainer" class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 max-w-3xl mx-auto"></div>
+
+      <div class="mt-12">
+        <p class="text-[11px] text-slate-500">TaskFlow Workspace • Acceso multiusuario seguro</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Principal de la App (se muestra cuando hay usuario logueado) -->
+  <div id="appMainView" class="hidden min-h-screen flex flex-col">
 
   <!-- HEADER -->
   <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.06] w-full">
@@ -198,7 +233,7 @@
               <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 truncate hidden sm:block">Control en tiempo real</p>
+          <p id="subHeaderUserRole" class="text-[11px] text-slate-400 truncate hidden sm:block">Patricio • Art Director</p>
         </div>
       </div>
 
@@ -226,18 +261,21 @@
 
         <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
 
-        <!-- Botón + Nueva Tarea (En móvil solo el icono +, en PC con texto completo) -->
-        <button onclick="openTaskModal()" title="Nueva Tarea" class="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0 active:scale-95">
+        <!-- Botón + Nueva Tarea -->
+        <button onclick="openTaskModal()" class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0">
           <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-          <span class="hidden sm:inline">Nueva Tarea</span>
+          <span class="hidden sm:inline">Nueva</span> Tarea
         </button>
 
-        <!-- Móvil: Sincronizar rápido y Menú 3 líneas -->
-        <button onclick="manualSync()" class="md:hidden w-9 h-9 rounded-xl bg-white/[0.04] text-cyan-400 flex items-center justify-center border border-white/[0.06]">
-          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <!-- Acceso Developer Profile Manager (solo visible si es dev) -->
+        <button id="devPanelBtn" onclick="openDevManagerModal()" class="hidden inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl hover:bg-amber-500/20 transition-all shrink-0">
+          <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span class="hidden lg:inline">Manager</span>
         </button>
-        <button onclick="openBottomSheet()" class="md:hidden w-9 h-9 rounded-xl bg-white/[0.04] text-slate-300 flex items-center justify-center border border-white/[0.06]">
-          <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+
+        <!-- BURBUJA DE USUARIO ARRIBA A LA DERECHA -->
+        <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all overflow-hidden shrink-0 active:scale-95 shadow-md">
+          <div id="navbarAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden"></div>
         </button>
       </div>
 
@@ -298,11 +336,21 @@
         </table>
       </div>
       <div id="emptyState" class="hidden p-14 text-center">
-        <p class="text-slate-400 text-sm">No se encontraron trabajos registrados.</p>
+        <p class="text-slate-400 text-sm">No se encontraron trabajos registrados para este usuario.</p>
       </div>
     </div>
 
   </main>
+
+  <!-- MÓVIL: BOTÓN ANCHO CON FLECHA ABAJO DEL TODO (DRAWER HANDLE) -->
+  <div class="md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-40 pb-2 pt-1 px-4">
+    <button onclick="openBottomSheet()" class="flex items-center justify-center gap-1.5 w-32 h-8 rounded-full bg-dark-900/90 border border-white/10 backdrop-blur-md text-slate-300 hover:text-white shadow-xl active:scale-95 transition-all">
+      <svg class="w-3.5 h-3.5 stroke-current -mt-0.5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Menú</span>
+    </button>
+  </div>
+
+  </div> <!-- Cierre de #appMainView -->
 
   <!-- MODAL: CREAR / EDITAR TAREA -->
   <div id="taskModal" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4">
@@ -412,16 +460,206 @@
     </div>
   </div>
 
+
+  <!-- ===================================================================== -->
+  <!-- 🔐 MODAL: CONTRASEÑA DE PERFIL (NETFLIX LOGIN)                         -->
+  <!-- ===================================================================== -->
+  <div id="profilePasswordModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+      <div id="passModalAvatar" class="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden border-2 border-white/20"></div>
+      <h3 id="passModalName" class="text-lg font-bold text-white mb-1">Nombre</h3>
+      <p id="passModalRole" class="text-xs text-slate-400 mb-4">Rol</p>
+
+      <form onsubmit="submitProfilePassword(event)" class="space-y-3">
+        <input type="password" id="profilePasswordInput" required placeholder="Ingresa tu contraseña"
+          class="w-full text-center text-sm border border-white/10 rounded-xl px-3 py-2.5 bg-dark-850 text-white outline-none focus:border-cyan-400 tracking-widest">
+        
+        <p id="passModalError" class="text-xs text-rose-400 hidden">Contraseña incorrecta</p>
+
+        <button type="submit" class="w-full py-2.5 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 active:scale-95 transition-all">
+          Ingresar
+        </button>
+      </form>
+
+      <div class="mt-4 pt-3 border-t border-white/[0.06] flex flex-col gap-2">
+        <button onclick="requestPasswordResetFromLogin()" class="text-xs text-slate-400 hover:text-cyan-400 underline transition-colors">
+          ¿Olvidaste tu contraseña? Solicitar reseteo a 12345678
+        </button>
+        <button onclick="closeProfilePasswordModal()" class="text-xs text-slate-500 hover:text-slate-300">
+          Volver a perfiles
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ➕ MODAL: AGREGAR NUEVO USUARIO (BURBUJA GRIS +)                      -->
+  <!-- ===================================================================== -->
+  <div id="createUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
+        <h3 class="text-base font-bold text-white">Nuevo Perfil</h3>
+        <button onclick="closeCreateUserModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+      <form onsubmit="submitCreateUser(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Nombre</label>
+          <input type="text" id="newUserName" required placeholder="Ej: Valentina" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Puesto / Posición</label>
+          <input type="text" id="newUserRole" required placeholder="Ej: Community Manager" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Contraseña</label>
+            <input type="password" id="newUserPass" required placeholder="••••••••" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Repetir Contraseña</label>
+            <input type="password" id="newUserPassRepeat" required placeholder="••••••••" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+          </div>
+        </div>
+        <p id="createUserError" class="text-rose-400 hidden"></p>
+        <div class="pt-3 flex justify-end gap-2 border-t border-white/[0.06]">
+          <button type="button" onclick="closeCreateUserModal()" class="px-4 py-2 text-slate-400 hover:text-white rounded-xl">Cancelar</button>
+          <button type="submit" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25">Crear Perfil</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- ⚙️ MODAL: PERFIL DE USUARIO & CONFIGURACIÓN PERSONAL                 -->
+  <!-- ===================================================================== -->
+  <div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scroll">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
+        <h3 class="text-base font-bold text-white">Mi Perfil</h3>
+        <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <!-- Avatar Preview & Upload -->
+      <div class="flex flex-col sm:flex-row items-center gap-5 pb-5 border-b border-white/[0.06] mb-5">
+        <div class="relative group">
+          <div id="profileEditAvatarPreview" class="w-24 h-24 rounded-full overflow-hidden border-2 border-cyan-400/50 flex items-center justify-center shadow-lg"></div>
+          <button onclick="document.getElementById('profilePhotoInput').click()" class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-bold text-white">
+            Cambiar
+          </button>
+        </div>
+        <div class="flex-1 text-center sm:text-left">
+          <h4 id="profileEditNameTitle" class="text-base font-bold text-white">Nombre</h4>
+          <p id="profileEditRoleTitle" class="text-xs text-slate-400 mb-2">Rol</p>
+          <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+            <button onclick="document.getElementById('profilePhotoInput').click()" class="px-3 py-1.5 text-xs font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl border border-white/[0.08]">
+              Subir PNG (Auto 150x150)
+            </button>
+            <button onclick="removeProfilePhoto()" class="px-2.5 py-1.5 text-xs text-slate-400 hover:text-rose-400">
+              Quitar foto
+            </button>
+          </div>
+          <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="handleProfilePhotoUpload(event)">
+        </div>
+      </div>
+
+      <!-- Paleta de 8 Colores Eléctricos para el Rayo -->
+      <div class="mb-5 pb-5 border-b border-white/[0.06]">
+        <label class="block text-xs font-semibold text-slate-300 mb-2">Color Eléctrico de Fondo del Rayo (8 Opciones):</label>
+        <div id="electricColorsPicker" class="flex flex-wrap gap-2.5"></div>
+      </div>
+
+      <!-- Modificar Datos Básicos -->
+      <div class="space-y-3 mb-5 pb-5 border-b border-white/[0.06] text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Nombre</label>
+          <input type="text" id="editProfileName" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Puesto / Posición</label>
+          <input type="text" id="editProfileRole" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <button onclick="saveProfileBasicInfo()" class="px-3.5 py-1.5 text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20">
+          Guardar Cambios de Nombre / Puesto
+        </button>
+      </div>
+
+      <!-- Cambiar Contraseña -->
+      <div class="space-y-3 mb-6 pb-5 border-b border-white/[0.06] text-xs">
+        <h5 class="text-xs font-bold uppercase tracking-wider text-slate-300">Cambiar Contraseña</h5>
+        <div>
+          <label class="block text-slate-400 mb-1">Contraseña Anterior</label>
+          <input type="password" id="changePassOld" placeholder="Ingresa tu clave actual" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Nueva Contraseña</label>
+            <input type="password" id="changePassNew" placeholder="Nueva clave" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Repetir Nueva Clave</label>
+            <input type="password" id="changePassNewRep" placeholder="Repite la clave" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+          </div>
+        </div>
+        <p id="changePassMsg" class="text-xs hidden"></p>
+        <div class="flex items-center justify-between">
+          <button onclick="submitChangePassword()" class="px-3.5 py-1.5 font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl">
+            Actualizar Clave
+          </button>
+          <button onclick="requestPasswordResetFromProfile()" class="text-xs text-slate-400 hover:text-cyan-400 underline">
+            ¿Olvidaste la anterior? Solicitar a 12345678
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer: Cerrar Sesión -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Cerrar Sesión
+        </button>
+        <button onclick="closeUserProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] rounded-xl">
+          Listo
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 🛡️ MODAL: DEVELOPER / PROFILE MANAGER (ADMIN PANEL)                    -->
+  <!-- ===================================================================== -->
+  <div id="devManagerModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scroll">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            Panel Developer (Profile Manager)
+          </h3>
+          <p class="text-xs text-slate-400">Control de usuarios, datos y reseteo de claves</p>
+        </div>
+        <button onclick="closeDevManagerModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <div class="space-y-3 mb-6" id="devProfilesList"></div>
+
+      <div class="pt-3 border-t border-white/[0.06] flex justify-end">
+        <button onclick="closeDevManagerModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] rounded-xl">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =========================================================================
-    // ☁️ ARQUITECTURA REST DIRECTA A FIRESTORE
+    // ☁️ ARQUITECTURA REST MULTIUSUARIO & NETFLIX PERFILES
     // =========================================================================
     const FIREBASE_PROJECT_ID = "trabajos-pendientes-59380";
     const FIRESTORE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/main`;
     const PRESENCE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/presence`;
     
-    // Identificador persistente por DISPOSITIVO FÍSICO (no por pestaña ni por recarga):
-    // Se almacena en localStorage del navegador; las pestañas o recargas del mismo equipo comparten este ID.
+    // Identificador persistente por dispositivo físico
     let DEVICE_ID = localStorage.getItem('tp_device_id');
     if (!DEVICE_ID) {
       DEVICE_ID = "dev_" + Math.random().toString(36).substring(2, 11) + "_" + (navigator.userAgent.includes('Mobi') ? 'mob' : 'pc');
@@ -444,137 +682,663 @@
       ]
     };
 
-    // Tus 8 tareas reales pre-cargadas directamente desde tu archivo JSON:
-    const INITIAL_SAVED_DATA = {
-      "companies": ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal", "Bmw"],
-      "tasks": [
-        { "id": "task-1", "company": "UNICO", "desc": "Crear página de Facebook e Instagram y armar placas para feed + historias", "status": "Aprobado", "priority": "Máxima", "date": "", "details": "Terminar de Postear por Facebook", "progress": 75, "updatedAt": 1788526382133 },
-        { "id": "task-1788369200849", "company": "Royal Enfield", "desc": "Crear placa para contratacion de administrativo", "status": "Realizado / Finalizado", "priority": "Máxima", "date": "2026-09-02", "details": "-", "progress": 100, "updatedAt": 1788525676222 },
-        { "id": "task-2", "company": "Itraco", "desc": "Realizar 3 posts sobre el edificio de Las Piedras", "status": "Realizado / Finalizado", "priority": "Máxima", "date": "", "details": "Falta corroborar copies", "progress": 100, "updatedAt": 1788526335985 },
-        { "id": "task-3", "company": "Royal Enfield", "desc": "Modificar placas madre con logo de la concesionaria", "status": "Realizado / Finalizado", "priority": "Máxima", "date": "", "details": "En espera de respuesta", "progress": 100, "updatedAt": 1788526328059 },
-        { "id": "task-4", "company": "Hotel Bicentenario", "desc": "Armar placa individual para el club San Martín", "status": "Chequeo / Entregado", "priority": "Media", "date": "2026-09-01", "details": "-", "progress": 50, "updatedAt": 1788526319217 },
-        { "id": "task-5", "company": "Royal Enfield", "desc": "Realizar edición de video de quedada", "status": "En proceso", "priority": "Media", "date": "", "details": "-", "progress": 25, "updatedAt": 1788525676222 },
-        { "id": "task-6", "company": "Alta Vista", "desc": "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)", "status": "Realizado / Finalizado", "priority": "Media", "date": "", "details": "-", "progress": 100, "updatedAt": 1788526314869 },
-        { "id": "task-7", "company": "RevCardinal", "desc": "Armar tarjeta de presentación con QR a la página oficial", "status": "No realizado", "priority": "Mínima", "date": "", "details": "-", "progress": 0, "updatedAt": 1788525676222 }
-      ]
-    };
+    // 8 Colores Eléctricos Vibrantes para el fondo del rayito
+    const ELECTRIC_COLORS = [
+      { name: "Cyan Neón", hex: "#06B6D4" },
+      { name: "Violeta Eléctrico", hex: "#7C3AED" },
+      { name: "Rosa Neón", hex: "#F43F5E" },
+      { name: "Amarillo Eléctrico", hex: "#FACC15" },
+      { name: "Verde Lima", hex: "#84CC16" },
+      { name: "Esmeralda Neón", hex: "#10B981" },
+      { name: "Azul Cobalto", hex: "#2563EB" },
+      { name: "Naranja Eléctrico", hex: "#F97316" }
+    ];
 
-    let config = { ...DEFAULT_CONFIG, companies: INITIAL_SAVED_DATA.companies };
-    let tasks = INITIAL_SAVED_DATA.tasks;
+    // Perfiles iniciales por defecto (Patricio y Developer con contraseña 30080112)
+    const DEFAULT_PROFILES = [
+      {
+        id: "patricio",
+        name: "Patricio",
+        role: "Art Director",
+        password: "30080112",
+        color: "#06B6D4",
+        photo: null,
+        resetRequested: false,
+        isDeveloper: false
+      },
+      {
+        id: "developer",
+        name: "Developer",
+        role: "Profile Manager",
+        password: "30080112",
+        color: "#7C3AED",
+        photo: null,
+        resetRequested: false,
+        isDeveloper: true
+      }
+    ];
+
+    const PATRICIO_INITIAL_TASKS = [
+      {
+            "id": "task-1",
+            "company": "UNICO",
+            "desc": "Crear página de Facebook e Instagram y armar placas para feed + historias",
+            "status": "Aprobado",
+            "priority": "Máxima",
+            "date": "",
+            "details": "Terminar de Postear por Facebook",
+            "progress": 75,
+            "updatedAt": 1788526382133
+      },
+      {
+            "id": "task-1788369200849",
+            "company": "Royal Enfield",
+            "desc": "Crear placa para contratacion de administrativo",
+            "status": "Finalizado",
+            "priority": "Máxima",
+            "date": "2026-09-02",
+            "details": "-",
+            "progress": 100,
+            "updatedAt": 1788525676222
+      },
+      {
+            "id": "task-2",
+            "company": "Itraco",
+            "desc": "Realizar 3 posts sobre el edificio de Las Piedras",
+            "status": "Finalizado",
+            "priority": "Máxima",
+            "date": "",
+            "details": "Falta corroborar copies",
+            "progress": 100,
+            "updatedAt": 1788526335985
+      },
+      {
+            "id": "task-3",
+            "company": "Royal Enfield",
+            "desc": "Modificar placas madre con logo de la concesionaria",
+            "status": "Finalizado",
+            "priority": "Máxima",
+            "date": "",
+            "details": "En espera de respuesta",
+            "progress": 100,
+            "updatedAt": 1788526328059
+      },
+      {
+            "id": "task-4",
+            "company": "Hotel Bicentenario",
+            "desc": "Armar placa individual para el club San Martín",
+            "status": "Revisión",
+            "priority": "Media",
+            "date": "2026-09-01",
+            "details": "-",
+            "progress": 50,
+            "updatedAt": 1788526319217
+      },
+      {
+            "id": "task-5",
+            "company": "Royal Enfield",
+            "desc": "Realizar edición de video de quedada",
+            "status": "Proceso",
+            "priority": "Media",
+            "date": "",
+            "details": "-",
+            "progress": 25,
+            "updatedAt": 1788525676222
+      },
+      {
+            "id": "task-6",
+            "company": "Alta Vista",
+            "desc": "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
+            "status": "Finalizado",
+            "priority": "Media",
+            "date": "",
+            "details": "-",
+            "progress": 100,
+            "updatedAt": 1788526314869
+      },
+      {
+            "id": "task-7",
+            "company": "RevCardinal",
+            "desc": "Armar tarjeta de presentación con QR a la página oficial",
+            "status": "Pendiente",
+            "priority": "Mínima",
+            "date": "",
+            "details": "-",
+            "progress": 0,
+            "updatedAt": 1788525676222
+      }
+];
+
+    let profiles = JSON.parse(localStorage.getItem('taskflow_profiles')) || DEFAULT_PROFILES;
+    let tasksByProfile = JSON.parse(localStorage.getItem('taskflow_tasks_by_profile')) || {
+      "patricio": PATRICIO_INITIAL_TASKS,
+      "developer": []
+    };
+    let config = JSON.parse(localStorage.getItem('taskflow_config')) || DEFAULT_CONFIG;
+
+    let currentUserId = localStorage.getItem('taskflow_current_user') || null;
+    let selectedProfileForLogin = null;
+    let tasks = [];
     let activeStatusFilter = "";
 
-    function normalizeStatus(s) {
-      if (!s) return "Pendiente";
-      const str = String(s).trim();
-      if (str === "No realizado" || str === "Pendientes" || str === "Pendiente") return "Pendiente";
-      if (str === "En proceso" || str === "Proceso") return "Proceso";
-      if (str === "Chequeo / Entregado" || str === "Entregados" || str === "Entregado" || str === "Chequeo" || str === "Revisión") return "Revisión";
-      if (str === "Aprobado" || str === "Aprobados") return "Aprobado";
-      if (str === "Realizado / Finalizado" || str === "Completados" || str === "Completado" || str === "Realizado" || str === "Finalizado") return "Finalizado";
-      return str;
+    function saveProfilesState() {
+      localStorage.setItem('taskflow_profiles', JSON.stringify(profiles));
+      localStorage.setItem('taskflow_tasks_by_profile', JSON.stringify(tasksByProfile));
+      localStorage.setItem('taskflow_config', JSON.stringify(config));
     }
 
-    function sanitizeTask(t) {
-      const statusClean = normalizeStatus(t.status);
-      const statusMap = {
-        "Pendiente": 0,
-        "Proceso": 25,
-        "Revisión": 50,
-        "Aprobado": 75,
-        "Finalizado": 100
-      };
-      const progressClean = (statusMap[statusClean] !== undefined) ? statusMap[statusClean] : (Number(t.progress) || 0);
-
-      return {
-        id: String(t.id || ("task-" + Date.now())),
-        company: String(t.company || "").trim(),
-        desc: String(t.desc || "").trim(),
-        status: statusClean,
-        priority: String(t.priority || "Media").trim(),
-        date: String(t.date || "").trim(),
-        details: String(t.details || "-").trim(),
-        progress: progressClean,
-        updatedAt: t.updatedAt || Date.now()
-      };
+    function getLightningAvatarSvg(bgColor = "#06B6D4") {
+      return `
+        <div class="w-full h-full flex items-center justify-center" style="background-color: ${bgColor};">
+          <svg class="w-1/2 h-1/2 fill-white drop-shadow-md" viewBox="0 0 24 24">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+      `;
     }
 
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      const text = document.getElementById('toastText');
-      if (!t || !text) return;
-      text.innerText = msg;
-      t.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
-      setTimeout(() => {
-        t.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
-      }, 2500);
-    }
-
-    function updateSyncBadge(status, color) {
-      const dot = document.getElementById('syncDot');
-      const text = document.getElementById('syncText');
-      if (!dot) return;
-      if (color === 'green') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
-        if (text) text.innerText = status;
-      } else if (color === 'yellow') {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping';
-        if (text) text.innerText = status;
+    function renderUserAvatarHtml(user, cssClass = "w-full h-full rounded-full") {
+      if (user && user.photo) {
+        return `<img src="${user.photo}" class="${cssClass} object-cover">`;
       } else {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
-        if (text) text.innerText = status;
+        return `<div class="${cssClass} overflow-hidden">${getLightningAvatarSvg(user ? user.color : '#06B6D4')}</div>`;
       }
     }
 
-    // CARGA DESDE LA NUBE
+    // =========================================================================
+    // 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)
+    // =========================================================================
+    function renderNetflixScreen() {
+      const container = document.getElementById('netflixProfilesContainer');
+      const maxUsers = 20;
+
+      let html = profiles.map(p => `
+        <div onclick="selectProfileForLogin('${p.id}')" class="netflix-bubble flex flex-col items-center cursor-pointer group">
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-white/20 group-hover:border-cyan-400 group-hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] transition-all overflow-hidden mb-3">
+            ${renderUserAvatarHtml(p)}
+          </div>
+          <div class="text-sm sm:text-base font-bold text-white group-hover:text-cyan-300 transition-colors">${p.name}</div>
+          <div class="text-xs text-slate-400">${p.role || ''}</div>
+          ${p.resetRequested ? '<span class="text-[9px] text-amber-400 font-bold mt-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30">Clave solicitada</span>' : ''}
+        </div>
+      `).join('');
+
+      if (profiles.length < maxUsers) {
+        html += `
+          <div onclick="openCreateUserModal()" class="netflix-bubble flex flex-col items-center cursor-pointer group">
+            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed border-slate-700 bg-slate-900/40 text-slate-500 group-hover:text-cyan-400 group-hover:border-cyan-400 group-hover:shadow-[0_0_25px_rgba(6,182,212,0.35)] transition-all flex items-center justify-center mb-3">
+              <svg class="w-10 h-10 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <div class="text-sm sm:text-base font-semibold text-slate-400 group-hover:text-cyan-400 transition-colors">Agregar</div>
+            <div class="text-xs text-slate-500">${profiles.length}/${maxUsers} perfiles</div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function selectProfileForLogin(profileId) {
+      const p = profiles.find(item => item.id === profileId);
+      if (!p) return;
+      selectedProfileForLogin = p;
+
+      document.getElementById('passModalName').innerText = p.name;
+      document.getElementById('passModalRole').innerText = p.role;
+      document.getElementById('passModalAvatar').innerHTML = renderUserAvatarHtml(p);
+      document.getElementById('profilePasswordInput').value = "";
+      document.getElementById('passModalError').classList.add('hidden');
+      document.getElementById('profilePasswordModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('profilePasswordInput').focus(), 100);
+    }
+
+    function closeProfilePasswordModal() {
+      document.getElementById('profilePasswordModal').classList.add('hidden');
+      selectedProfileForLogin = null;
+    }
+
+    async function submitProfilePassword(e) {
+      e.preventDefault();
+      if (!selectedProfileForLogin) return;
+      const enteredPass = document.getElementById('profilePasswordInput').value.trim();
+
+      if (enteredPass === selectedProfileForLogin.password) {
+        currentUserId = selectedProfileForLogin.id;
+        localStorage.setItem('taskflow_current_user', currentUserId);
+        closeProfilePasswordModal();
+        initUserSession();
+      } else {
+        document.getElementById('passModalError').classList.remove('hidden');
+      }
+    }
+
+    async function requestPasswordResetFromLogin() {
+      if (!selectedProfileForLogin) return;
+      selectedProfileForLogin.resetRequested = true;
+      saveProfilesState();
+      await saveToCloud();
+      alert(`Solicitud enviada al Developer para "${selectedProfileForLogin.name}". Podrá resetear tu clave a 12345678.`);
+      closeProfilePasswordModal();
+      renderNetflixScreen();
+    }
+
+    // =========================================================================
+    // ➕ AGREGAR NUEVO USUARIO
+    // =========================================================================
+    function openCreateUserModal() {
+      if (profiles.length >= 20) {
+        alert("Se ha alcanzado el límite máximo de 20 usuarios.");
+        return;
+      }
+      document.getElementById('newUserName').value = "";
+      document.getElementById('newUserRole').value = "";
+      document.getElementById('newUserPass').value = "";
+      document.getElementById('newUserPassRepeat').value = "";
+      document.getElementById('createUserError').classList.add('hidden');
+      document.getElementById('createUserModal').classList.remove('hidden');
+    }
+
+    function closeCreateUserModal() {
+      document.getElementById('createUserModal').classList.add('hidden');
+    }
+
+    async function submitCreateUser(e) {
+      e.preventDefault();
+      const name = document.getElementById('newUserName').value.trim();
+      const role = document.getElementById('newUserRole').value.trim();
+      const pass = document.getElementById('newUserPass').value.trim();
+      const rep = document.getElementById('newUserPassRepeat').value.trim();
+      const errEl = document.getElementById('createUserError');
+
+      if (pass !== rep) {
+        errEl.innerText = "Las contraseñas no coinciden.";
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      if (pass.length < 4) {
+        errEl.innerText = "La contraseña debe tener al menos 4 caracteres.";
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const randomColor = ELECTRIC_COLORS[Math.floor(Math.random() * ELECTRIC_COLORS.length)].hex;
+      const newId = "user_" + Date.now();
+
+      const newProfile = {
+        id: newId,
+        name: name,
+        role: role,
+        password: pass,
+        color: randomColor,
+        photo: null,
+        resetRequested: false,
+        isDeveloper: false
+      };
+
+      profiles.push(newProfile);
+      tasksByProfile[newId] = [];
+
+      saveProfilesState();
+      await saveToCloud();
+
+      closeCreateUserModal();
+      renderNetflixScreen();
+      showToast(`¡Perfil ${name} creado!`);
+    }
+
+    // =========================================================================
+    // 🚀 SESIÓN ACTIVA Y BARRA SUPERIOR
+    // =========================================================================
+    function initUserSession() {
+      if (!currentUserId) {
+        document.getElementById('netflixScreen').classList.remove('hidden');
+        document.getElementById('appMainView').classList.add('hidden');
+        renderNetflixScreen();
+        return;
+      }
+
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      if (!currentUser) {
+        logoutProfile();
+        return;
+      }
+
+      // Mostrar App
+      document.getElementById('netflixScreen').classList.add('hidden');
+      document.getElementById('appMainView').classList.remove('hidden');
+
+      // Actualizar Barra Superior
+      document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
+      document.getElementById('navbarAvatarContainer').innerHTML = renderUserAvatarHtml(currentUser);
+      document.getElementById('navbarUserBtn').title = `${currentUser.name} (${currentUser.role}) - Mi Perfil`;
+
+      const devBtn = document.getElementById('devPanelBtn');
+      if (currentUser.isDeveloper) {
+        devBtn.classList.remove('hidden');
+      } else {
+        devBtn.classList.add('hidden');
+      }
+
+      if (!tasksByProfile[currentUser.id]) {
+        tasksByProfile[currentUser.id] = [];
+      }
+      tasks = tasksByProfile[currentUser.id];
+
+      populateDropdowns();
+      renderKPIs();
+      renderTable();
+    }
+
+    function logoutProfile() {
+      currentUserId = null;
+      localStorage.removeItem('taskflow_current_user');
+      closeUserProfileModal();
+      closeDevManagerModal();
+      initUserSession();
+    }
+
+    // =========================================================================
+    // ⚙️ MODAL DE PERFIL (PERSONALIZACIÓN, COLOR RAYO Y FOTO 150x150)
+    // =========================================================================
+    function openUserProfileModal() {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (!user) return;
+
+      document.getElementById('profileEditNameTitle').innerText = user.name;
+      document.getElementById('profileEditRoleTitle').innerText = user.role;
+      document.getElementById('editProfileName').value = user.name;
+      document.getElementById('editProfileRole').value = user.role;
+      document.getElementById('profileEditAvatarPreview').innerHTML = renderUserAvatarHtml(user);
+
+      // Renderizar los 8 colores eléctricos
+      const colorsContainer = document.getElementById('electricColorsPicker');
+      colorsContainer.innerHTML = ELECTRIC_COLORS.map(c => {
+        const isSelected = (user.color === c.hex);
+        return `
+          <button type="button" onclick="selectElectricColor('${c.hex}')"
+            class="w-8 h-8 rounded-full transition-transform ${isSelected ? 'scale-125 ring-2 ring-white shadow-lg' : 'hover:scale-110'}"
+            style="background-color: ${c.hex};" title="${c.name}">
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('changePassOld').value = "";
+      document.getElementById('changePassNew').value = "";
+      document.getElementById('changePassNewRep').value = "";
+      document.getElementById('changePassMsg').classList.add('hidden');
+
+      document.getElementById('userProfileModal').classList.remove('hidden');
+    }
+
+    function closeUserProfileModal() {
+      document.getElementById('userProfileModal').classList.add('hidden');
+    }
+
+    // Procesar foto subida: Recorte cuadrado centrado exacto a 150x150 PNG sin deformar
+    function handleProfilePhotoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = async function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = 150;
+          canvas.height = 150;
+          const ctx = canvas.getContext('2d');
+
+          const size = Math.min(img.width, img.height);
+          const startX = (img.width - size) / 2;
+          const startY = (img.height - size) / 2;
+
+          ctx.drawImage(img, startX, startY, size, size, 0, 0, 150, 150);
+          const croppedDataUrl = canvas.toDataURL('image/png');
+
+          const user = profiles.find(p => p.id === currentUserId);
+          if (user) {
+            user.photo = croppedDataUrl;
+            saveProfilesState();
+            await saveToCloud();
+            openUserProfileModal();
+            initUserSession();
+            showToast("Foto recortada a 150x150");
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+      event.target.value = "";
+    }
+
+    async function removeProfilePhoto() {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (user) {
+        user.photo = null;
+        saveProfilesState();
+        await saveToCloud();
+        openUserProfileModal();
+        initUserSession();
+        showToast("Rayo restablecido");
+      }
+    }
+
+    async function selectElectricColor(hexColor) {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (user) {
+        user.color = hexColor;
+        saveProfilesState();
+        await saveToCloud();
+        openUserProfileModal();
+        initUserSession();
+      }
+    }
+
+    async function saveProfileBasicInfo() {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (!user) return;
+      user.name = document.getElementById('editProfileName').value.trim() || user.name;
+      user.role = document.getElementById('editProfileRole').value.trim() || user.role;
+      saveProfilesState();
+      await saveToCloud();
+      initUserSession();
+      openUserProfileModal();
+      showToast("Datos actualizados");
+    }
+
+    async function submitChangePassword() {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (!user) return;
+
+      const oldPass = document.getElementById('changePassOld').value.trim();
+      const newPass = document.getElementById('changePassNew').value.trim();
+      const newRep = document.getElementById('changePassNewRep').value.trim();
+      const msgEl = document.getElementById('changePassMsg');
+
+      if (oldPass !== user.password) {
+        msgEl.className = "text-xs text-rose-400";
+        msgEl.innerText = "La contraseña anterior es incorrecta.";
+        msgEl.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass !== newRep) {
+        msgEl.className = "text-xs text-rose-400";
+        msgEl.innerText = "Las nuevas contraseñas no coinciden.";
+        msgEl.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass.length < 4) {
+        msgEl.className = "text-xs text-rose-400";
+        msgEl.innerText = "Debe tener al menos 4 caracteres.";
+        msgEl.classList.remove('hidden');
+        return;
+      }
+
+      user.password = newPass;
+      user.resetRequested = false;
+      saveProfilesState();
+      await saveToCloud();
+
+      msgEl.className = "text-xs text-emerald-400";
+      msgEl.innerText = "¡Contraseña actualizada con éxito!";
+      msgEl.classList.remove('hidden');
+      setTimeout(() => closeUserProfileModal(), 1200);
+    }
+
+    async function requestPasswordResetFromProfile() {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (!user) return;
+      user.resetRequested = true;
+      saveProfilesState();
+      await saveToCloud();
+      alert("Solicitud enviada al Developer. Podrá autorizar el cambio a 12345678.");
+      closeUserProfileModal();
+    }
+
+    // =========================================================================
+    // 🛡️ PANEL DEVELOPER (PROFILE MANAGER)
+    // =========================================================================
+    function openDevManagerModal() {
+      renderDevProfilesList();
+      document.getElementById('devManagerModal').classList.remove('hidden');
+    }
+
+    function closeDevManagerModal() {
+      document.getElementById('devManagerModal').classList.add('hidden');
+    }
+
+    function renderDevProfilesList() {
+      const container = document.getElementById('devProfilesList');
+      container.innerHTML = profiles.map(p => `
+        <div class="glass-card p-3.5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden border border-white/20 shrink-0">
+              ${renderUserAvatarHtml(p)}
+            </div>
+            <div>
+              <div class="text-sm font-bold text-white flex items-center gap-2">
+                ${p.name}
+                ${p.isDeveloper ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">DEV</span>' : ''}
+                ${p.id === currentUserId ? '<span class="text-[9px] font-bold text-cyan-400">(Activo)</span>' : ''}
+              </div>
+              <div class="text-xs text-slate-400">${p.role}</div>
+              ${p.resetRequested ? '<div class="text-[11px] text-rose-400 font-bold mt-0.5">⚠️ Solicitó reseteo de clave</div>' : ''}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+            ${p.resetRequested ? `
+              <button onclick="devApproveReset('${p.id}')" class="px-2.5 py-1 text-xs font-bold text-rose-300 bg-rose-500/20 border border-rose-500/40 rounded-xl hover:bg-rose-500/30">
+                Resetear a 12345678
+              </button>
+            ` : ''}
+
+            <button onclick="devSwitchToUser('${p.id}')" class="px-2.5 py-1 text-xs font-semibold text-cyan-300 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20">
+              Ver Tareas
+            </button>
+
+            ${(!p.isDeveloper && p.id !== 'patricio') ? `
+              <button onclick="devDeleteUser('${p.id}')" class="p-1 text-slate-500 hover:text-rose-400" title="Eliminar perfil">
+                <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function devApproveReset(userId) {
+      const p = profiles.find(item => item.id === userId);
+      if (!p) return;
+      p.password = "12345678";
+      p.resetRequested = false;
+      saveProfilesState();
+      await saveToCloud();
+      renderDevProfilesList();
+      alert(`La contraseña de ${p.name} fue reseteada a: 12345678`);
+    }
+
+    function devSwitchToUser(userId) {
+      currentUserId = userId;
+      localStorage.setItem('taskflow_current_user', currentUserId);
+      closeDevManagerModal();
+      initUserSession();
+      showToast(`Viendo tareas de ${profiles.find(p=>p.id===userId).name}`);
+    }
+
+    async function devDeleteUser(userId) {
+      const p = profiles.find(item => item.id === userId);
+      if (!p) return;
+      if (confirm(`¿Eliminar al usuario ${p.name}?`)) {
+        profiles = profiles.filter(item => item.id !== userId);
+        delete tasksByProfile[userId];
+        saveProfilesState();
+        await saveToCloud();
+        renderDevProfilesList();
+        renderNetflixScreen();
+        showToast("Usuario eliminado");
+      }
+    }
+
+    // =========================================================================
+    // ☁️ SINCRONIZACIÓN CLOUD REST
+    // =========================================================================
     async function loadFromCloud(silent = false) {
       if (!silent) updateSyncBadge("Sincronizando...", "yellow");
       try {
         const res = await fetch(FIRESTORE_ENDPOINT, { cache: 'no-store' });
         if (res.status === 404) {
-          // Si el documento en la nube no existe aún, subimos tus datos reales
           await saveToCloud();
           updateSyncBadge("En línea", "green");
           return;
         }
-
         if (!res.ok) throw new Error("HTTP " + res.status);
 
         const data = await res.json();
         if (data.fields && data.fields.payload && data.fields.payload.stringValue) {
           const parsed = JSON.parse(data.fields.payload.stringValue);
-          const newTasks = (parsed.tasks || []).map(sanitizeTask);
-          const newComp = (parsed.companies && Array.isArray(parsed.companies)) ? parsed.companies : config.companies;
 
-          // Si son iguales, no tocar el DOM para evitar parpadeos
-          if (JSON.stringify(tasks) === JSON.stringify(newTasks) && JSON.stringify(config.companies) === JSON.stringify(newComp)) {
-            updateSyncBadge("En línea", "green");
-            return;
+          if (parsed.profiles && Array.isArray(parsed.profiles)) {
+            profiles = parsed.profiles;
+          }
+          if (parsed.tasksByProfile) {
+            tasksByProfile = parsed.tasksByProfile;
+          }
+          if (parsed.companies && Array.isArray(parsed.companies)) {
+            config.companies = parsed.companies;
           }
 
-          tasks = newTasks;
-          config.companies = newComp;
-          localStorage.setItem('tp_saved_data', JSON.stringify({ tasks, companies: config.companies }));
-          populateDropdowns();
-          renderTable();
-          renderKPIs();
+          saveProfilesState();
+
+          if (currentUserId && tasksByProfile[currentUserId]) {
+            tasks = tasksByProfile[currentUserId];
+          }
+
+          renderNetflixScreen();
+          initUserSession();
           updateSyncBadge("En línea", "green");
         }
       } catch (err) {
-        console.warn("Error cargando de la nube, usando datos en memoria:", err);
+        console.warn("Fallo nube:", err);
         updateSyncBadge("En línea", "green");
       }
     }
 
-    // GUARDADO EN LA NUBE
     async function saveToCloud() {
       updateSyncBadge("Guardando...", "yellow");
-      localStorage.setItem('tp_saved_data', JSON.stringify({ tasks, companies: config.companies }));
-      renderKPIs();
-      renderTable();
+
+      if (currentUserId) {
+        tasksByProfile[currentUserId] = tasks;
+      }
+      saveProfilesState();
 
       try {
         const payloadString = JSON.stringify({
-          tasks: tasks,
+          profiles: profiles,
+          tasksByProfile: tasksByProfile,
           companies: config.companies,
           updatedAt: Date.now()
         });
@@ -596,7 +1360,7 @@
           updateSyncBadge("Error al guardar", "red");
         }
       } catch (err) {
-        console.warn("Fallo de red:", err);
+        console.warn("Fallo al guardar:", err);
         updateSyncBadge("Sin conexión", "red");
       }
     }
@@ -607,13 +1371,69 @@
       showToast("¡Datos sincronizados!");
     }
 
-    // COLORIMETRÍA EXACTA: 0% Gris, 25% Amarillo, 50% Lima/Verde amarillento, 75% Verde, 100% Cyan
+    async function updatePresence() {
+      try {
+        const now = Date.now();
+        let sessions = {};
+        const res = await fetch(PRESENCE_ENDPOINT, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.fields && data.fields.sessions && data.fields.sessions.stringValue) {
+            try { sessions = JSON.parse(data.fields.sessions.stringValue); } catch(e) {}
+          }
+        }
+
+        const active = {};
+        for (const [id, lastSeen] of Object.entries(sessions)) {
+          if (now - lastSeen < 40000) active[id] = lastSeen;
+        }
+        active[DEVICE_ID] = now;
+
+        const count = Math.max(1, Object.keys(active).length);
+        const countEl = document.getElementById('presenceCount');
+        if (countEl) countEl.innerText = count;
+
+        await fetch(`${PRESENCE_ENDPOINT}?updateMask.fieldPaths=sessions`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: { sessions: { stringValue: JSON.stringify(active) } }
+          })
+        });
+      } catch (err) {}
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      const text = document.getElementById('toastText');
+      if (!t || !text) return;
+      text.innerText = msg;
+      t.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+      setTimeout(() => t.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2'), 2500);
+    }
+
+    function updateSyncBadge(status, color) {
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncText');
+      if (!dot) return;
+      if (color === 'green') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]';
+        if (text) text.innerText = status;
+      } else if (color === 'yellow') {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping';
+        if (text) text.innerText = status;
+      } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
+        if (text) text.innerText = status;
+      }
+    }
+
     function getProgressStyle(percent) {
       if (percent <= 0) return { stroke: "#64748B", text: "text-slate-400" };
-      if (percent <= 35) return { stroke: "#FACC15", text: "text-yellow-400" }; // Amarillo
-      if (percent <= 60) return { stroke: "#A3E635", text: "text-lime-400" }; // Lima / Verde amarillento
-      if (percent <= 85) return { stroke: "#22C55E", text: "text-emerald-400" }; // Verde
-      return { stroke: "#06B6D4", text: "text-cyan-400" }; // Cyan
+      if (percent <= 35) return { stroke: "#FACC15", text: "text-yellow-400" };
+      if (percent <= 60) return { stroke: "#A3E635", text: "text-lime-400" };
+      if (percent <= 85) return { stroke: "#22C55E", text: "text-emerald-400" };
+      return { stroke: "#06B6D4", text: "text-cyan-400" };
     }
 
     function renderCircularProgress(percent) {
@@ -634,6 +1454,66 @@
       `;
     }
 
+    function renderPriorityRank(priority) {
+      const p = String(priority || "Media").trim();
+      if (p === "Máxima") {
+        return `
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30" title="Prioridad Máxima (Sargento)">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 17l6-5 6 5"/><path d="M6 12l6-5 6 5"/><path d="M6 7l6-5 6 5"/>
+            </svg>
+          </span>
+        `;
+      } else if (p === "Media") {
+        return `
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30" title="Prioridad Media (Cabo)">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 15l6-5 6 5"/><path d="M6 10l6-5 6 5"/>
+            </svg>
+          </span>
+        `;
+      } else {
+        return `
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 border border-slate-700/50" title="Prioridad Mínima (Soldado)">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 14l6-5 6 5"/>
+            </svg>
+          </span>
+        `;
+      }
+    }
+
+    function normalizeStatus(s) {
+      if (!s) return "Pendiente";
+      const str = String(s).trim();
+      if (str === "No realizado" || str === "Pendientes" || str === "Pendiente") return "Pendiente";
+      if (str === "En proceso" || str === "Proceso") return "Proceso";
+      if (str === "Chequeo / Entregado" || str === "Entregados" || str === "Entregado" || str === "Chequeo" || str === "Revisión") return "Revisión";
+      if (str === "Aprobado" || str === "Aprobados") return "Aprobado";
+      if (str === "Realizado / Finalizado" || str === "Completados" || str === "Completado" || str === "Realizado" || str === "Finalizado") return "Finalizado";
+      return str;
+    }
+
+    function sanitizeTask(t) {
+      const statusClean = normalizeStatus(t.status);
+      const statusMap = {
+        "Pendiente": 0, "Proceso": 25, "Revisión": 50, "Aprobado": 75, "Finalizado": 100
+      };
+      const progressClean = (statusMap[statusClean] !== undefined) ? statusMap[statusClean] : (Number(t.progress) || 0);
+
+      return {
+        id: String(t.id || ("task-" + Date.now())),
+        company: String(t.company || "").trim(),
+        desc: String(t.desc || "").trim(),
+        status: statusClean,
+        priority: String(t.priority || "Media").trim(),
+        date: String(t.date || "").trim(),
+        details: String(t.details || "-").trim(),
+        progress: progressClean,
+        updatedAt: t.updatedAt || Date.now()
+      };
+    }
+
     function setStatusFilter(statusKey) {
       activeStatusFilter = (activeStatusFilter === statusKey) ? "" : statusKey;
       const badge = document.getElementById('activeFilterBadge');
@@ -647,7 +1527,6 @@
       renderKPIs();
       renderTable();
     }
-
     // TARJETAS KPI CON ICONOS VECTORIALES NATIVOS
     function renderKPIs() {
       const total = tasks.length;
@@ -1046,11 +1925,10 @@
     }
 
     // Arranque inicial
-    populateDropdowns();
-    renderKPIs();
-    renderTable();
+    initUserSession();
     loadFromCloud();
     updatePresence();
+    setInterval(updatePresence, 20000);
 
     // Sistema de Detección de Dispositivos Conectados en Vivo (Ojo)
     async function updatePresence() {
@@ -1076,7 +1954,7 @@
             active[id] = lastSeen;
           }
         }
-        active[DEVICE_ID] = now;
+        active[SESSION_ID] = now;
 
         // Actualizar el número en pantalla
         const count = Math.max(1, Object.keys(active).length);

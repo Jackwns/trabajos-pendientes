@@ -477,7 +477,7 @@
         </button>
 
         <!-- Exportar -->
-        <button onclick="closeBottomSheet(); exportData();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
+        <button id="sheetExportBtn" onclick="closeBottomSheet(); exportData();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-1.5">
             <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -488,7 +488,7 @@
         </button>
 
         <!-- Importar -->
-        <button onclick="closeBottomSheet(); document.getElementById('importFileInput').click();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
+        <button id="sheetImportBtn" onclick="closeBottomSheet(); document.getElementById('importFileInput').click();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
           <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-1.5">
             <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -748,20 +748,21 @@
         isDeveloper: false
       },
       {
-        id: "developer",
-        name: "Developer",
-        role: "Profile Manager",
+        id: "viewer",
+        name: "Viewer",
+        role: "Task Observer",
         password: "30080112",
         color: "#7C3AED",
         photo: null,
         resetRequested: false,
-        isDeveloper: true
+        isViewer: true
       }
     ];
 
     const PATRICIO_INITIAL_TASKS = [
       {
             "id": "task-1",
+            "userId": "patricio",
             "company": "UNICO",
             "desc": "Crear página de Facebook e Instagram y armar placas para feed + historias",
             "status": "Aprobado",
@@ -773,6 +774,7 @@
       },
       {
             "id": "task-1788369200849",
+            "userId": "patricio",
             "company": "Royal Enfield",
             "desc": "Crear placa para contratacion de administrativo",
             "status": "Finalizado",
@@ -784,6 +786,7 @@
       },
       {
             "id": "task-2",
+            "userId": "patricio",
             "company": "Itraco",
             "desc": "Realizar 3 posts sobre el edificio de Las Piedras",
             "status": "Finalizado",
@@ -795,6 +798,7 @@
       },
       {
             "id": "task-3",
+            "userId": "patricio",
             "company": "Royal Enfield",
             "desc": "Modificar placas madre con logo de la concesionaria",
             "status": "Finalizado",
@@ -806,6 +810,7 @@
       },
       {
             "id": "task-4",
+            "userId": "patricio",
             "company": "Hotel Bicentenario",
             "desc": "Armar placa individual para el club San Martín",
             "status": "Revisión",
@@ -817,6 +822,7 @@
       },
       {
             "id": "task-5",
+            "userId": "patricio",
             "company": "Royal Enfield",
             "desc": "Realizar edición de video de quedada",
             "status": "Proceso",
@@ -828,6 +834,7 @@
       },
       {
             "id": "task-6",
+            "userId": "patricio",
             "company": "Alta Vista",
             "desc": "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
             "status": "Finalizado",
@@ -839,6 +846,7 @@
       },
       {
             "id": "task-7",
+            "userId": "patricio",
             "company": "RevCardinal",
             "desc": "Armar tarjeta de presentación con QR a la página oficial",
             "status": "Pendiente",
@@ -861,7 +869,48 @@
     let selectedProfileForLogin = null;
     let selectedDevUserId = "patricio";
     let tasks = [];
+    // Helper seguro: Recuperar lista completa de tareas combinadas
+    function getAllTasksFlat() {
+      // 1. Si tasksByProfile tiene arrays, extraerlos
+      let combined = [];
+      if (tasksByProfile && typeof tasksByProfile === 'object') {
+        for (const [uid, uTasks] of Object.entries(tasksByProfile)) {
+          if (Array.isArray(uTasks)) {
+            uTasks.forEach(t => {
+              if (t) combined.push({ ...sanitizeTask(t), userId: t.userId || uid });
+            });
+          }
+        }
+      }
+
+      // 2. Si las tareas de Patricio no estaban cargadas, agregarlas
+      const hasPatricio = combined.some(t => (t.userId || 'patricio') === 'patricio');
+      if (!hasPatricio && Array.isArray(PATRICIO_INITIAL_TASKS)) {
+        PATRICIO_INITIAL_TASKS.forEach(t => combined.push({ ...sanitizeTask(t), userId: 'patricio' }));
+      }
+
+      // 3. Eliminar duplicados por id
+      const uniqueMap = {};
+      combined.forEach(t => { uniqueMap[t.id] = t; });
+      return Object.values(uniqueMap);
+    }
+
     let activeStatusFilter = "";
+
+
+    // Asegurar que Patricio y Viewer siempre tengan su contraseña 30080112 activa
+    function enforceMandatoryPasswords() {
+      profiles = profiles.map(p => {
+        if (p.id === 'viewer' || p.isViewer) {
+          return { ...p, id: 'viewer', isViewer: true, name: 'Viewer', role: 'Task Observer', password: p.password || "30080112" };
+        }
+        if (p.id === 'patricio') {
+          return { ...p, id: 'patricio', password: p.password || "30080112" };
+        }
+        return p;
+      });
+      saveProfilesState();
+    }
 
     function saveProfilesState() {
       localStorage.setItem('taskflow_profiles', JSON.stringify(profiles));
@@ -944,13 +993,21 @@
       if (!selectedProfileForLogin) return;
       const enteredPass = document.getElementById('profilePasswordInput').value.trim();
 
-      if (enteredPass === selectedProfileForLogin.password) {
+      // Contraseña esperada con blindaje estricto para Viewer y Patricio (30080112)
+      let expectedPass = String(selectedProfileForLogin.password || "").trim();
+      if (!expectedPass && (selectedProfileForLogin.id === 'viewer' || selectedProfileForLogin.isViewer || selectedProfileForLogin.id === 'patricio')) {
+        expectedPass = "30080112";
+      }
+
+      if (enteredPass && enteredPass === expectedPass) {
         currentUserId = selectedProfileForLogin.id;
         localStorage.setItem('taskflow_current_user', currentUserId);
         closeProfilePasswordModal();
         initUserSession();
       } else {
+        document.getElementById('passModalError').innerText = "Contraseña incorrecta";
         document.getElementById('passModalError').classList.remove('hidden');
+        document.getElementById('profilePasswordInput').focus();
       }
     }
 
@@ -1056,30 +1113,47 @@
 
       const devBar = document.getElementById('devViewerBar');
 
-      if (currentUser.isDeveloper) {
-        // Modo Developer: Activar barra de visor debajo del navbar
+      const isViewerMode = (currentUser.id === 'viewer' || currentUser.isViewer);
+
+      // Ocultar botones de crear/importar/exportar en modo Viewer
+      const newTaskBtn = document.getElementById('newTaskBtn');
+      const exportBtn = document.getElementById('exportBtn');
+      const importBtn = document.getElementById('importBtn');
+      const sheetExport = document.getElementById('sheetExportBtn');
+      const sheetImport = document.getElementById('sheetImportBtn');
+
+      if (isViewerMode) {
+        if (newTaskBtn) newTaskBtn.classList.add('hidden');
+        if (exportBtn) exportBtn.classList.add('hidden');
+        if (importBtn) importBtn.classList.add('hidden');
+        if (sheetExport) sheetExport.classList.add('hidden');
+        if (sheetImport) sheetImport.classList.add('hidden');
+
         devBar.classList.remove('hidden');
-        if (!selectedDevUserId || !profiles.find(p => p.id === selectedDevUserId)) {
+        if (!selectedDevUserId || !profiles.find(p => p.id === selectedDevUserId && p.id !== 'viewer')) {
           selectedDevUserId = "patricio";
         }
         renderDevViewerBubbles();
 
         const inspectedUser = profiles.find(p => p.id === selectedDevUserId) || currentUser;
-        document.getElementById('subHeaderUserRole').innerText = `Developer • Viendo a ${inspectedUser.name}`;
+        document.getElementById('subHeaderUserRole').innerText = `Viewer • Viendo a ${inspectedUser.name}`;
 
-        if (!tasksByProfile[selectedDevUserId]) {
-          tasksByProfile[selectedDevUserId] = [];
-        }
-        tasks = tasksByProfile[selectedDevUserId];
+        // Obtener tareas del usuario inspeccionado
+        const allTasks = getAllTasksFlat();
+        tasks = allTasks.filter(t => (t.userId || 'patricio') === selectedDevUserId);
       } else {
-        // Modo Usuario Normal: Ocultar barra de visor
+        if (newTaskBtn) newTaskBtn.classList.remove('hidden');
+        if (exportBtn) exportBtn.classList.remove('hidden');
+        if (importBtn) importBtn.classList.remove('hidden');
+        if (sheetExport) sheetExport.classList.remove('hidden');
+        if (sheetImport) sheetImport.classList.remove('hidden');
+
         devBar.classList.add('hidden');
         document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
 
-        if (!tasksByProfile[currentUser.id]) {
-          tasksByProfile[currentUser.id] = [];
-        }
-        tasks = tasksByProfile[currentUser.id];
+        // Obtener tareas del usuario actual
+        const allTasks = getAllTasksFlat();
+        tasks = allTasks.filter(t => (t.userId || 'patricio') === currentUser.id);
       }
 
       populateDropdowns();
@@ -1087,30 +1161,33 @@
       renderTable();
     }
 
-    // Renderizar selector horizontal de burbujas para el Developer (Debajo del Navbar)
+    // Renderizar selector horizontal de burbujas para Viewer (Debajo del Navbar)
     function renderDevViewerBubbles() {
       const container = document.getElementById('devViewerBubbles');
       if (!container) return;
 
-      // Mostrar todos los perfiles de usuarios (excepto developer)
-      const userProfiles = profiles.filter(p => !p.isDeveloper);
+      // Mostrar todos los perfiles de usuarios normales (excepto la cuenta visor)
+      const userProfiles = profiles.filter(p => p.id !== 'viewer' && !p.isViewer);
 
       container.innerHTML = userProfiles.map(p => {
         const isSelected = (p.id === selectedDevUserId);
         const activeClass = isSelected 
-          ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)] scale-105" 
+          ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.35)] scale-105" 
           : "bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]";
 
         return `
           <div onclick="selectDevInspectedUser('${p.id}')"
-            class="flex items-center gap-2 px-2.5 py-1 rounded-xl border transition-all cursor-pointer select-none shrink-0 ${activeClass}">
-            <div class="w-6 h-6 rounded-full overflow-hidden shrink-0 border border-white/20">
-              ${renderUserAvatarHtml(p)}
+            class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl border transition-all cursor-pointer select-none shrink-0 ${activeClass}">
+            <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-white/20 shadow-sm flex items-center justify-center">
+              ${renderUserAvatarHtml(p, 'w-full h-full rounded-full')}
             </div>
-            <div class="text-xs font-bold whitespace-nowrap">${p.name}</div>
+            <div class="text-left min-w-0">
+              <div class="text-xs font-bold text-white truncate leading-tight">${p.name}</div>
+              <div class="text-[10px] text-slate-400 truncate leading-tight">${p.role || ''}</div>
+            </div>
             ${p.resetRequested ? `
               <button onclick="event.stopPropagation(); devApproveReset('${p.id}');"
-                class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-rose-500 text-white hover:bg-rose-600 transition-colors animate-pulse"
+                class="ml-1 px-2 py-0.5 rounded-lg text-[9px] font-extrabold bg-rose-500 text-white hover:bg-rose-600 transition-colors animate-pulse"
                 title="Click para resetear clave a 12345678">
                 Reset
               </button>
@@ -1124,12 +1201,10 @@
       selectedDevUserId = userId;
       const inspectedUser = profiles.find(p => p.id === selectedDevUserId);
       if (inspectedUser) {
-        document.getElementById('subHeaderUserRole').innerText = `Developer • Viendo a ${inspectedUser.name}`;
+        document.getElementById('subHeaderUserRole').innerText = `Viewer • Viendo a ${inspectedUser.name}`;
       }
-      if (!tasksByProfile[selectedDevUserId]) {
-        tasksByProfile[selectedDevUserId] = [];
-      }
-      tasks = tasksByProfile[selectedDevUserId];
+      const allTasks = getAllTasksFlat();
+      tasks = allTasks.filter(t => (t.userId || 'patricio') === selectedDevUserId);
       populateDropdowns();
       renderKPIs();
       renderTable();
@@ -1408,22 +1483,35 @@
         if (data.fields && data.fields.payload && data.fields.payload.stringValue) {
           const parsed = JSON.parse(data.fields.payload.stringValue);
 
-          if (parsed.profiles && Array.isArray(parsed.profiles)) {
+          if (parsed.profiles && Array.isArray(parsed.profiles) && parsed.profiles.length > 0) {
             profiles = parsed.profiles;
           }
-          if (parsed.tasksByProfile) {
-            tasksByProfile = parsed.tasksByProfile;
+
+          // Asegurar que exista perfil Patricio y Viewer
+          if (!profiles.some(p => p.id === 'patricio')) {
+            profiles.unshift(DEFAULT_PROFILES[0]);
           }
+          if (!profiles.some(p => p.id === 'viewer' || p.isViewer)) {
+            profiles.push(DEFAULT_PROFILES[1]);
+          }
+
+          if (parsed.tasksByProfile && typeof parsed.tasksByProfile === 'object') {
+            tasksByProfile = parsed.tasksByProfile;
+          } else if (parsed.tasks && Array.isArray(parsed.tasks)) {
+            // Migrar tareas planas al usuario Patricio
+            tasksByProfile['patricio'] = parsed.tasks.map(t => ({ ...sanitizeTask(t), userId: t.userId || 'patricio' }));
+          }
+
+          // Si las tareas de Patricio están vacías por error, cargar las 8 tareas reales
+          if (!tasksByProfile['patricio'] || tasksByProfile['patricio'].length === 0) {
+            tasksByProfile['patricio'] = PATRICIO_INITIAL_TASKS;
+          }
+
           if (parsed.companies && Array.isArray(parsed.companies)) {
             config.companies = parsed.companies;
           }
 
-          saveProfilesState();
-
-          if (currentUserId && tasksByProfile[currentUserId]) {
-            tasks = tasksByProfile[currentUserId];
-          }
-
+          enforceMandatoryPasswords();
           renderNetflixScreen();
           initUserSession();
           updateSyncBadge("En línea", "green");
@@ -1919,7 +2007,8 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details });
+      const currentUid = (currentUserId === 'viewer' && selectedDevUserId) ? selectedDevUserId : (currentUserId || 'patricio');
+      const taskObj = { ...sanitizeTask({ id, company, desc, status, priority, date, progress, details }), userId: currentUid };
 
       const index = tasks.findIndex(t => t.id === id);
       if (index !== -1) {

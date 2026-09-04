@@ -420,8 +420,13 @@
     const FIRESTORE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/main`;
     const PRESENCE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/presence`;
     
-    // Identificador único de este dispositivo / pestaña
-    const SESSION_ID = "device_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now();
+    // Identificador persistente por DISPOSITIVO FÍSICO (no por pestaña ni por recarga):
+    // Se almacena en localStorage del navegador; las pestañas o recargas del mismo equipo comparten este ID.
+    let DEVICE_ID = localStorage.getItem('tp_device_id');
+    if (!DEVICE_ID) {
+      DEVICE_ID = "dev_" + Math.random().toString(36).substring(2, 11) + "_" + (navigator.userAgent.includes('Mobi') ? 'mob' : 'pc');
+      localStorage.setItem('tp_device_id', DEVICE_ID);
+    }
 
     const DEFAULT_CONFIG = {
       companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal", "Bmw"],
@@ -1071,7 +1076,7 @@
             active[id] = lastSeen;
           }
         }
-        active[SESSION_ID] = now;
+        active[DEVICE_ID] = now;
 
         // Actualizar el número en pantalla
         const count = Math.max(1, Object.keys(active).length);

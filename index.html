@@ -20,9 +20,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   
-  <!-- Firebase SDK (Compat Version) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <!-- Arquitectura REST Directa: Cero SDKs pesados, cero cachés fantasma -->
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -473,18 +471,11 @@
 
   <script>
     // =========================================================================
-    // 🔥 CONFIGURACIÓN DIRECTA DE FIREBASE FIRESTORE
+    // ☁️ ARQUITECTURA REST DIRECTA (FIRESTORE CLOUD)
+    // Conexión directa a la nube: Sin SDKs pesados, sin IndexedDB ni desfasajes.
     // =========================================================================
-    const DEFAULT_FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBieGuJZLjNOD5x-lT4OApACvKPMnOEm8A",
-      authDomain: "trabajos-pendientes-59380.firebaseapp.com",
-      projectId: "trabajos-pendientes-59380",
-      storageBucket: "trabajos-pendientes-59380.firebasestorage.app",
-      messagingSenderId: "744731878244",
-      appId: "1:744731878244:web:bc518dfe7749852618d071",
-      measurementId: "G-N0274ZSDSB"
-    };
-    // =========================================================================
+    const FIREBASE_PROJECT_ID = "trabajos-pendientes-59380";
+    const FIRESTORE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/main`;
 
     const DEFAULT_CONFIG = {
       companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal"],
@@ -502,21 +493,11 @@
       ]
     };
 
-    const INITIAL_TASKS = [
-      { id: "task-1", company: "UNICO", desc: "Crear página de Instagram y armar placas para feed + historias", status: "Aprobado", priority: "Máxima", date: "", details: "Corroborar que el Instagram esté bien", progress: 75 },
-      { id: "task-2", company: "Itraco", desc: "Realizar 3 posts sobre el edificio de Las Piedras", status: "En proceso", priority: "Máxima", date: "", details: "Faltan los copys", progress: 25 },
-      { id: "task-3", company: "Royal Enfield", desc: "Modificar placas madre con logo de la concesionaria", status: "Chequeo / Entregado", priority: "Máxima", date: "", details: "En espera de respuesta", progress: 50 },
-      { id: "task-4", company: "Hotel Bicentenario", desc: "Armar placa individual para el club San Martín", status: "No realizado", priority: "Media", date: "2026-09-01", details: "-", progress: 0 },
-      { id: "task-5", company: "Royal Enfield", desc: "Realizar edición de video de quedada", status: "No realizado", priority: "Media", date: "", details: "-", progress: 0 },
-      { id: "task-6", company: "Alta Vista", desc: "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)", status: "No realizado", priority: "Media", date: "", details: "-", progress: 0 },
-      { id: "task-7", company: "RevCardinal", desc: "Armar tarjeta de presentación con QR a la página oficial", status: "No realizado", priority: "Mínima", date: "", details: "-", progress: 0 }
-    ];
-
-    let config = JSON.parse(localStorage.getItem('tp_config_fs')) || DEFAULT_CONFIG;
-    let tasks = JSON.parse(localStorage.getItem('tp_tasks_fs')) || INITIAL_TASKS;
+    // Cero tareas residuales o mock en el código: la nube es la única verdad
+    let config = DEFAULT_CONFIG;
+    let tasks = [];
     let activeStatusFilter = "";
-    let db = null;
-    let unsubscribeFirestore = null;
+    let isInitialLoad = true;
 
     function sanitizeTask(t) {
       return {
@@ -532,121 +513,12 @@
       };
     }
 
-    // Inicializar Firebase Firestore con Persistencia Nativa Multi-Pestaña y Offline
-    async function initFirebase() {
-      const fbConfig = DEFAULT_FIREBASE_CONFIG;
-
-      if (!fbConfig.apiKey || !fbConfig.projectId) {
-        updateSyncBadge("Modo Local", "slate");
-        return;
-      }
-
-      try {
-        if (!firebase.apps.length) {
-          firebase.initializeApp(fbConfig);
-        }
-        db = firebase.firestore();
-
-        // Activar persistencia en disco (IndexedDB) para que NUNCA se pierdan cambios
-        try {
-          await db.enablePersistence({ synchronizeTabs: true });
-          console.log("Persistencia nativa offline y multi-pestaña activada.");
-        } catch (persError) {
-          if (persError.code === 'failed-precondition') {
-            console.warn("Múltiples pestañas abiertas simultáneamente sin soporte de sincronización.");
-          } else if (persError.code === 'unimplemented') {
-            console.warn("El navegador no soporta persistencia IndexedDB.");
-          }
-        }
-
-        updateSyncBadge("Conectando...", "yellow");
-        listenToFirestore();
-      } catch (err) {
-        console.error("Error al iniciar Firebase:", err);
-        updateSyncBadge("Error Firebase", "red");
-      }
-    }
-
-    // Escucha en Tiempo Real
-    function listenToFirestore() {
-      if (!db) return;
-
-      if (unsubscribeFirestore) unsubscribeFirestore();
-
-      unsubscribeFirestore = db.collection("tasks").onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
-        const cloudTasks = [];
-        snapshot.forEach((doc) => {
-          const d = doc.data();
-          if (d && d.desc) {
-            cloudTasks.push(sanitizeTask(d));
-          }
-        });
-
-        // Si la nube tiene tareas, ellas son la verdad absoluta compartida
-        if (!snapshot.empty) {
-          tasks = cloudTasks;
-          localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
-          renderKPIs();
-          renderTable();
-        } else if (tasks.length > 0 && !localStorage.getItem('tp_seeded_once')) {
-          // Solo si la base de datos es 100% virgen por primera vez se suben las tareas
-          localStorage.setItem('tp_seeded_once', 'true');
-          seedInitialFirestore();
-        } else {
-          tasks = [];
-          localStorage.setItem('tp_tasks_fs', JSON.stringify([]));
-          renderKPIs();
-          renderTable();
-        }
-
-        // Si los cambios provienen de la memoria local pendiente de subir:
-        const hasPendingWrites = snapshot.metadata.hasPendingWrites;
-        if (hasPendingWrites) {
-          updateSyncBadge("Guardando...", "yellow");
-        } else {
-          updateSyncBadge("Tiempo Real", "green");
-        }
-      }, (err) => {
-        console.error("Fallo de Firestore:", err);
-        if (err.code === "permission-denied") {
-          updateSyncBadge("Permiso Denegado", "red");
-        } else {
-          updateSyncBadge("Sin conexión", "red");
-        }
-      });
-
-      db.collection("settings").doc("companies").onSnapshot((doc) => {
-        if (doc.exists && doc.data().list) {
-          config.companies = doc.data().list;
-          localStorage.setItem('tp_config_fs', JSON.stringify(config));
-          populateDropdowns();
-          renderTable();
-        }
-      });
-    }
-
-    async function seedInitialFirestore() {
-      if (!db) return;
-      try {
-        const batch = db.batch();
-        tasks.forEach((t) => {
-          const ref = db.collection("tasks").doc(t.id);
-          batch.set(ref, sanitizeTask(t));
-        });
-        const compRef = db.collection("settings").doc("companies");
-        batch.set(compRef, { list: config.companies });
-        await batch.commit();
-        updateSyncBadge("Tiempo Real", "green");
-      } catch (e) {
-        console.warn("Error al inicializar Firestore:", e);
-      }
-    }
-
-    // Actualiza el indicador: En móvil solo muestra el punto con su color
+    // Indicador de sincronización en barra superior
     function updateSyncBadge(status, color) {
       const badge = document.getElementById('syncBadge');
       const dot = document.getElementById('syncDot');
       const text = document.getElementById('syncText');
+      if (!badge || !dot) return;
 
       let dotColor = "bg-slate-400";
       let textColor = "text-slate-400";
@@ -666,51 +538,101 @@
         borderColor = "border-rose-500/30";
       }
 
-      badge.className = ` text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1 hover:border-cyan-400/40 transition-colors shrink-0`;
+      badge.className = `text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 ${textColor} border ${borderColor} flex items-center gap-1 shrink-0`;
       dot.className = `w-1.5 h-1.5 rounded-full ${dotColor}`;
-      text.innerText = status;
+      if (text) text.innerText = status;
     }
 
-    async function saveTaskToCloud(task) {
-      if (db) {
-        try {
-          const cleanTask = sanitizeTask(task);
-          await db.collection("tasks").doc(cleanTask.id).set(cleanTask);
-        } catch (e) {
-          console.error("Error al escribir tarea en Firestore:", e);
+    // 1. CARGA DIRECTA DESDE LA NUBE (Network-First)
+    async function loadFromCloud(isBackground = false) {
+      if (!isBackground) {
+        updateSyncBadge("Sincronizando...", "yellow");
+      }
+
+      try {
+        const res = await fetch(FIRESTORE_ENDPOINT, { cache: 'no-store' });
+        
+        if (res.status === 404) {
+          // Documento inicial vacío en Firestore
+          tasks = [];
+          renderTable();
+          renderKPIs();
+          updateSyncBadge("En línea", "green");
+          return;
         }
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        if (data.fields && data.fields.payload && data.fields.payload.stringValue) {
+          const parsed = JSON.parse(data.fields.payload.stringValue);
+          tasks = (parsed.tasks || []).map(sanitizeTask);
+          if (parsed.companies && Array.isArray(parsed.companies)) {
+            config.companies = parsed.companies;
+          }
+          // Guardar copia de respaldo solo para emergencias offline
+          localStorage.setItem('tp_rest_backup', JSON.stringify({ tasks, companies: config.companies }));
+          populateDropdowns();
+          renderTable();
+          renderKPIs();
+          updateSyncBadge("En línea", "green");
+        } else {
+          updateSyncBadge("En línea", "green");
+        }
+      } catch (err) {
+        console.warn("No se pudo conectar a la nube, usando respaldo offline:", err);
+        const backup = JSON.parse(localStorage.getItem('tp_rest_backup'));
+        if (backup && backup.tasks) {
+          tasks = backup.tasks;
+          if (backup.companies) config.companies = backup.companies;
+          populateDropdowns();
+          renderTable();
+          renderKPIs();
+        }
+        updateSyncBadge("Sin conexión", "red");
       }
     }
 
-    async function deleteTaskFromCloud(taskId) {
-      if (db) {
-        try {
-          await db.collection("tasks").doc(taskId).delete();
-        } catch (e) {
-          console.error("Error al eliminar tarea en Firestore:", e);
-        }
-      }
-    }
-
-    async function saveCompaniesToCloud() {
-      if (db) {
-        try {
-          await db.collection("settings").doc("companies").set({ list: config.companies });
-        } catch (e) {
-          console.warn("Error al guardar empresas en Firestore:", e);
-        }
-      }
-    }
-
-    function saveState() {
-      localStorage.setItem('tp_config_fs', JSON.stringify(config));
-      localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
-      renderKPIs();
-      populateDropdowns();
+    // 2. GUARDADO DIRECTO A LA NUBE (Envío Atómico REST)
+    async function saveToCloud() {
+      updateSyncBadge("Guardando...", "yellow");
+      localStorage.setItem('tp_rest_backup', JSON.stringify({ tasks, companies: config.companies }));
       renderTable();
+      renderKPIs();
+
+      try {
+        const payloadString = JSON.stringify({
+          tasks: tasks,
+          companies: config.companies,
+          updatedAt: Date.now()
+        });
+
+        const url = `${FIRESTORE_ENDPOINT}?updateMask.fieldPaths=payload`;
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              payload: { stringValue: payloadString }
+            }
+          })
+        });
+
+        if (res.ok) {
+          updateSyncBadge("En línea", "green");
+        } else {
+          console.error("Error al guardar en Firestore REST:", await res.text());
+          updateSyncBadge("Error al guardar", "red");
+        }
+      } catch (err) {
+        console.warn("Fallo de red al guardar:", err);
+        updateSyncBadge("Sin conexión", "red");
+      }
     }
 
-    function getProgressStyle(percent) {
+        function getProgressStyle(percent) {
       if (percent <= 0) return { stroke: "#64748B", glow: "glow-slate", text: "text-slate-400" };
       if (percent <= 35) return { stroke: "#FACC15", glow: "glow-yellow", text: "text-yellow-400" }; // En proceso: Amarillo
       if (percent <= 60) return { stroke: "#A3E635", glow: "glow-lime", text: "text-lime-400" }; // Chequeo: Verde amarillento (Lima)
@@ -970,8 +892,8 @@
       }
 
       closeTaskModal();
-      saveState();
-      await saveTaskToCloud(taskObj);
+      // estado sincronizado en saveToCloud
+      await saveToCloud();
     }
 
     function editTask(id) {
@@ -982,8 +904,8 @@
     async function deleteTask(id) {
       if (confirm("¿Eliminar este trabajo de la lista?")) {
         tasks = tasks.filter(t => t.id !== id);
-        saveState();
-        await deleteTaskFromCloud(id);
+        // estado sincronizado en saveToCloud
+        await saveToCloud();
       }
     }
 
@@ -1014,9 +936,9 @@
       if (name && !config.companies.includes(name)) {
         config.companies.push(name);
         nameInput.value = "";
-        saveState();
+        // estado sincronizado en saveToCloud
         renderVariantsUI();
-        await saveCompaniesToCloud();
+        await saveToCloud();
       }
     }
 
@@ -1026,9 +948,9 @@
         return;
       }
       config.companies = config.companies.filter(c => c !== name);
-      saveState();
+      // estado sincronizado en saveToCloud
       renderVariantsUI();
-      await saveCompaniesToCloud();
+      await saveToCloud();
     }
 
     // Funciones del Menú 3 Líneas (Bottom Sheet en Móvil)
@@ -1057,36 +979,16 @@
       reader.onload = async function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (imported.tasks && Array.isArray(imported.tasks)) {
+          if (imported.tasks && imported.config) {
             tasks = imported.tasks;
-            if (imported.config && imported.config.companies) {
-              config.companies = imported.config.companies;
-            }
-            saveState();
-
-            // Sincronizar y reemplazar la nube con los datos importados
+            config = imported.config;
+            // estado sincronizado en saveToCloud
             if (db) {
-              updateSyncBadge("Subiendo...", "yellow");
-              try {
-                const snap = await db.collection("tasks").get();
-                const batch = db.batch();
-                snap.forEach(doc => batch.delete(doc.ref));
-                tasks.forEach(t => {
-                  const ref = db.collection("tasks").doc(t.id);
-                  batch.set(ref, sanitizeTask(t));
-                });
-                const compRef = db.collection("settings").doc("companies");
-                batch.set(compRef, { list: config.companies });
-                await batch.commit();
-                updateSyncBadge("Tiempo Real", "green");
-                showToast("¡Nube actualizada con los datos importados!", "cloud_done");
-              } catch (cloudErr) {
-                console.warn("Fallo al actualizar nube tras importar:", cloudErr);
-              }
+              await seedInitialFirestore();
             }
-            alert("¡Datos importados y respaldados en la nube exitosamente!");
+            alert("¡Datos importados exitosamente!");
           } else {
-            alert("El archivo no contiene un formato de tareas válido.");
+            alert("El archivo no tiene el formato esperado.");
           }
         } catch (err) {
           alert("Error al leer el archivo JSON.");
@@ -1195,57 +1097,21 @@
       }, 3000);
     }
 
-    // Sincronización Manual y Respaldo Bidireccional Nube / Local
+    // Sincronización Manual Directa REST con Feedback Visual
     async function manualSyncCloud(notify = true) {
-      if (!db) {
-        showToast("Firebase no está conectado aún", "error", true);
-        return;
-      }
-
       const syncBtnIcon = document.getElementById('syncBtnIcon');
       const syncMobileIcon = document.getElementById('syncMobileIcon');
       if (syncBtnIcon) syncBtnIcon.classList.add('animate-spin');
       if (syncMobileIcon) syncMobileIcon.classList.add('animate-spin');
 
-      updateSyncBadge("Sincronizando...", "yellow");
-
       try {
-        // 1. Respaldar tareas locales a la nube (para no perder nada)
-        const batch = db.batch();
-        tasks.forEach(t => {
-          const ref = db.collection("tasks").doc(t.id);
-          batch.set(ref, sanitizeTask(t), { merge: true });
-        });
-        const compRef = db.collection("settings").doc("companies");
-        batch.set(compRef, { list: config.companies }, { merge: true });
-        await batch.commit();
-
-        // 2. Traer el snapshot más reciente de la nube
-        const snapshot = await db.collection("tasks").get();
-        const cloudTasks = [];
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          if (d && d.desc) {
-            cloudTasks.push(sanitizeTask(d));
-          }
-        });
-
-        if (cloudTasks.length > 0) {
-          tasks = cloudTasks;
-          localStorage.setItem('tp_tasks_fs', JSON.stringify(tasks));
-          renderKPIs();
-          renderTable();
-        }
-
-        updateSyncBadge("Tiempo Real", "green");
+        await loadFromCloud(false);
         if (notify) {
-          showToast("¡Nube actualizada y sincronizada!", "cloud_done");
+          showToast("¡Datos sincronizados con la nube!", "cloud_done");
         }
       } catch (err) {
-        console.error("Error al sincronizar:", err);
-        updateSyncBadge("Error al sincronizar", "red");
         if (notify) {
-          showToast("Error al conectar con la nube", "cloud_off", true);
+          showToast("Sin conexión con el servidor", "cloud_off", true);
         }
       } finally {
         if (syncBtnIcon) syncBtnIcon.classList.remove('animate-spin');
@@ -1253,21 +1119,29 @@
       }
     }
 
-    // Auto-sincronizar cuando vuelves a la pestaña, desbloqueas el teléfono o enfocas la ventana
+    // Sincronización automática periódica cada 15 segundos y al enfocar pestaña
     window.addEventListener('focus', () => {
-      if (db) manualSyncCloud(false);
+      loadFromCloud(true);
     });
+
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && db) {
-        manualSyncCloud(false);
+      if (!document.hidden) {
+        loadFromCloud(true);
       }
     });
+
+    // Sondeo ligero en segundo plano para reflejar cambios entre PC y Celular en tiempo real
+    setInterval(() => {
+      if (!document.hidden) {
+        loadFromCloud(true);
+      }
+    }, 15000);
 
     // Arranque
     populateDropdowns();
     renderKPIs();
     renderTable();
-    initFirebase();
+    loadFromCloud();
   </script>
 </body>
 </html>

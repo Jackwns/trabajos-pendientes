@@ -163,48 +163,6 @@
       transform: scale(1.1);
     }
 
-
-    /* Animación de entrada moderna estilo Netflix */
-    @keyframes netflixEntrance {
-      0% {
-        opacity: 0;
-        transform: scale(0.92) translateY(12px);
-        filter: blur(10px);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-        filter: blur(0);
-      }
-    }
-    .animate-netflix {
-      animation: netflixEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* Animación corta y fluida para apertura de ventanas modales */
-    @keyframes modalShortPop {
-      0% {
-        opacity: 0;
-        transform: scale(0.95) translateY(8px);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-    .animate-modal-pop {
-      animation: modalShortPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    /* Animación fluida de despliegue inferior para el cajón móvil */
-    @keyframes drawerSlideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-    .animate-drawer {
-      animation: drawerSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
   </style>
 </head>
 <body class="selection:bg-cyan-500 selection:text-black">
@@ -226,13 +184,13 @@
   <!-- 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)                      -->
   <!-- ===================================================================== -->
   <div id="netflixScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-950/90 backdrop-blur-2xl transition-all duration-500">
-    <div class="max-w-4xl w-full text-center py-8 animate-netflix">
+    <div class="max-w-4xl w-full text-center py-8">
       
       <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white items-center justify-center shadow-2xl shadow-cyan-500/30 mb-5">
         <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
 
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">TaskFlow</h1>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">¿Quién está usando TaskFlow?</h1>
       <p class="text-xs sm:text-sm text-slate-400 mb-10">Selecciona tu perfil para ingresar</p>
 
       <!-- Contenedor dinámico de burbujas de perfiles -->
@@ -384,10 +342,11 @@
 
   </main>
 
-  <!-- MÓVIL: BOTÓN ANCHO ESTÁTICO CON FLECHA ABAJO DEL TODO -->
+  <!-- MÓVIL: BOTÓN ANCHO CON FLECHA ABAJO DEL TODO (DRAWER HANDLE) -->
   <div class="md:hidden fixed bottom-0 left-1/2 -translate-x-1/2 z-40 pb-2 pt-1 px-4">
-    <button onclick="openBottomSheet()" title="Opciones" class="flex items-center justify-center w-28 h-6 rounded-full bg-dark-900/90 border border-white/10 backdrop-blur-md text-slate-300 hover:text-white shadow-xl active:scale-95 transition-all">
-      <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+    <button onclick="openBottomSheet()" class="flex items-center justify-center gap-1.5 w-32 h-8 rounded-full bg-dark-900/90 border border-white/10 backdrop-blur-md text-slate-300 hover:text-white shadow-xl active:scale-95 transition-all">
+      <svg class="w-3.5 h-3.5 stroke-current -mt-0.5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Menú</span>
     </button>
   </div>
 
@@ -458,7 +417,7 @@
 
   <!-- BOTTOM SHEET MÓVIL (3 LÍNEAS) -->
   <div id="bottomSheetModal" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-end justify-center hidden" onclick="closeBottomSheet()">
-    <div class="bg-dark-900 border-t border-white/[0.1] rounded-t-3xl w-full max-w-lg p-5 shadow-2xl animate-drawer" onclick="event.stopPropagation()">
+    <div class="bg-dark-900 border-t border-white/[0.1] rounded-t-3xl w-full max-w-lg p-5 shadow-2xl" onclick="event.stopPropagation()">
       <div class="w-12 h-1 rounded-full bg-white/20 mx-auto mb-4"></div>
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
         <h3 class="text-sm font-bold text-white">Menú de Opciones</h3>
@@ -477,7 +436,7 @@
         </button>
 
         <!-- Exportar -->
-        <button id="sheetExportBtn" onclick="closeBottomSheet(); exportData();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
+        <button onclick="closeBottomSheet(); exportData();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
           <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-1.5">
             <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -488,7 +447,7 @@
         </button>
 
         <!-- Importar -->
-        <button id="sheetImportBtn" onclick="closeBottomSheet(); document.getElementById('importFileInput').click();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
+        <button onclick="closeBottomSheet(); document.getElementById('importFileInput').click();" class="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all">
           <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-1.5">
             <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -506,7 +465,7 @@
   <!-- 🔐 MODAL: CONTRASEÑA DE PERFIL (NETFLIX LOGIN)                         -->
   <!-- ===================================================================== -->
   <div id="profilePasswordModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-modal-pop">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
       <div id="passModalAvatar" class="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden border-2 border-white/20"></div>
       <h3 id="passModalName" class="text-lg font-bold text-white mb-1">Nombre</h3>
       <p id="passModalRole" class="text-xs text-slate-400 mb-4">Rol</p>
@@ -537,7 +496,7 @@
   <!-- ➕ MODAL: AGREGAR NUEVO USUARIO (BURBUJA GRIS +)                      -->
   <!-- ===================================================================== -->
   <div id="createUserModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl relative animate-modal-pop">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
         <h3 class="text-base font-bold text-white">Nuevo Perfil</h3>
         <button onclick="closeCreateUserModal()" class="text-slate-400 hover:text-white p-1">✕</button>
@@ -574,7 +533,7 @@
   <!-- ⚙️ MODAL: PERFIL DE USUARIO & CONFIGURACIÓN PERSONAL                 -->
   <!-- ===================================================================== -->
   <div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative animate-modal-pop max-h-[92vh] overflow-y-auto custom-scroll">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scroll">
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
         <h3 class="text-base font-bold text-white">Mi Perfil</h3>
         <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white p-1">✕</button>
@@ -744,17 +703,15 @@
         password: "30080112",
         color: "#06B6D4",
         photo: null,
-        resetRequested: false,
-        isDeveloper: false
+        isViewer: false
       },
       {
         id: "viewer",
         name: "Viewer",
-        role: "Task Observer",
-        password: "30080112",
+        role: "Solo Lectura",
+        password: "", // Acceso directo sin clave
         color: "#7C3AED",
         photo: null,
-        resetRequested: false,
         isViewer: true
       }
     ];
@@ -762,7 +719,6 @@
     const PATRICIO_INITIAL_TASKS = [
       {
             "id": "task-1",
-            "userId": "patricio",
             "company": "UNICO",
             "desc": "Crear página de Facebook e Instagram y armar placas para feed + historias",
             "status": "Aprobado",
@@ -774,7 +730,6 @@
       },
       {
             "id": "task-1788369200849",
-            "userId": "patricio",
             "company": "Royal Enfield",
             "desc": "Crear placa para contratacion de administrativo",
             "status": "Finalizado",
@@ -786,7 +741,6 @@
       },
       {
             "id": "task-2",
-            "userId": "patricio",
             "company": "Itraco",
             "desc": "Realizar 3 posts sobre el edificio de Las Piedras",
             "status": "Finalizado",
@@ -798,7 +752,6 @@
       },
       {
             "id": "task-3",
-            "userId": "patricio",
             "company": "Royal Enfield",
             "desc": "Modificar placas madre con logo de la concesionaria",
             "status": "Finalizado",
@@ -810,7 +763,6 @@
       },
       {
             "id": "task-4",
-            "userId": "patricio",
             "company": "Hotel Bicentenario",
             "desc": "Armar placa individual para el club San Martín",
             "status": "Revisión",
@@ -822,7 +774,6 @@
       },
       {
             "id": "task-5",
-            "userId": "patricio",
             "company": "Royal Enfield",
             "desc": "Realizar edición de video de quedada",
             "status": "Proceso",
@@ -834,7 +785,6 @@
       },
       {
             "id": "task-6",
-            "userId": "patricio",
             "company": "Alta Vista",
             "desc": "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
             "status": "Finalizado",
@@ -846,7 +796,6 @@
       },
       {
             "id": "task-7",
-            "userId": "patricio",
             "company": "RevCardinal",
             "desc": "Armar tarjeta de presentación con QR a la página oficial",
             "status": "Pendiente",
@@ -867,50 +816,8 @@
 
     let currentUserId = localStorage.getItem('taskflow_current_user') || null;
     let selectedProfileForLogin = null;
-    let selectedDevUserId = "patricio";
     let tasks = [];
-    // Helper seguro: Recuperar lista completa de tareas combinadas
-    function getAllTasksFlat() {
-      // 1. Si tasksByProfile tiene arrays, extraerlos
-      let combined = [];
-      if (tasksByProfile && typeof tasksByProfile === 'object') {
-        for (const [uid, uTasks] of Object.entries(tasksByProfile)) {
-          if (Array.isArray(uTasks)) {
-            uTasks.forEach(t => {
-              if (t) combined.push({ ...sanitizeTask(t), userId: t.userId || uid });
-            });
-          }
-        }
-      }
-
-      // 2. Si las tareas de Patricio no estaban cargadas, agregarlas
-      const hasPatricio = combined.some(t => (t.userId || 'patricio') === 'patricio');
-      if (!hasPatricio && Array.isArray(PATRICIO_INITIAL_TASKS)) {
-        PATRICIO_INITIAL_TASKS.forEach(t => combined.push({ ...sanitizeTask(t), userId: 'patricio' }));
-      }
-
-      // 3. Eliminar duplicados por id
-      const uniqueMap = {};
-      combined.forEach(t => { uniqueMap[t.id] = t; });
-      return Object.values(uniqueMap);
-    }
-
     let activeStatusFilter = "";
-
-
-    // Asegurar que Patricio y Viewer siempre tengan su contraseña 30080112 activa
-    function enforceMandatoryPasswords() {
-      profiles = profiles.map(p => {
-        if (p.id === 'viewer' || p.isViewer) {
-          return { ...p, id: 'viewer', isViewer: true, name: 'Viewer', role: 'Task Observer', password: p.password || "30080112" };
-        }
-        if (p.id === 'patricio') {
-          return { ...p, id: 'patricio', password: p.password || "30080112" };
-        }
-        return p;
-      });
-      saveProfilesState();
-    }
 
     function saveProfilesState() {
       localStorage.setItem('taskflow_profiles', JSON.stringify(profiles));
@@ -972,8 +879,17 @@
     function selectProfileForLogin(profileId) {
       const p = profiles.find(item => item.id === profileId);
       if (!p) return;
-      selectedProfileForLogin = p;
 
+      // Si es el perfil Viewer (o no tiene contraseña): INGRESO DIRECTO SIN CONTRASEÑA
+      if (p.id === 'viewer' || p.isViewer || !p.password) {
+        currentUserId = p.id;
+        localStorage.setItem('taskflow_current_user', currentUserId);
+        initUserSession();
+        return;
+      }
+
+      // Para Patricio y otros perfiles con clave, pedir contraseña:
+      selectedProfileForLogin = p;
       document.getElementById('passModalName').innerText = p.name;
       document.getElementById('passModalRole').innerText = p.role;
       document.getElementById('passModalAvatar').innerHTML = renderUserAvatarHtml(p);
@@ -993,21 +909,13 @@
       if (!selectedProfileForLogin) return;
       const enteredPass = document.getElementById('profilePasswordInput').value.trim();
 
-      // Contraseña esperada con blindaje estricto para Viewer y Patricio (30080112)
-      let expectedPass = String(selectedProfileForLogin.password || "").trim();
-      if (!expectedPass && (selectedProfileForLogin.id === 'viewer' || selectedProfileForLogin.isViewer || selectedProfileForLogin.id === 'patricio')) {
-        expectedPass = "30080112";
-      }
-
-      if (enteredPass && enteredPass === expectedPass) {
+      if (enteredPass === selectedProfileForLogin.password) {
         currentUserId = selectedProfileForLogin.id;
         localStorage.setItem('taskflow_current_user', currentUserId);
         closeProfilePasswordModal();
         initUserSession();
       } else {
-        document.getElementById('passModalError').innerText = "Contraseña incorrecta";
         document.getElementById('passModalError').classList.remove('hidden');
-        document.getElementById('profilePasswordInput').focus();
       }
     }
 
@@ -1097,10 +1005,14 @@
         return;
       }
 
-      const currentUser = profiles.find(p => p.id === currentUserId);
+      let currentUser = profiles.find(p => p.id === currentUserId);
       if (!currentUser) {
-        logoutProfile();
-        return;
+        if (currentUserId === 'viewer') {
+          currentUser = DEFAULT_PROFILES[1];
+        } else {
+          logoutProfile();
+          return;
+        }
       }
 
       // Mostrar App
@@ -1108,108 +1020,42 @@
       document.getElementById('appMainView').classList.remove('hidden');
 
       // Actualizar Barra Superior
+      document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
       document.getElementById('navbarAvatarContainer').innerHTML = renderUserAvatarHtml(currentUser);
       document.getElementById('navbarUserBtn').title = `${currentUser.name} (${currentUser.role}) - Mi Perfil`;
 
+      // Eliminar definitivamente modo Developer
+      const devBtn = document.getElementById('devPanelBtn');
+      if (devBtn) devBtn.remove();
       const devBar = document.getElementById('devViewerBar');
+      if (devBar) devBar.remove();
 
-      const isViewerMode = (currentUser.id === 'viewer' || currentUser.isViewer);
-
-      // Ocultar botones de crear/importar/exportar en modo Viewer
+      // MODO VIEWER: Solo lectura (oculta botones de modificación)
+      const isViewer = (currentUser.id === 'viewer' || currentUser.isViewer);
       const newTaskBtn = document.getElementById('newTaskBtn');
       const exportBtn = document.getElementById('exportBtn');
       const importBtn = document.getElementById('importBtn');
       const sheetExport = document.getElementById('sheetExportBtn');
       const sheetImport = document.getElementById('sheetImportBtn');
 
-      if (isViewerMode) {
+      if (isViewer) {
         if (newTaskBtn) newTaskBtn.classList.add('hidden');
         if (exportBtn) exportBtn.classList.add('hidden');
         if (importBtn) importBtn.classList.add('hidden');
         if (sheetExport) sheetExport.classList.add('hidden');
         if (sheetImport) sheetImport.classList.add('hidden');
-
-        devBar.classList.remove('hidden');
-        if (!selectedDevUserId || !profiles.find(p => p.id === selectedDevUserId && p.id !== 'viewer')) {
-          selectedDevUserId = "patricio";
-        }
-        renderDevViewerBubbles();
-
-        const inspectedUser = profiles.find(p => p.id === selectedDevUserId) || currentUser;
-        document.getElementById('subHeaderUserRole').innerText = `Viewer • Viendo a ${inspectedUser.name}`;
-
-        // Obtener tareas del usuario inspeccionado
-        const allTasks = getAllTasksFlat();
-        tasks = allTasks.filter(t => (t.userId || 'patricio') === selectedDevUserId);
       } else {
         if (newTaskBtn) newTaskBtn.classList.remove('hidden');
         if (exportBtn) exportBtn.classList.remove('hidden');
         if (importBtn) importBtn.classList.remove('hidden');
         if (sheetExport) sheetExport.classList.remove('hidden');
         if (sheetImport) sheetImport.classList.remove('hidden');
-
-        devBar.classList.add('hidden');
-        document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
-
-        // Obtener tareas del usuario actual
-        const allTasks = getAllTasksFlat();
-        tasks = allTasks.filter(t => (t.userId || 'patricio') === currentUser.id);
       }
 
+      // TODAS LAS TAREAS SON COMPARTIDAS EN TIEMPO REAL (Una sola lista unificada)
       populateDropdowns();
       renderKPIs();
       renderTable();
-    }
-
-    // Renderizar selector horizontal de burbujas para Viewer (Debajo del Navbar)
-    function renderDevViewerBubbles() {
-      const container = document.getElementById('devViewerBubbles');
-      if (!container) return;
-
-      // Mostrar todos los perfiles de usuarios normales (excepto la cuenta visor)
-      const userProfiles = profiles.filter(p => p.id !== 'viewer' && !p.isViewer);
-
-      container.innerHTML = userProfiles.map(p => {
-        const isSelected = (p.id === selectedDevUserId);
-        const activeClass = isSelected 
-          ? "bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(6,182,212,0.35)] scale-105" 
-          : "bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]";
-
-        return `
-          <div onclick="selectDevInspectedUser('${p.id}')"
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl border transition-all cursor-pointer select-none shrink-0 ${activeClass}">
-            <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-white/20 shadow-sm flex items-center justify-center">
-              ${renderUserAvatarHtml(p, 'w-full h-full rounded-full')}
-            </div>
-            <div class="text-left min-w-0">
-              <div class="text-xs font-bold text-white truncate leading-tight">${p.name}</div>
-              <div class="text-[10px] text-slate-400 truncate leading-tight">${p.role || ''}</div>
-            </div>
-            ${p.resetRequested ? `
-              <button onclick="event.stopPropagation(); devApproveReset('${p.id}');"
-                class="ml-1 px-2 py-0.5 rounded-lg text-[9px] font-extrabold bg-rose-500 text-white hover:bg-rose-600 transition-colors animate-pulse"
-                title="Click para resetear clave a 12345678">
-                Reset
-              </button>
-            ` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function selectDevInspectedUser(userId) {
-      selectedDevUserId = userId;
-      const inspectedUser = profiles.find(p => p.id === selectedDevUserId);
-      if (inspectedUser) {
-        document.getElementById('subHeaderUserRole').innerText = `Viewer • Viendo a ${inspectedUser.name}`;
-      }
-      const allTasks = getAllTasksFlat();
-      tasks = allTasks.filter(t => (t.userId || 'patricio') === selectedDevUserId);
-      populateDropdowns();
-      renderKPIs();
-      renderTable();
-      renderDevViewerBubbles();
-      showToast(`Viendo tareas de ${inspectedUser ? inspectedUser.name : ''}`);
     }
 
     function logoutProfile() {
@@ -1483,35 +1329,22 @@
         if (data.fields && data.fields.payload && data.fields.payload.stringValue) {
           const parsed = JSON.parse(data.fields.payload.stringValue);
 
-          if (parsed.profiles && Array.isArray(parsed.profiles) && parsed.profiles.length > 0) {
+          if (parsed.profiles && Array.isArray(parsed.profiles)) {
             profiles = parsed.profiles;
           }
-
-          // Asegurar que exista perfil Patricio y Viewer
-          if (!profiles.some(p => p.id === 'patricio')) {
-            profiles.unshift(DEFAULT_PROFILES[0]);
-          }
-          if (!profiles.some(p => p.id === 'viewer' || p.isViewer)) {
-            profiles.push(DEFAULT_PROFILES[1]);
-          }
-
-          if (parsed.tasksByProfile && typeof parsed.tasksByProfile === 'object') {
+          if (parsed.tasksByProfile) {
             tasksByProfile = parsed.tasksByProfile;
-          } else if (parsed.tasks && Array.isArray(parsed.tasks)) {
-            // Migrar tareas planas al usuario Patricio
-            tasksByProfile['patricio'] = parsed.tasks.map(t => ({ ...sanitizeTask(t), userId: t.userId || 'patricio' }));
           }
-
-          // Si las tareas de Patricio están vacías por error, cargar las 8 tareas reales
-          if (!tasksByProfile['patricio'] || tasksByProfile['patricio'].length === 0) {
-            tasksByProfile['patricio'] = PATRICIO_INITIAL_TASKS;
-          }
-
           if (parsed.companies && Array.isArray(parsed.companies)) {
             config.companies = parsed.companies;
           }
 
-          enforceMandatoryPasswords();
+          saveProfilesState();
+
+          if (currentUserId && tasksByProfile[currentUserId]) {
+            tasks = tasksByProfile[currentUserId];
+          }
+
           renderNetflixScreen();
           initUserSession();
           updateSyncBadge("En línea", "green");
@@ -1525,9 +1358,8 @@
     async function saveToCloud() {
       updateSyncBadge("Guardando...", "yellow");
 
-      const targetSaveId = (currentUserId === 'developer' && selectedDevUserId) ? selectedDevUserId : currentUserId;
-      if (targetSaveId) {
-        tasksByProfile[targetSaveId] = tasks;
+      if (currentUserId) {
+        tasksByProfile[currentUserId] = tasks;
       }
       saveProfilesState();
 
@@ -1914,8 +1746,11 @@
         else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
         else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
 
+        const currentUser = profiles.find(p => p.id === currentUserId);
+        const isViewer = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer));
+
         return `
-          <tr onclick="onRowClick(event, '${task.id}')" class="table-row-card group" title="Click para editar">
+          <tr ${isViewer ? '' : `onclick="onRowClick(event, '${task.id}')"`} class="table-row-card group" title="${isViewer ? 'Modo Solo Lectura' : 'Click para editar'}">
             <td class="py-3 px-4 text-center">
               ${renderCircularProgress(task.progress !== undefined ? task.progress : 0)}
             </td>
@@ -1942,14 +1777,16 @@
               ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
             </td>
             <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
-              <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100">
-                <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center">
-                  <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                </button>
-                <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center">
-                  <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                </button>
-              </div>
+              ${isViewer ? '<span class="text-xs text-slate-500 font-mono">-</span>' : `
+                <div class="inline-flex items-center gap-1 opacity-80 group-hover:opacity-100">
+                  <button onclick="editTask('${task.id}')" title="Editar tarea" class="w-8 h-8 rounded-xl text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="w-8 h-8 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              `}
             </td>
           </tr>
         `;
@@ -2007,8 +1844,7 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const currentUid = (currentUserId === 'viewer' && selectedDevUserId) ? selectedDevUserId : (currentUserId || 'patricio');
-      const taskObj = { ...sanitizeTask({ id, company, desc, status, priority, date, progress, details }), userId: currentUid };
+      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details });
 
       const index = tasks.findIndex(t => t.id === id);
       if (index !== -1) {

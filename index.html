@@ -272,18 +272,30 @@
       </div>
     </header>
 
-    <!-- CONSOLA DE OBSERVACIÓN PARA VIEWER (Debajo del Navbar con Selector de Perfiles) -->
-    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2.5 px-3 sm:px-6 lg:px-8 w-full z-20">
-      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-2 shrink-0">
-          <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-xl flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            Consola Viewer
-          </span>
-          <span class="text-xs text-slate-400">Observando:</span>
+    <!-- CONSOLA DE OBSERVACIÓN PARA VIEWER (Carrusel de Supervisión Premium) -->
+    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-3 px-3 sm:px-6 lg:px-8 w-full z-20 shadow-2xl relative overflow-hidden">
+      <!-- Línea sutil de acento luminoso superior -->
+      <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/30 to-transparent pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+        <!-- Badge y etiqueta del Visor -->
+        <div class="flex items-center justify-between md:justify-start gap-2.5 shrink-0">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 shadow-inner">
+            <svg class="w-4 h-4 text-emerald-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400">Consola Viewer</span>
+          </div>
+          <span class="text-xs text-slate-400 font-medium hidden sm:inline">Supervisión de equipos en vivo:</span>
         </div>
-        <!-- Selector horizontal de burbujas de perfiles observables (todos menos Viewer) -->
-        <div id="viewerProfilesSelector" class="flex items-center gap-2.5 overflow-x-auto custom-scroll no-scrollbar py-0.5"></div>
+
+        <!-- Carrusel deslizable táctil en móvil y desktop -->
+        <div class="relative w-full md:w-auto overflow-hidden">
+          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-1 px-1 snap-x snap-mandatory -mx-1 sm:mx-0">
+            <!-- Inyectado vía JS con tarjetas enriquecidas de cada miembro -->
+          </div>
+        </div>
       </div>
     </div>
 
@@ -813,8 +825,8 @@
     let tasks = JSON.parse(localStorage.getItem('taskflow_tasks_unified')) || PATRICIO_INITIAL_TASKS;
     let selectedObservedUserId = "patricio";
 
-    // Renderizar selector de burbujas en la Consola del Viewer (Debajo del Navbar)
-    // Muestra todos los perfiles existentes excepto el propio Viewer
+    // Renderizar Carrusel Premium en la Consola del Viewer (Debajo del Navbar)
+    // Muestra tarjetas táctiles para todos los perfiles existentes (excepto Viewer)
     function renderViewerProfilesSelector() {
       const container = document.getElementById('viewerProfilesSelector');
       if (!container) return;
@@ -823,21 +835,44 @@
 
       container.innerHTML = observableProfiles.map(p => {
         const isSelected = (p.id === selectedObservedUserId);
-        const activeClass = isSelected 
-          ? "bg-emerald-500/20 border-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.35)] scale-105" 
-          : "bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]";
+        
+        // Contar cuántas tareas tiene este perfil en la lista maestra
+        const userTaskCount = allMasterTasks.filter(t => (t.userId || 'patricio') === p.id).length;
+
+        const activeClasses = isSelected
+          ? "bg-gradient-to-r from-emerald-500/15 via-cyan-500/10 to-emerald-500/5 border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.25)] scale-[1.02] ring-1 ring-emerald-400/50"
+          : "bg-white/[0.025] hover:bg-white/[0.055] border-white/[0.07] hover:border-emerald-500/30 text-slate-300 hover:text-white";
+
+        const badgeClasses = isSelected
+          ? "bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 font-extrabold"
+          : "bg-white/[0.05] text-slate-400 border border-white/[0.06]";
 
         return `
           <div onclick="selectObservedUser('${p.id}')"
-            class="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl border transition-all cursor-pointer select-none shrink-0 ${activeClass}"
-            title="Ver trabajos de ${p.name}">
-            <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-white/20 shadow-sm flex items-center justify-center">
+            class="flex items-center gap-3 p-2 sm:p-2.5 pr-3.5 rounded-2xl border transition-all duration-200 cursor-pointer select-none shrink-0 snap-start active:scale-95 ${activeClasses}"
+            title="Ver tablero de ${p.name} (${userTaskCount} trabajos)">
+            
+            <!-- Avatar circular con borde de estado -->
+            <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'border-white/15'} shadow-md flex items-center justify-center">
               ${renderUserAvatarHtml(p, 'w-full h-full rounded-full')}
             </div>
-            <div class="text-left min-w-0">
-              <div class="text-xs font-bold text-white truncate leading-tight">${p.name}</div>
-              <div class="text-[10px] text-slate-400 truncate leading-tight">${p.role || ''}</div>
+
+            <!-- Nombre, Rol e Indicador en Vivo -->
+            <div class="text-left min-w-0 pr-1">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs sm:text-sm font-extrabold text-white truncate leading-tight tracking-tight">${p.name}</span>
+                ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0"></span>' : ''}
+              </div>
+              <div class="text-[10px] sm:text-[11px] text-slate-400 truncate leading-tight mt-0.5">${p.role || 'Miembro'}</div>
             </div>
+
+            <!-- Contador de Trabajos -->
+            <div class="shrink-0 ml-auto pl-1">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] ${badgeClasses}">
+                ${userTaskCount} ${userTaskCount === 1 ? 'tarea' : 'tareas'}
+              </span>
+            </div>
+
           </div>
         `;
       }).join('');

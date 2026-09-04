@@ -604,6 +604,7 @@
     };
     let tasks = INITIAL_SAVED_DATA.tasks;
     let activeStatusFilter = "";
+    let isInitialLoad = true;
 
     function sanitizeTask(t) {
       return {
@@ -672,11 +673,22 @@
         const data = await res.json();
         if (data.fields && data.fields.payload && data.fields.payload.stringValue) {
           const parsed = JSON.parse(data.fields.payload.stringValue);
-          tasks = (parsed.tasks || []).map(sanitizeTask);
-          if (parsed.companies && Array.isArray(parsed.companies)) {
-            config.companies = parsed.companies;
+          const newTasks = (parsed.tasks || []).map(sanitizeTask);
+          const newCompanies = (parsed.companies && Array.isArray(parsed.companies)) ? parsed.companies : config.companies;
+
+          // Comprobación inteligente: si los datos son exactamente iguales, NO re-renderizar para evitar parpadeos
+          const currentSignature = JSON.stringify({ t: tasks, c: config.companies });
+          const newSignature = JSON.stringify({ t: newTasks, c: newCompanies });
+
+          if (currentSignature === newSignature && !isInitialLoad) {
+            updateSyncBadge("En línea", "green");
+            return;
           }
-          // Guardar copia de respaldo solo para emergencias offline
+
+          isInitialLoad = false;
+          tasks = newTasks;
+          config.companies = newCompanies;
+
           localStorage.setItem('tp_rest_backup', JSON.stringify({ tasks, companies: config.companies }));
           populateDropdowns();
           renderTable();
@@ -1226,7 +1238,7 @@
       }
     }
 
-    // Sincronización automática periódica cada 15 segundos y al enfocar pestaña
+    // Sincronización silenciosa solo al volver a la pestaña o desbloquear el dispositivo
     window.addEventListener('focus', () => {
       loadFromCloud(true);
     });
@@ -1236,13 +1248,6 @@
         loadFromCloud(true);
       }
     });
-
-    // Sondeo ligero en segundo plano para reflejar cambios entre PC y Celular en tiempo real
-    setInterval(() => {
-      if (!document.hidden) {
-        loadFromCloud(true);
-      }
-    }, 15000);
 
     // Arranque
     populateDropdowns();

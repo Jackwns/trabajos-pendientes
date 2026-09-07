@@ -345,6 +345,7 @@
                 <th class="py-3.5 px-4">Estado</th>
                 <th class="py-3.5 px-4 text-center">Prioridad</th>
                 <th class="py-3.5 px-4">Fecha Ingreso</th>
+                <th class="py-3.5 px-4">Fecha Finalizado</th>
                 <th class="py-3.5 px-4">Detalles</th>
                 <th id="thActions" class="py-3.5 px-4 text-center w-24">Acciones</th>
               </tr>
@@ -553,9 +554,15 @@
             <select id="taskPriority" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></select>
           </div>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
-          <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
+            <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Finalizado</label>
+            <input type="date" id="taskCompletedDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+          </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Detalles / Observaciones</label>
@@ -729,6 +736,7 @@
             "status": "Finalizado",
             "priority": "Máxima",
             "date": "2026-09-02",
+            "completedDate": "2026-09-02",
             "details": "-",
             "progress": 100,
             "updatedAt": 1788525676222
@@ -1641,6 +1649,13 @@
       };
       const progressClean = (statusMap[statusClean] !== undefined) ? statusMap[statusClean] : (Number(t.progress) || 0);
 
+      let compDate = String(t.completedDate || "").trim();
+      if (statusClean === "Finalizado" && !compDate) {
+        compDate = String(t.date || "").trim();
+      } else if (statusClean !== "Finalizado") {
+        compDate = "";
+      }
+
       return {
         id: String(t.id || ("task-" + Date.now())),
         company: String(t.company || "").trim(),
@@ -1648,6 +1663,7 @@
         status: statusClean,
         priority: String(t.priority || "Media").trim(),
         date: String(t.date || "").trim(),
+        completedDate: compDate,
         details: String(t.details || "-").trim(),
         progress: progressClean,
         updatedAt: t.updatedAt || Date.now()
@@ -1814,6 +1830,9 @@
             <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
               ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
             </td>
+            <td class="py-3 px-4 text-xs font-semibold ${task.completedDate ? 'text-cyan-400' : 'text-slate-600'} whitespace-nowrap">
+              ${task.completedDate ? task.completedDate : '-'}
+            </td>
             <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
               ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
             </td>
@@ -1840,6 +1859,25 @@
       editTask(id);
     }
 
+    function setupTaskStatusChangeListener() {
+      const statusSelect = document.getElementById('taskStatus');
+      const compDateInput = document.getElementById('taskCompletedDate');
+      if (!statusSelect || !compDateInput) return;
+
+      statusSelect.onchange = function() {
+        const norm = normalizeStatus(this.value);
+        if (norm === "Finalizado") {
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          compDateInput.value = `${yyyy}-${mm}-${dd}`;
+        } else {
+          compDateInput.value = "";
+        }
+      };
+    }
+
     function openTaskModal(task = null) {
       const currentUser = profiles.find(p => p.id === currentUserId);
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
@@ -1853,6 +1891,7 @@
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
         document.getElementById('taskDate').value = task.date;
+        document.getElementById('taskCompletedDate').value = task.completedDate || "";
         document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
@@ -1862,8 +1901,10 @@
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const dd = String(now.getDate()).padStart(2, '0');
         document.getElementById('taskDate').value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('taskCompletedDate').value = "";
       }
       document.getElementById('taskModal').classList.remove('hidden');
+      setupTaskStatusChangeListener();
     }
 
     function closeTaskModal() {
@@ -1881,6 +1922,7 @@
       const status = document.getElementById('taskStatus').value;
       const priority = document.getElementById('taskPriority').value;
       const date = document.getElementById('taskDate').value;
+      let completedDate = document.getElementById('taskCompletedDate').value;
       const details = document.getElementById('taskDetails').value;
 
       const statusMap = {
@@ -1888,7 +1930,21 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details });
+      // Si el estado es Finalizado y no tenía fecha de finalizado, se asigna la fecha de hoy
+      if (status === "Finalizado") {
+        if (!completedDate) {
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          completedDate = `${yyyy}-${mm}-${dd}`;
+        }
+      } else {
+        // Al sacarle el realizado por otro estado se blanquea
+        completedDate = "";
+      }
+
+      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, completedDate, progress, details });
 
       const authorId = (currentUserId && currentUserId !== 'viewer') ? currentUserId : 'patricio';
       const taskWithUser = { ...taskObj, userId: authorId };

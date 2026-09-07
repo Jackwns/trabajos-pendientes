@@ -1594,13 +1594,28 @@
       `;
     }
 
-        function formatDateDisplay(d) {
+    function formatDateDisplay(d) {
       if (!d) return '<span class="text-slate-600">-</span>';
-      const parts = String(d).trim().split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      const str = String(d).trim();
+      if (!str || str === "-") return '<span class="text-slate-600">-</span>';
+      if (str.includes('/')) return str; // Ya viene en formato DD/MM/AAAA
+      const parts = str.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
       }
-      return d;
+      return str;
+    }
+
+    function toInputDateFormat(d) {
+      if (!d) return "";
+      const str = String(d).trim();
+      if (str.includes('/')) {
+        const parts = str.split('/');
+        if (parts.length === 3 && parts[2].length === 4) {
+          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+      return str;
     }
 
     function renderPriorityRank(priority) {
@@ -1650,6 +1665,7 @@
       };
       const progressClean = (statusMap[statusClean] !== undefined) ? statusMap[statusClean] : (Number(t.progress) || 0);
 
+      const isDone = (statusClean === "Finalizado" || progressClean >= 100);
       return {
         id: String(t.id || ("task-" + Date.now())),
         company: String(t.company || "").trim(),
@@ -1659,7 +1675,8 @@
         date: String(t.date || "").trim(),
         details: String(t.details || "-").trim(),
         progress: progressClean,
-        updatedAt: t.updatedAt || Date.now()
+        completedAt: t.completedAt ? Number(t.completedAt) : (isDone ? (Number(t.updatedAt) || Date.now()) : null),
+        updatedAt: Number(t.updatedAt) || Date.now()
       };
     }
 
@@ -1756,38 +1773,41 @@
         const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
         const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
 
-        // Tareas finalizadas al fondo de la tabla
+        // 1. Tareas finalizadas al fondo de la tabla
         if (isDoneA && !isDoneB) return 1;
         if (!isDoneA && isDoneB) return -1;
 
-        // Si ambos están finalizados: ordenar de los últimos realizados hasta los más antiguos
+        // 2. Si ambos están finalizados: ordenar de los últimos realizados hasta los más antiguos (más recientes primero)
         if (isDoneA && isDoneB) {
-          const dateA = a.date || "";
-          const dateB = b.date || "";
+          const dateA = a.completedDate || a.date || "";
+          const dateB = b.completedDate || b.date || "";
           if (dateA && dateB && dateA !== dateB) {
-            return dateB.localeCompare(dateA);
+            return dateB.localeCompare(dateA); // Fecha más reciente primero
           }
           if (dateA && !dateB) return -1;
           if (!dateA && dateB) return 1;
 
-          const timeA = a.updatedAt || 0;
-          const timeB = b.updatedAt || 0;
-          return timeB - timeA;
+          const timeA = a.completedAt || a.updatedAt || 0;
+          const timeB = b.completedAt || b.updatedAt || 0;
+          if (timeA !== timeB) {
+            return timeB - timeA;
+          }
+          return 0;
         }
 
-        // Para las tareas activas:
-        // 1. Nivel de avance en el proceso: entre más avanzado esté el proceso más abajo va
+        // 3. Tareas activas:
+        // Entre más avanzado esté el proceso, más abajo va (menor progreso arriba)
         // (Pendiente 0% arriba -> Proceso 25% -> Revisión 50% -> Aprobado 75% más abajo)
         const progA = (a.progress !== undefined) ? Number(a.progress) : 0;
         const progB = (b.progress !== undefined) ? Number(b.progress) : 0;
         if (progA !== progB) return progA - progB;
 
-        // 2. Dentro de cada nivel de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
+        // 4. Dentro de cada nivel de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
         const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
         const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
         if (diffPrio !== 0) return diffPrio;
 
-        // 3. Criterio por fecha para desempatar: más antiguas primero
+        // 5. Desempate por fecha para tareas activas: más antiguas primero para evitar atrasos
         if (a.date && b.date) return a.date.localeCompare(b.date);
         if (a.date && !b.date) return -1;
         if (!a.date && b.date) return 1;
@@ -1840,6 +1860,9 @@
             <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap font-mono">
               ${formatDateDisplay(task.date)}
             </td>
+            <td class="py-3 px-4 text-xs font-semibold font-mono ${task.completedDate ? 'text-cyan-400' : 'text-slate-600'} whitespace-nowrap">
+              ${formatDateDisplay(task.completedDate)}
+            </td>
             <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
               ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
             </td>
@@ -1878,7 +1901,7 @@
         document.getElementById('taskDesc').value = task.desc;
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
-        document.getElementById('taskDate').value = task.date;
+        document.getElementById('taskDate').value = toInputDateFormat(task.date);
         document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
@@ -1914,7 +1937,21 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details });
+      const existingTask = tasks.find(t => t.id === id);
+      const isNowDone = (status === "Finalizado" || progress >= 100);
+      const wasDone = existingTask && (existingTask.status === "Finalizado" || existingTask.progress >= 100);
+      let completedAt = existingTask ? existingTask.completedAt : null;
+      if (isNowDone && (!wasDone || !completedAt)) {
+        completedAt = Date.now();
+      } else if (!isNowDone) {
+        completedAt = null;
+      }
+
+      const taskObj = sanitizeTask({
+        id, company, desc, status, priority, date, progress, details,
+        completedAt: completedAt,
+        updatedAt: Date.now()
+      });
 
       const authorId = (currentUserId && currentUserId !== 'viewer') ? currentUserId : 'patricio';
       const taskWithUser = { ...taskObj, userId: authorId };

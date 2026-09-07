@@ -1744,12 +1744,29 @@
       });
 
       filtered.sort((a, b) => {
-        const isDoneA = a.status === "Finalizado";
-        const isDoneB = b.status === "Finalizado";
+        // 1. Tareas finalizadas siempre al fondo de la lista
+        const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
+        const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
         if (isDoneA && !isDoneB) return 1;
         if (!isDoneA && isDoneB) return -1;
+
+        // 2. Prioridad principal: Máxima > Media > Mínima (más urgentes arriba)
         const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
-        return (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
+        const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
+        if (diffPrio !== 0) return diffPrio;
+
+        // 3. Nivel de avance: entre más avanzado el proceso más abajo va (menor progreso arriba)
+        // (ej: Pendiente 0% -> Proceso 25% -> Revisión 50% -> Aprobado 75%)
+        const progA = (a.progress !== undefined) ? Number(a.progress) : 0;
+        const progB = (b.progress !== undefined) ? Number(b.progress) : 0;
+        if (progA !== progB) return progA - progB;
+
+        // 4. Criterio terciario por fecha: más antiguas primero para evitar atrasos
+        if (a.date && b.date) return a.date.localeCompare(b.date);
+        if (a.date && !b.date) return -1;
+        if (!a.date && b.date) return 1;
+
+        return 0;
       });
 
       const tbody = document.getElementById('tasksTableBody');

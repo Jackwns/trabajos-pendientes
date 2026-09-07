@@ -158,49 +158,6 @@
     .netflix-bubble:hover {
       transform: scale(1.1);
     }
-
-    /* Animación bucle de puntos suspensivos para trabajos en Revisión */
-    @keyframes ellipsisDotsAnim {
-      0% { content: '.'; }
-      33% { content: '..'; }
-      66% { content: '...'; }
-      100% { content: '.'; }
-    }
-    .ellipsis-loop::after {
-      content: '.';
-      animation: ellipsisDotsAnim 1.4s infinite steps(1);
-    }
-
-    /* Cartel de felicitaciones con bordes animados neón */
-    @keyframes neonBorderPulse {
-      0%, 100% {
-        border-color: #06B6D4;
-        box-shadow: 0 0 28px rgba(6, 182, 212, 0.6), inset 0 0 16px rgba(6, 182, 212, 0.3);
-      }
-      50% {
-        border-color: #D946EF;
-        box-shadow: 0 0 38px rgba(217, 70, 239, 0.7), inset 0 0 22px rgba(217, 70, 239, 0.35);
-      }
-    }
-    .neon-level-card {
-      animation: neonBorderPulse 2.2s infinite ease-in-out;
-    }
-
-    /* Animación de líquido para burbuja móvil */
-    @keyframes waveLiquid {
-      0% { transform: translateY(0) scaleY(1); }
-      50% { transform: translateY(-2px) scaleY(1.08); }
-      100% { transform: translateY(0) scaleY(1); }
-    }
-    .liquid-anim {
-      animation: waveLiquid 3s ease-in-out infinite;
-    }
-
-    /* Resplandor neón dorado para insignia de sprint y excelencia creativa */
-    .military-gold-neon {
-      box-shadow: 0 0 22px rgba(251, 191, 36, 0.4);
-      border-color: rgba(251, 191, 36, 0.85);
-    }
   </style>
 </head>
 <body class="selection:bg-cyan-500 selection:text-black">
@@ -215,31 +172,6 @@
   <!-- TOAST -->
   <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-dark-850/95 border border-cyan-500/40 text-white text-xs px-4 py-2 rounded-2xl shadow-2xl backdrop-blur-md flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none -translate-y-2">
     <span id="toastText">Sincronizado</span>
-  </div>
-
-  <!-- ===================================================================== -->
-  <!-- 🏆 CARTEL DE BORDES ANIMADOS NEÓN: SUBIDA DE NIVEL                    -->
-  <!-- ===================================================================== -->
-  <div id="levelUpModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-dark-900 border-2 rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-modal-pop neon-level-card">
-      
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 via-sky-400 to-fuchsia-500 text-white mx-auto flex items-center justify-center shadow-2xl shadow-fuchsia-500/40 mb-4 animate-bounce">
-        <svg class="w-9 h-9 fill-current" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-      </div>
-
-      <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400 tracking-tight uppercase mb-1">¡Subiste de Nivel!</h3>
-      <p class="text-xs text-slate-300 mb-4">Has ascendido a una nueva categoría profesional:</p>
-
-      <div class="py-3.5 px-4 rounded-2xl bg-white/[0.04] border border-white/10 mb-5">
-        <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Nuevo Rango Profesional</span>
-        <div id="levelUpModalNum" class="text-4xl font-black text-white tracking-tight mt-1 mb-0.5">Nv 2</div>
-        <span id="levelUpModalRank" class="text-xs font-bold text-cyan-300">Oficial Táctico</span>
-      </div>
-
-      <button onclick="closeLevelUpModal()" class="w-full py-2.5 text-xs font-black text-white bg-gradient-to-r from-cyan-500 to-fuchsia-500 hover:from-cyan-400 hover:to-fuchsia-400 rounded-xl shadow-lg shadow-fuchsia-500/30 active:scale-95 transition-all uppercase tracking-wider">
-        Continuar Operación
-      </button>
-    </div>
   </div>
 
   <!-- ===================================================================== -->
@@ -273,8 +205,8 @@
     <header class="sticky top-0 z-30 glass-panel border-b border-white/[0.06] w-full">
       <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
         
-        <!-- Left: Logo, TaskFlow, Estado, Presencia y Burbuja Líquida Móvil -->
-        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <!-- Left: Logo, TaskFlow, Estado y Presencia -->
+        <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           </div>
@@ -295,13 +227,6 @@
                 </svg>
                 <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
               </span>
-
-              <!-- 🌊 BURBUJA LÍQUIDA MÓVIL (Nivel con líquido llenándose, no satura) -->
-              <div onclick="openUserProfileModal()" id="mobileLiquidBubble" class="sm:hidden relative w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-dark-900 shadow-md shadow-cyan-500/20 shrink-0 cursor-pointer active:scale-95 transition-transform" title="Nivel y Experiencia (Click para ver detalles)">
-                <div id="mobileLiquidFill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-fuchsia-600 via-pink-500 to-cyan-400 liquid-anim transition-all duration-700 ease-out" style="height: 25%;"></div>
-                <span id="mobileLiquidLevelText" class="absolute inset-0 flex items-center justify-center font-black text-white text-[11px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.95)] z-10 select-none">Nv 1</span>
-              </div>
-
             </div>
             <p id="subHeaderUserRole" class="text-[11px] text-slate-400 truncate hidden sm:block">Patricio • Art Director</p>
           </div>
@@ -349,9 +274,11 @@
 
     <!-- CONSOLA DE OBSERVACIÓN PARA VIEWER (Carrusel de Supervisión Premium) -->
     <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2.5 px-3 sm:px-6 lg:px-8 w-full z-20 shadow-2xl relative">
+      <!-- Línea sutil de acento luminoso superior -->
       <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-emerald-500/40 via-cyan-500/30 to-transparent pointer-events-none"></div>
 
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+        <!-- Badge y etiqueta del Visor -->
         <div class="flex items-center justify-between md:justify-start gap-2.5 shrink-0">
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 shadow-inner">
             <svg class="w-4 h-4 text-emerald-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
@@ -363,53 +290,20 @@
           <span class="text-xs text-slate-400 font-medium hidden sm:inline">Supervisión de equipos en vivo:</span>
         </div>
 
+        <!-- Carrusel deslizable táctil en móvil y desktop con holgura completa -->
         <div class="relative w-full md:w-auto">
-          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-2 px-3 sm:px-1 snap-x snap-mandatory scroll-smooth"></div>
+          <div id="viewerProfilesSelector" class="flex items-center gap-3 overflow-x-auto custom-scroll no-scrollbar py-2 px-3 sm:px-1 snap-x snap-mandatory scroll-smooth">
+            <!-- Inyectado vía JS con tarjetas enriquecidas de cada miembro -->
+          </div>
         </div>
       </div>
     </div>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-4 relative z-10 w-full flex-1 pb-24 md:pb-12">
-
-      <!-- ================================================================= -->
-      <!-- 🎮 BARRA DE EXPERIENCIA Y GAMIFICACIÓN (DESKTOP)                  -->
-      <!-- ================================================================= -->
-      <div id="desktopXpSection" class="mb-4 hidden sm:block">
-        <div class="glass-panel p-3.5 sm:p-4 rounded-2xl border border-white/[0.08] shadow-2xl flex items-center gap-4 relative overflow-hidden group">
-          
-          <!-- Círculo Grande Izquierda: Nv + Número -->
-          <div class="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-dark-900 to-dark-800 border-2 border-cyan-400/60 flex flex-col items-center justify-center shrink-0 shadow-[0_0_20px_rgba(6,182,212,0.35)] group-hover:border-cyan-400 transition-all">
-            <span class="text-[10px] font-black uppercase tracking-wider text-cyan-400 leading-none">Nv</span>
-            <span id="desktopXpLevelNum" class="text-2xl font-black text-white leading-none mt-0.5 tracking-tight">1</span>
-          </div>
-
-          <!-- Barra y Métricas Centrales -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="text-xs uppercase font-extrabold tracking-wider text-white">Experiencia</span>
-                <span id="desktopXpRankTitle" class="text-[11px] text-cyan-300 font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">Cadete</span>
-              </div>
-              <div class="text-xs font-semibold">
-                <span id="desktopXpCurrent" class="text-cyan-400 font-bold">0</span>
-                <span class="text-slate-400"> / </span>
-                <span id="desktopXpNext" class="text-slate-300">500 XP</span>
-                <span id="desktopXpPercent" class="text-fuchsia-400 font-bold ml-1.5">(0%)</span>
-              </div>
-            </div>
-
-            <!-- Barra Minimalista Cyan to Magenta con Glass Shine -->
-            <div class="w-full h-3.5 bg-dark-950/90 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner relative">
-              <div id="desktopXpBarFill" class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all duration-700 ease-out" style="width: 0%;"></div>
-            </div>
-          </div>
-
-        </div>
-      </div>
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-5 relative z-10 w-full flex-1 pb-24 md:pb-12">
 
       <!-- KPI CARDS -->
-      <div class="mb-4 pt-1">
+      <div class="mb-4 pt-2">
         <div id="kpiContainer" class="flex md:grid md:grid-cols-6 gap-2 sm:gap-2.5 overflow-x-auto custom-scroll pt-2 pb-2.5 px-1 no-scrollbar snap-x snap-mandatory"></div>
       </div>
 
@@ -439,10 +333,10 @@
         </div>
       </div>
 
-      <!-- TABLA CON SCROLL HORIZONTAL ENCAPSULADO Y NUEVA COLUMNA DÍAS -->
+      <!-- TABLA CON SCROLL HORIZONTAL ENCAPSULADO -->
       <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl w-full">
         <div class="overflow-x-auto custom-scroll w-full">
-          <table class="w-full text-left border-collapse min-w-[850px]">
+          <table class="w-full text-left border-collapse min-w-[780px]">
             <thead>
               <tr class="border-b border-white/[0.05] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold select-none">
                 <th class="py-3.5 px-4 w-16 text-center">Progreso</th>
@@ -451,7 +345,6 @@
                 <th class="py-3.5 px-4">Estado</th>
                 <th class="py-3.5 px-4 text-center">Prioridad</th>
                 <th class="py-3.5 px-4">Fecha Ingreso</th>
-                <th class="py-3.5 px-4 text-center w-24">Días Hábiles</th>
                 <th class="py-3.5 px-4">Detalles</th>
                 <th id="thActions" class="py-3.5 px-4 text-center w-24">Acciones</th>
               </tr>
@@ -540,187 +433,87 @@
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- 🎖️ MODAL PERFIL REDISEÑADO (GAMIFICACIÓN, INSIGNIA Y BOTÓN CUENTA)    -->
-  <!-- ===================================================================== -->
-  <div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4">
-    <div class="bg-dark-900 border border-white/[0.08] rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scroll animate-modal-pop">
-      
-      <!-- Header Modal -->
-      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <span>Mi Perfil</span>
-          <span id="profileModalRoleBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">Art Director</span>
-        </h3>
+  <!-- Modal Configuración de Perfil -->
+  <div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-dark-900 border border-white/[0.08] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scroll animate-modal-pop">
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-5">
+        <h3 class="text-base font-bold text-white">Mi Perfil</h3>
         <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white p-1">✕</button>
       </div>
 
-      <!-- Avatar & Info del Usuario Activo -->
-      <div class="flex items-center gap-4 pb-4 border-b border-white/[0.06] mb-4">
-        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-cyan-400/50 flex items-center justify-center shadow-lg shrink-0">
-          <div id="profileEditAvatarPreview" class="w-full h-full"></div>
+      <div class="flex flex-col sm:flex-row items-center gap-5 pb-5 border-b border-white/[0.06] mb-5">
+        <div class="relative group">
+          <div id="profileEditAvatarPreview" class="w-24 h-24 rounded-full overflow-hidden border-2 border-cyan-400/50 flex items-center justify-center shadow-lg"></div>
+          <button onclick="document.getElementById('profilePhotoInput').click()" class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-bold text-white">
+            Cambiar
+          </button>
         </div>
-        <div class="flex-1 min-w-0">
-          <h4 id="profileEditNameTitle" class="text-base font-bold text-white truncate">Patricio</h4>
-          <p id="profileEditRoleTitle" class="text-xs text-slate-400 truncate">Art Director</p>
-          <div class="flex items-center gap-2 mt-1">
-            <span id="profileModalLevelTag" class="text-[10px] font-black text-cyan-400 px-2 py-0.5 rounded-md bg-dark-850 border border-cyan-500/30">Nv 1</span>
-            <span id="profileModalTotalXp" class="text-[11px] text-slate-300 font-semibold">0 XP Total</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ================================================================= -->
-      <!-- 🎮 SECCIÓN DE NIVELES Y GAMIFICACIÓN DETALLADA                    -->
-      <!-- ================================================================= -->
-      <div id="gamificationDetailSection" class="space-y-3.5 mb-5">
-        
-        <!-- Tarjeta de Nivel y Progreso -->
-        <div class="p-3.5 rounded-2xl bg-dark-850/80 border border-white/[0.06] shadow-inner">
-          <div class="flex items-center justify-between mb-2">
-            <div>
-              <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block">Progreso de Nivel</span>
-              <span id="gamificationRankName" class="text-sm font-black text-white">Nivel 1 • Recluta Creativo</span>
-            </div>
-            <div class="text-right">
-              <span id="gamificationXpFraction" class="text-xs font-bold text-cyan-400">0 / 500 XP</span>
-              <span id="gamificationXpPercentText" class="text-[11px] font-semibold text-fuchsia-400 block">(0%)</span>
-            </div>
-          </div>
-
-          <!-- Barra de Progreso Interna -->
-          <div class="w-full h-3 bg-dark-950 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
-            <div id="gamificationModalBarFill" class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-fuchsia-500 shadow-[0_0_12px_rgba(217,70,239,0.5)] transition-all duration-700" style="width: 0%;"></div>
-          </div>
-          <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2">
-            <span>2 trabajos Máxima en 3d = +500 XP</span>
-            <span id="gamificationCompletedCount">0 finalizados</span>
-          </div>
-        </div>
-
-        <!-- 🏆 INSIGNIA PROFESIONAL: SPRINT CREATIVO (1 DÍA HÁBIL) -->
-        <div id="militaryBadgeCard" class="p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500">
-          
-          <!-- Insignia: Estrella con dos alas de tres plumas cuadriculadas -->
-          <div id="militaryBadgeIconWrapper" class="w-16 h-12 flex items-center justify-center shrink-0">
-            <svg class="w-16 h-10 fill-current transition-all" viewBox="0 0 96 60">
-              <!-- Estrella Central -->
-              <polygon points="48,14 51.5,23 61,23 53.5,29 56.5,38 48,32.5 39.5,38 42.5,29 35,23 44.5,23" />
-              <!-- Ala Izquierda: 3 plumas cuadriculadas/geométricas -->
-              <polygon points="36,21 16,14 12,19 35,25" />
-              <polygon points="35,27 12,25 8,30 33,33" />
-              <polygon points="34,35 16,37 14,42 35,40" />
-              <!-- Ala Derecha: 3 plumas cuadriculadas/geométricas -->
-              <polygon points="60,21 80,14 84,19 61,25" />
-              <polygon points="61,27 84,25 88,30 63,33" />
-              <polygon points="62,35 80,37 82,42 61,40" />
-            </svg>
-          </div>
-
-          <!-- Descripción y Contador de la Insignia -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <span id="militaryBadgeTitle" class="text-xs font-black uppercase tracking-wider text-slate-400">Insignia Sprint Creativo</span>
-              <span id="militaryBadgeTag" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-white/5 border border-white/10 uppercase text-slate-400">Sprint</span>
-            </div>
-            <p id="militaryBadgeDesc" class="text-xs text-slate-400 mt-0.5 leading-snug">
-              0 trabajos de prioridad máxima finalizados en 1 solo día hábil.
-            </p>
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- ================================================================= -->
-      <!-- 🔘 BOTÓN "CUENTA" (DESPLIEGA AJUSTES DE PERFIL Y CONTRASEÑA)       -->
-      <!-- ================================================================= -->
-      <div id="accountAccordionSection" class="mb-5">
-        <button type="button" onclick="toggleAccountSettings()" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.035] hover:bg-white/[0.07] border border-white/[0.08] text-xs font-extrabold text-slate-200 transition-all active:scale-[0.99] shadow-sm">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            <span>Ajustes de Cuenta</span>
-          </div>
-          <span id="accountToggleArrow" class="text-slate-400 font-bold text-xs transition-transform duration-200">▼</span>
-        </button>
-
-        <!-- Contenedor Desplegable de Ajustes de Cuenta -->
-        <div id="accountSettingsWrapper" class="hidden mt-3 p-4 rounded-2xl bg-dark-850/70 border border-white/[0.06] space-y-4">
-          
-          <!-- Foto de Perfil -->
-          <div id="profilePhotoButtons" class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-            <div>
-              <span class="text-xs font-semibold text-slate-300 block">Foto de Perfil</span>
-              <span class="text-[10px] text-slate-500">Recorte centrado 150x150</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="document.getElementById('profilePhotoInput').click()" class="px-3 py-1.5 text-xs font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl border border-white/[0.08]">
-                Subir Foto
-              </button>
-              <button onclick="removeProfilePhoto()" class="px-2 py-1.5 text-xs text-slate-400 hover:text-rose-400">
-                Quitar
-              </button>
-            </div>
-            <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="handleProfilePhotoUpload(event)">
-          </div>
-
-          <!-- Paleta de 8 Colores Eléctricos -->
-          <div id="electricColorsSection" class="pb-3 border-b border-white/[0.06]">
-            <label class="block text-xs font-semibold text-slate-300 mb-2">Color Eléctrico del Rayo (8 opciones):</label>
-            <div id="electricColorsPicker" class="flex flex-wrap gap-2.5"></div>
-          </div>
-
-          <!-- Modificar Datos Básicos -->
-          <div id="basicInfoSection" class="space-y-3 pb-3 border-b border-white/[0.06] text-xs">
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Nombre</label>
-              <input type="text" id="editProfileName" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400 text-sm">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Puesto / Posición</label>
-              <input type="text" id="editProfileRole" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400 text-sm">
-            </div>
-            <button onclick="saveProfileBasicInfo()" class="px-3.5 py-1.5 text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20">
-              Guardar Nombre y Puesto
+        <div class="flex-1 text-center sm:text-left">
+          <h4 id="profileEditNameTitle" class="text-base font-bold text-white">Nombre</h4>
+          <p id="profileEditRoleTitle" class="text-xs text-slate-400 mb-2">Rol</p>
+          <div id="profilePhotoButtons" class="flex flex-wrap gap-2 justify-center sm:justify-start">
+            <button onclick="document.getElementById('profilePhotoInput').click()" class="px-3 py-1.5 text-xs font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl border border-white/[0.08]">
+              Subir Foto (150x150)
+            </button>
+            <button onclick="removeProfilePhoto()" class="px-2.5 py-1.5 text-xs text-slate-400 hover:text-rose-400">
+              Restablecer
             </button>
           </div>
-
-          <!-- Cambiar Contraseña -->
-          <div id="changePassSection" class="space-y-3 text-xs">
-            <h5 class="text-xs font-bold uppercase tracking-wider text-slate-300">Cambiar Contraseña</h5>
-            <div>
-              <label class="block text-slate-400 mb-1">Contraseña Anterior</label>
-              <input type="password" id="changePassOld" placeholder="Ingresa tu clave actual" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400 text-sm">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-slate-400 mb-1">Nueva Contraseña</label>
-                <input type="password" id="changePassNew" placeholder="Nueva clave" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400 text-sm">
-              </div>
-              <div>
-                <label class="block text-slate-400 mb-1">Repetir Nueva Clave</label>
-                <input type="password" id="changePassNewRep" placeholder="Repite la clave" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400 text-sm">
-              </div>
-            </div>
-            <p id="changePassMsg" class="text-xs hidden"></p>
-            <div class="flex items-center justify-between">
-              <button onclick="submitChangePassword()" class="px-3.5 py-1.5 font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl">
-                Actualizar Clave
-              </button>
-              <button onclick="requestPasswordResetFromProfile()" class="text-xs text-slate-400 hover:text-cyan-400 underline">
-                Solicitar a 12345678
-              </button>
-            </div>
-          </div>
-
+          <input type="file" id="profilePhotoInput" accept="image/png,image/jpeg,image/webp" class="hidden" onchange="handleProfilePhotoUpload(event)">
         </div>
       </div>
 
-      <!-- Footer: Cerrar Sesión y Salir (Se mantienen exactamente en su posición) -->
-      <div class="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+      <!-- Paleta de 8 Colores Eléctricos para el Rayo -->
+      <div id="electricColorsSection" class="mb-5 pb-5 border-b border-white/[0.06]">
+        <label class="block text-xs font-semibold text-slate-300 mb-2">Color Eléctrico de Fondo del Rayo (8 Opciones):</label>
+        <div id="electricColorsPicker" class="flex flex-wrap gap-2.5"></div>
+      </div>
+
+      <!-- Modificar Datos Básicos -->
+      <div id="basicInfoSection" class="space-y-3 mb-5 pb-5 border-b border-white/[0.06] text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Nombre</label>
+          <input type="text" id="editProfileName" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Puesto / Posición</label>
+          <input type="text" id="editProfileRole" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <button onclick="saveProfileBasicInfo()" class="px-3.5 py-1.5 text-xs font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 rounded-xl hover:bg-cyan-500/20">
+          Guardar Nombre y Puesto
+        </button>
+      </div>
+
+      <!-- Cambiar Contraseña -->
+      <div id="changePassSection" class="space-y-3 mb-6 pb-5 border-b border-white/[0.06] text-xs">
+        <h5 class="text-xs font-bold uppercase tracking-wider text-slate-300">Cambiar Contraseña</h5>
+        <div>
+          <label class="block text-slate-400 mb-1">Contraseña Anterior</label>
+          <input type="password" id="changePassOld" placeholder="Ingresa tu clave actual" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Nueva Contraseña</label>
+            <input type="password" id="changePassNew" placeholder="Nueva clave" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Repetir Nueva Clave</label>
+            <input type="password" id="changePassNewRep" placeholder="Repite la clave" class="w-full border border-white/10 rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 text-sm">
+          </div>
+        </div>
+        <p id="changePassMsg" class="text-xs hidden"></p>
+        <div class="flex items-center justify-between">
+          <button onclick="submitChangePassword()" class="px-3.5 py-1.5 font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl">
+            Actualizar Clave
+          </button>
+          <button onclick="requestPasswordResetFromProfile()" class="text-xs text-slate-400 hover:text-cyan-400 underline">
+            ¿Olvidaste la anterior? Solicitar a 12345678
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer: Cerrar Sesión -->
+      <div class="flex items-center justify-between pt-2">
         <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
           <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Cerrar Sesión
@@ -853,13 +646,14 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 📜 JAVASCRIPT: MOTOR GAMIFICADO, TIEMPOS Y SINCRONIZACIÓN             -->
+  <!-- 📜 JAVASCRIPT: MOTOR DE SINCRONIZACIÓN Y PERFILES                     -->
   <!-- ===================================================================== -->
   <script>
     const FIREBASE_PROJECT_ID = "trabajos-pendientes-59380";
     const FIRESTORE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/main`;
     const PRESENCE_ENDPOINT = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/boards/presence`;
     
+    // Identificador persistente por dispositivo físico para presencia
     let DEVICE_ID = localStorage.getItem('tp_device_id');
     if (!DEVICE_ID) {
       DEVICE_ID = "dev_" + Math.random().toString(36).substring(2, 11) + "_" + (navigator.userAgent.includes('Mobi') ? 'mob' : 'pc');
@@ -893,123 +687,122 @@
       { name: "Naranja Eléctrico", hex: "#F97316" }
     ];
 
+    // Perfiles oficiales: Patricio y Viewer (cero developer)
     const DEFAULT_PROFILES = [
       {
-        id: "patricio",
-        name: "Patricio",
-        role: "Art Director",
-        password: "30080112",
-        color: "#06B6D4",
-        photo: null,
-        isViewer: false
+            "id": "patricio",
+            "name": "Patricio",
+            "role": "Art Director",
+            "password": "30080112",
+            "color": "#06B6D4",
+            "photo": null,
+            "isViewer": false
       },
       {
-        id: "viewer",
-        name: "Viewer",
-        role: "Task Observer",
-        password: "",
-        color: "#10B981",
-        photo: null,
-        isViewer: true
+            "id": "viewer",
+            "name": "Viewer",
+            "role": "Task Observer",
+            "password": "",
+            "color": "#10B981",
+            "photo": null,
+            "isViewer": true
       }
-    ];
+];
 
+    // Tareas reales de Patricio
     const PATRICIO_INITIAL_TASKS = [
       {
-        id: "task-1",
-        company: "UNICO",
-        desc: "Crear página de Facebook e Instagram y armar placas para feed + historias",
-        status: "Aprobado",
-        priority: "Máxima",
-        date: "",
-        details: "Terminar de Postear por Facebook",
-        progress: 75,
-        updatedAt: 1788526382133
+            "id": "task-1",
+            "company": "UNICO",
+            "desc": "Crear página de Facebook e Instagram y armar placas para feed + historias",
+            "status": "Aprobado",
+            "priority": "Máxima",
+            "date": "",
+            "details": "Terminar de Postear por Facebook",
+            "progress": 75,
+            "updatedAt": 1788526382133
       },
       {
-        id: "task-1788369200849",
-        company: "Royal Enfield",
-        desc: "Crear placa para contratacion de administrativo",
-        status: "Finalizado",
-        priority: "Máxima",
-        date: "2026-09-02",
-        details: "-",
-        progress: 100,
-        updatedAt: 1788525676222,
-        completedAt: 1788525676222
+            "id": "task-1788369200849",
+            "company": "Royal Enfield",
+            "desc": "Crear placa para contratacion de administrativo",
+            "status": "Finalizado",
+            "priority": "Máxima",
+            "date": "2026-09-02",
+            "details": "-",
+            "progress": 100,
+            "updatedAt": 1788525676222
       },
       {
-        id: "task-2",
-        company: "Itraco",
-        desc: "Realizar 3 posts sobre el edificio de Las Piedras",
-        status: "Finalizado",
-        priority: "Máxima",
-        date: "",
-        details: "Falta corroborar copies",
-        progress: 100,
-        updatedAt: 1788526335985,
-        completedAt: 1788526335985
+            "id": "task-2",
+            "company": "Itraco",
+            "desc": "Realizar 3 posts sobre el edificio de Las Piedras",
+            "status": "Finalizado",
+            "priority": "Máxima",
+            "date": "",
+            "details": "Falta corroborar copies",
+            "progress": 100,
+            "updatedAt": 1788526335985
       },
       {
-        id: "task-3",
-        company: "Royal Enfield",
-        desc: "Modificar placas madre con logo de la concesionaria",
-        status: "Finalizado",
-        priority: "Máxima",
-        date: "",
-        details: "En espera de respuesta",
-        progress: 100,
-        updatedAt: 1788526328059,
-        completedAt: 1788526328059
+            "id": "task-3",
+            "company": "Royal Enfield",
+            "desc": "Modificar placas madre con logo de la concesionaria",
+            "status": "Finalizado",
+            "priority": "Máxima",
+            "date": "",
+            "details": "En espera de respuesta",
+            "progress": 100,
+            "updatedAt": 1788526328059
       },
       {
-        id: "task-4",
-        company: "Hotel Bicentenario",
-        desc: "Armar placa individual para el club San Martín",
-        status: "Revisión",
-        priority: "Media",
-        date: "2026-09-01",
-        details: "-",
-        progress: 50,
-        updatedAt: 1788526319217
+            "id": "task-4",
+            "company": "Hotel Bicentenario",
+            "desc": "Armar placa individual para el club San Martín",
+            "status": "Revisión",
+            "priority": "Media",
+            "date": "2026-09-01",
+            "details": "-",
+            "progress": 50,
+            "updatedAt": 1788526319217
       },
       {
-        id: "task-5",
-        company: "Royal Enfield",
-        desc: "Realizar edición de video de quedada",
-        status: "Proceso",
-        priority: "Media",
-        date: "",
-        details: "-",
-        progress: 25,
-        updatedAt: 1788525676222
+            "id": "task-5",
+            "company": "Royal Enfield",
+            "desc": "Realizar edición de video de quedada",
+            "status": "Proceso",
+            "priority": "Media",
+            "date": "",
+            "details": "-",
+            "progress": 25,
+            "updatedAt": 1788525676222
       },
       {
-        id: "task-6",
-        company: "Alta Vista",
-        desc: "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
-        status: "Finalizado",
-        priority: "Media",
-        date: "",
-        details: "-",
-        progress: 100,
-        updatedAt: 1788526314869,
-        completedAt: 1788526314869
+            "id": "task-6",
+            "company": "Alta Vista",
+            "desc": "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
+            "status": "Finalizado",
+            "priority": "Media",
+            "date": "",
+            "details": "-",
+            "progress": 100,
+            "updatedAt": 1788526314869
       },
       {
-        id: "task-7",
-        company: "RevCardinal",
-        desc: "Armar tarjeta de presentación con QR a la página oficial",
-        status: "Pendiente",
-        priority: "Mínima",
-        date: "",
-        details: "-",
-        progress: 0,
-        updatedAt: 1788525676222
+            "id": "task-7",
+            "company": "RevCardinal",
+            "desc": "Armar tarjeta de presentación con QR a la página oficial",
+            "status": "Pendiente",
+            "priority": "Mínima",
+            "date": "",
+            "details": "-",
+            "progress": 0,
+            "updatedAt": 1788525676222
       }
-    ];
+];
 
     let profiles = JSON.parse(localStorage.getItem('taskflow_profiles')) || DEFAULT_PROFILES;
+    // Purga estricta en memoria local
     profiles = profiles.filter(p => p && p.id !== 'developer' && p.name.toLowerCase() !== 'developer');
     if (!profiles.some(p => p.id === 'patricio')) profiles.unshift(DEFAULT_PROFILES[0]);
     if (!profiles.some(p => p.id === 'viewer' || p.isViewer)) profiles.push(DEFAULT_PROFILES[1]);
@@ -1028,272 +821,12 @@
     let currentUserId = localStorage.getItem('taskflow_current_user') || null;
     let selectedProfileForLogin = null;
 
+    // Lista maestra unificada de tareas en memoria
     let tasks = JSON.parse(localStorage.getItem('taskflow_tasks_unified')) || PATRICIO_INITIAL_TASKS;
     let selectedObservedUserId = "patricio";
-    let activeStatusFilter = "";
 
-    function saveLocalState() {
-      localStorage.setItem('taskflow_profiles', JSON.stringify(profiles));
-      localStorage.setItem('taskflow_tasks_unified', JSON.stringify(tasks));
-      localStorage.setItem('taskflow_config', JSON.stringify(config));
-    }
-
-    // =========================================================================
-    // ⏱️ CÁLCULO DE DÍAS TRANSCURRIDOS (COLUMNA "DÍAS")
-    // =========================================================================
-    function calculateTaskDays(task) {
-      if (!task.date) return null;
-      const parts = String(task.date).split('-');
-      if (parts.length < 3) return null;
-      const start = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-      if (isNaN(start.getTime())) return null;
-
-      let end = new Date();
-      if (task.status === "Finalizado" || (task.progress !== undefined && task.progress >= 100)) {
-        if (task.completedAt) {
-          end = new Date(task.completedAt);
-        } else if (task.updatedAt) {
-          end = new Date(task.updatedAt);
-        }
-      }
-
-      const curr = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-      const target = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-
-      if (curr.getTime() > target.getTime()) return 0;
-
-      let businessDays = 0;
-      while (curr.getTime() <= target.getTime()) {
-        const dayOfWeek = curr.getDay(); // 0 = Domingo, 6 = Sábado
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-          businessDays++;
-        }
-        curr.setDate(curr.getDate() + 1);
-      }
-      return businessDays;
-    }
-
-    // =========================================================================
-    // 🎮 MOTOR DE GAMIFICACIÓN (XP, NIVELES Y ESCALA +1% POR NIVEL)
-    // =========================================================================
-    function calculateTaskXP(task) {
-      if (task.status !== "Finalizado" && (!task.progress || task.progress < 100)) {
-        return 0;
-      }
-      const days = calculateTaskDays(task);
-      const prio = String(task.priority || "Media").trim();
-
-      // Base: Máxima = 250 (en 3 días), Media = 150, Mínima = 90
-      let baseXP = 250;
-      if (prio === "Media") baseXP = 150;
-      else if (prio === "Mínima") baseXP = 90;
-
-      // Si aún no tiene fecha de inicio, suma puntaje base provisional (al ingresar la fecha se ajusta)
-      if (days === null) {
-        return Math.round(baseXP * 0.4);
-      }
-
-      // Multiplicador por velocidad de entrega en días:
-      // <= 1 día: 1.2x (300 XP en Máxima)
-      // 2 - 3 días: 1.0x (250 XP en Máxima -> 2 tareas = 500 XP = 1 Nivel)
-      // 4 - 5 días: 0.8x (200 XP)
-      // 6 - 7 días: 0.65x (162 XP)
-      // > 7 días: 0.5x (125 XP)
-      let mult = 1.0;
-      if (days <= 1) mult = 1.2;
-      else if (days <= 3) mult = 1.0;
-      else if (days <= 5) mult = 0.8;
-      else if (days <= 7) mult = 0.65;
-      else mult = 0.5;
-
-      return Math.round(baseXP * mult);
-    }
-
-    // Obtener información de Gamificación por Perfil (Patricio u otro usuario)
-    function getUserGamification(userId) {
-      const targetId = userId || 'patricio';
-      const userTasks = tasks.filter(t => (t.userId || 'patricio') === targetId);
-      
-      let totalXP = 0;
-      let completedCount = 0;
-      let fastPriorityCount = 0; // Prioridad Máxima en 1 solo día
-
-      userTasks.forEach(t => {
-        if (t.status === "Finalizado" || (t.progress !== undefined && t.progress >= 100)) {
-          completedCount++;
-          const xp = calculateTaskXP(t);
-          totalXP += xp;
-          const days = calculateTaskDays(t);
-          if (String(t.priority || '').trim() === "Máxima" && days !== null && days <= 1) {
-            fastPriorityCount++;
-          }
-        }
-      });
-
-      // Cálculo de Nivel: Base 500 XP. En cada nivel sube un 1% (en Nivel 100 requiere 2 veces la cantidad)
-      let level = 1;
-      let xpRemaining = Math.max(0, totalXP);
-      const baseXP = 500;
-
-      while (true) {
-        const reqForNext = Math.round(baseXP * (1 + (level - 1) * 0.01));
-        if (xpRemaining >= reqForNext) {
-          xpRemaining -= reqForNext;
-          level++;
-        } else {
-          const percent = Math.min(100, Math.round((xpRemaining / reqForNext) * 100));
-          return {
-            level,
-            currentLevelXP: xpRemaining,
-            nextLevelXP: reqForNext,
-            percent,
-            totalXP,
-            completedCount,
-            fastPriorityCount
-          };
-        }
-      }
-    }
-
-    function getRankTitle(level) {
-      if (level < 5) return "Recluta Creativo";
-      if (level < 10) return "Cadete de Diseño";
-      if (level < 15) return "Diseñador Junior";
-      if (level < 20) return "Diseñador Operativo";
-      if (level < 25) return "Diseñador Senior";
-      if (level < 30) return "Especialista Creativo";
-      if (level < 35) return "Oficial de Diseño";
-      if (level < 40) return "Director Creativo";
-      if (level < 45) return "Comandante Creativo";
-      if (level < 50) return "Estratega Visual";
-      if (level < 55) return "Director de Operaciones Creativas";
-      return "Maestro de Arte";
-    }
-
-    function updateGamificationUI() {
-      const currentUser = profiles.find(p => p.id === currentUserId);
-      const targetUserId = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer))
-        ? (selectedObservedUserId || 'patricio')
-        : (currentUserId || 'patricio');
-
-      const info = getUserGamification(targetUserId);
-
-      // 1. Barra Desktop
-      const lvlNumEl = document.getElementById('desktopXpLevelNum');
-      const rankTitleEl = document.getElementById('desktopXpRankTitle');
-      const xpCurEl = document.getElementById('desktopXpCurrent');
-      const xpNextEl = document.getElementById('desktopXpNext');
-      const xpPctEl = document.getElementById('desktopXpPercent');
-      const barFillEl = document.getElementById('desktopXpBarFill');
-
-      if (lvlNumEl) lvlNumEl.innerText = info.level;
-      if (rankTitleEl) rankTitleEl.innerText = getRankTitle(info.level);
-      if (xpCurEl) xpCurEl.innerText = info.currentLevelXP;
-      if (xpNextEl) xpNextEl.innerText = `${info.nextLevelXP} XP`;
-      if (xpPctEl) xpPctEl.innerText = `(${info.percent}%)`;
-      if (barFillEl) barFillEl.style.width = `${info.percent}%`;
-
-      // 2. Burbuja Líquida Móvil
-      const mobFill = document.getElementById('mobileLiquidFill');
-      const mobText = document.getElementById('mobileLiquidLevelText');
-      if (mobFill) mobFill.style.height = `${info.percent}%`;
-      if (mobText) mobText.innerText = `Nv ${info.level}`;
-
-      // 3. Verificación de Subida de Nivel (Cartel Neón)
-      const storageKey = `taskflow_last_level_${targetUserId}`;
-      const prevLevel = parseInt(localStorage.getItem(storageKey) || "0", 10);
-      if (prevLevel > 0 && info.level > prevLevel) {
-        triggerLevelUpCelebration(info.level);
-      }
-      localStorage.setItem(storageKey, String(info.level));
-
-      // Actualizar datos del Modal de Perfil si está abierto
-      renderProfileModalGamification(info);
-    }
-
-    function triggerLevelUpCelebration(newLevel) {
-      const modal = document.getElementById('levelUpModal');
-      const numEl = document.getElementById('levelUpModalNum');
-      const rankEl = document.getElementById('levelUpModalRank');
-      if (modal && numEl) {
-        numEl.innerText = `Nv ${newLevel}`;
-        if (rankEl) rankEl.innerText = getRankTitle(newLevel);
-        modal.classList.remove('hidden');
-      }
-    }
-
-    function closeLevelUpModal() {
-      const modal = document.getElementById('levelUpModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function renderProfileModalGamification(infoPassed = null) {
-      const currentUser = profiles.find(p => p.id === currentUserId);
-      const targetUserId = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer))
-        ? (selectedObservedUserId || 'patricio')
-        : (currentUserId || 'patricio');
-
-      const info = infoPassed || getUserGamification(targetUserId);
-
-      const lvlTag = document.getElementById('profileModalLevelTag');
-      const totalXpEl = document.getElementById('profileModalTotalXp');
-      const rankNameEl = document.getElementById('gamificationRankName');
-      const xpFracEl = document.getElementById('gamificationXpFraction');
-      const xpPctText = document.getElementById('gamificationXpPercentText');
-      const barFill = document.getElementById('gamificationModalBarFill');
-      const compCountEl = document.getElementById('gamificationCompletedCount');
-
-      if (lvlTag) lvlTag.innerText = `Nv ${info.level}`;
-      if (totalXpEl) totalXpEl.innerText = `${info.totalXP} XP Total`;
-      if (rankNameEl) rankNameEl.innerText = `Nivel ${info.level} • ${getRankTitle(info.level)}`;
-      if (xpFracEl) xpFracEl.innerText = `${info.currentLevelXP} / ${info.nextLevelXP} XP`;
-      if (xpPctText) xpPctText.innerText = `(${info.percent}%)`;
-      if (barFill) barFill.style.width = `${info.percent}%`;
-      if (compCountEl) compCountEl.innerText = `${info.completedCount} finalizados`;
-
-            // Insignia Sprint Creativo (Entrega en 1 día hábil)
-      const badgeCard = document.getElementById('militaryBadgeCard');
-      const badgeDesc = document.getElementById('militaryBadgeDesc');
-      const badgeTitle = document.getElementById('militaryBadgeTitle');
-      const count = info.fastPriorityCount;
-
-      if (badgeCard && badgeDesc) {
-        if (count >= 1) {
-          badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-amber-500/10 border-amber-400 text-amber-400 military-gold-neon ring-1 ring-amber-400/40";
-          if (badgeTitle) {
-            badgeTitle.className = "text-xs font-black uppercase tracking-wider text-amber-300";
-            badgeTitle.innerText = "Insignia Sprint Creativo";
-          }
-          badgeDesc.innerText = `${count} ${count === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados'} en 1 solo día hábil.`;
-          badgeDesc.className = "text-xs text-amber-200/90 mt-0.5 leading-snug font-medium";
-        } else {
-          badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500";
-          if (badgeTitle) {
-            badgeTitle.className = "text-xs font-black uppercase tracking-wider text-slate-500";
-            badgeTitle.innerText = "Insignia Sprint Creativo";
-          }
-          badgeDesc.innerText = "0 trabajos de prioridad máxima finalizados en 1 solo día hábil.";
-          badgeDesc.className = "text-xs text-slate-500 mt-0.5 leading-snug";
-        }
-      }    }
-
-    // Alternar Sección "Cuenta" dentro de Mi Perfil
-    function toggleAccountSettings() {
-      const wrapper = document.getElementById('accountSettingsWrapper');
-      const arrow = document.getElementById('accountToggleArrow');
-      if (!wrapper) return;
-      if (wrapper.classList.contains('hidden')) {
-        wrapper.classList.remove('hidden');
-        if (arrow) arrow.innerText = '▲';
-      } else {
-        wrapper.classList.add('hidden');
-        if (arrow) arrow.innerText = '▼';
-      }
-    }
-
-    // =========================================================================
-    // 📺 RENDER CONSOLA VIEWER
-    // =========================================================================
+    // Renderizar Carrusel Premium en la Consola del Viewer (Debajo del Navbar)
+    // Muestra tarjetas táctiles para todos los perfiles existentes (excepto Viewer)
     function renderViewerProfilesSelector() {
       const container = document.getElementById('viewerProfilesSelector');
       if (!container) return;
@@ -1303,6 +836,7 @@
       container.innerHTML = observableProfiles.map(p => {
         const isSelected = (p.id === selectedObservedUserId);
         
+        // Contar tareas pendientes: suma desde Pendiente hasta Revisión/Chequeo (Pendiente, Proceso, Revisión)
         const userPendingCount = tasks.filter(t => {
           const matchUser = (t.userId || 'patricio') === p.id;
           const status = normalizeStatus(t.status);
@@ -1314,6 +848,7 @@
           ? "bg-gradient-to-r from-emerald-500/20 via-cyan-500/10 to-emerald-500/5 border-emerald-400 shadow-[0_0_18px_rgba(16,185,129,0.3)] ring-1 ring-emerald-400/40"
           : "bg-dark-850/70 hover:bg-dark-800/90 border-white/[0.08] hover:border-emerald-500/30 text-slate-300 hover:text-white";
 
+        // Estilos del contenedor: cuando haya 0 pendientes en celeste/cyan, de lo contrario verde esmeralda
         let badgeClasses = "";
         if (userPendingCount === 0) {
           badgeClasses = isSelected
@@ -1330,10 +865,12 @@
             class="flex items-center gap-3 p-2 sm:p-2.5 pr-3 rounded-2xl border transition-all duration-200 cursor-pointer select-none shrink-0 snap-start active:scale-95 first:ml-0.5 last:mr-1 ${activeClasses}"
             title="Ver tablero de ${p.name} (${userPendingCount} pendientes)">
             
+            <!-- Avatar circular con borde de estado sin desbordamiento -->
             <div class="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border-2 ${isSelected ? 'border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'border-white/15'} shadow-md flex items-center justify-center">
               ${renderUserAvatarHtml(p, 'w-full h-full rounded-full')}
             </div>
 
+            <!-- Nombre, Rol e Indicador en Vivo -->
             <div class="text-left min-w-0 pr-0.5">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs sm:text-sm font-extrabold text-white truncate leading-tight tracking-tight">${p.name}</span>
@@ -1342,6 +879,7 @@
               <div class="text-[10px] sm:text-[11px] text-slate-400 truncate leading-tight mt-0.5">${p.role || 'Miembro'}</div>
             </div>
 
+            <!-- Contenedor de Tareas Pendientes (Celeste si 0, Verde si > 0) -->
             <div class="shrink-0 ml-auto pl-1">
               <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] ${badgeClasses}">
                 ${userPendingCount} ${userPendingCount === 1 ? 'pendiente' : 'pendientes'}
@@ -1358,11 +896,24 @@
       const targetUser = profiles.find(p => p.id === selectedObservedUserId) || profiles[0];
       document.getElementById('subHeaderUserRole').innerText = `Viewer • Observando a ${targetUser ? targetUser.name : 'Patricio'}`;
       renderViewerProfilesSelector();
-      populateDropdowns();
+
+      // Cargar tareas del usuario seleccionado
+            populateDropdowns();
       renderKPIs();
       renderTable();
-      updateGamificationUI();
       showToast(`Observando tareas de ${targetUser ? targetUser.name : ''}`);
+    }
+
+    // Tareas maestras completas y filtrado según vista activa
+    // Lista única compartida de tareas
+// Vista unificada de tareas compartida
+
+    let activeStatusFilter = "";
+
+    function saveLocalState() {
+      localStorage.setItem('taskflow_profiles', JSON.stringify(profiles));
+      localStorage.setItem('taskflow_tasks_unified', JSON.stringify(tasks));
+      localStorage.setItem('taskflow_config', JSON.stringify(config));
     }
 
     function getLightningAvatarSvg(bgColor = "#06B6D4") {
@@ -1375,6 +926,7 @@
       `;
     }
 
+    // Avatar exclusivo para Viewer: OJO BLANCO CON FONDO VERDE ESMERALDA (#10B981)
     function getViewerEyeAvatarSvg(bgColor = "#10B981") {
       return `
         <div class="w-full h-full flex items-center justify-center shadow-inner" style="background-color: ${bgColor};">
@@ -1398,7 +950,7 @@
     }
 
     // =========================================================================
-    // 📺 PANTALLA SELECTOR DE PERFILES NETFLIX
+    // 📺 PANTALLA SELECTOR DE PERFILES (ESTILO NETFLIX)
     // =========================================================================
     function renderNetflixScreen() {
       const container = document.getElementById('netflixProfilesContainer');
@@ -1415,6 +967,7 @@
         </div>
       `).join('');
 
+      // Burbuja gris con + (Agregar usuario)
       if (profiles.length < maxUsers) {
         html += `
           <div onclick="openCreateUserModal()" class="netflix-bubble flex flex-col items-center cursor-pointer group">
@@ -1434,6 +987,7 @@
       const p = profiles.find(item => item.id === profileId);
       if (!p) return;
 
+      // SI ES VIEWER: ENTRA DIRECTAMENTE CON 1 CLIC SIN NINGUNA CONTRASEÑA
       if (p.id === 'viewer' || p.isViewer || !p.password) {
         currentUserId = p.id;
         localStorage.setItem('taskflow_current_user', currentUserId);
@@ -1441,6 +995,7 @@
         return;
       }
 
+      // Para Patricio u otros perfiles con clave: pedir contraseña
       selectedProfileForLogin = p;
       document.getElementById('passModalName').innerText = p.name;
       document.getElementById('passModalRole').innerText = p.role;
@@ -1552,6 +1107,7 @@
       const appEl = document.getElementById('appMainView');
 
       if (!currentUserId) {
+        // Mostrar pantalla de Netflix y bloquear app principal
         if (netflixEl) {
           netflixEl.style.display = 'flex';
           netflixEl.classList.remove('pointer-events-none');
@@ -1573,6 +1129,7 @@
         }
       }
 
+      // Desactivar y ocultar totalmente la pantalla de Netflix para liberar todos los clics y visualización
       if (netflixEl) {
         netflixEl.style.display = 'none';
         netflixEl.classList.add('pointer-events-none');
@@ -1593,10 +1150,12 @@
       const sheetExport = document.getElementById('sheetExportBtn');
       const sheetImport = document.getElementById('sheetImportBtn');
       const thActions = document.getElementById('thActions');
+
       const variantsBtn = document.getElementById('variantsBtn');
       const sheetVariants = document.getElementById('sheetVariantsBtn');
 
       if (isViewer) {
+        // MODO VIEWER: Consola activa, ocultar botones de edición y Empresas
         if (viewerBar) viewerBar.classList.remove('hidden');
         if (newTaskBtn) newTaskBtn.classList.add('hidden');
         if (exportBtn) exportBtn.classList.add('hidden');
@@ -1614,6 +1173,7 @@
         const observed = profiles.find(p => p.id === selectedObservedUserId);
         document.getElementById('subHeaderUserRole').innerText = `Viewer • Observando a ${observed ? observed.name : 'Patricio'}`;
       } else {
+        // MODO NORMAL (Patricio)
         if (viewerBar) viewerBar.classList.add('hidden');
         if (newTaskBtn) newTaskBtn.classList.remove('hidden');
         if (exportBtn) exportBtn.classList.remove('hidden');
@@ -1626,10 +1186,10 @@
         document.getElementById('subHeaderUserRole').innerText = `${currentUser.name} • ${currentUser.role}`;
       }
 
+      
       populateDropdowns();
       renderKPIs();
       renderTable();
-      updateGamificationUI();
     }
 
     function logoutProfile() {
@@ -1649,7 +1209,7 @@
     }
 
     // =========================================================================
-    // ⚙️ MODAL DE PERFIL (PERSONALIZACIÓN Y CUENTA)
+    // ⚙️ MODAL DE PERFIL (PERSONALIZACIÓN, COLOR RAYO Y FOTO 150x150)
     // =========================================================================
     function openUserProfileModal() {
       const user = profiles.find(p => p.id === currentUserId) || DEFAULT_PROFILES[0];
@@ -1657,23 +1217,27 @@
 
       document.getElementById('profileEditNameTitle').innerText = user.name;
       document.getElementById('profileEditRoleTitle').innerText = user.role;
-      document.getElementById('profileModalRoleBadge').innerText = user.role || 'Miembro';
       document.getElementById('editProfileName').value = user.name;
       document.getElementById('editProfileRole').value = user.role;
       document.getElementById('profileEditAvatarPreview').innerHTML = renderUserAvatarHtml(user);
 
-      const accordion = document.getElementById('accountAccordionSection');
-      if (isViewer) {
-        if (accordion) accordion.classList.add('hidden');
-      } else {
-        if (accordion) accordion.classList.remove('hidden');
-      }
+      // Si es Viewer, ocultar opciones de edición de cuenta
+      const passSec = document.getElementById('changePassSection');
+      const colorsSec = document.getElementById('electricColorsSection');
+      const basicSec = document.getElementById('basicInfoSection');
+      const photoBtns = document.getElementById('profilePhotoButtons');
 
-      // Cerrar acordeón por defecto al abrir
-      const wrapper = document.getElementById('accountSettingsWrapper');
-      const arrow = document.getElementById('accountToggleArrow');
-      if (wrapper) wrapper.classList.add('hidden');
-      if (arrow) arrow.innerText = '▼';
+      if (isViewer) {
+        if (passSec) passSec.classList.add('hidden');
+        if (colorsSec) colorsSec.classList.add('hidden');
+        if (basicSec) basicSec.classList.add('hidden');
+        if (photoBtns) photoBtns.classList.add('hidden');
+      } else {
+        if (passSec) passSec.classList.remove('hidden');
+        if (colorsSec) colorsSec.classList.remove('hidden');
+        if (basicSec) basicSec.classList.remove('hidden');
+        if (photoBtns) photoBtns.classList.remove('hidden');
+      }
 
       // Paleta de 8 colores
       const colorsContainer = document.getElementById('electricColorsPicker');
@@ -1692,7 +1256,6 @@
       document.getElementById('changePassNewRep').value = "";
       document.getElementById('changePassMsg').classList.add('hidden');
 
-      renderProfileModalGamification();
       document.getElementById('userProfileModal').classList.remove('hidden');
     }
 
@@ -1823,11 +1386,12 @@
     }
 
     // =========================================================================
-    // ☁️ SINCRONIZACIÓN EN TIEMPO REAL
+    // ☁️ SINCRONIZACIÓN EN TIEMPO REAL (CACHE-BUSTING & POLLING EN VIVO)
     // =========================================================================
     async function loadFromCloud(silent = false) {
       if (!silent) updateSyncBadge("Sincronizando...", "yellow");
       try {
+        // Petición limpia directa a Firestore (sin parámetros no soportados que causan error 400)
         const res = await fetch(FIRESTORE_ENDPOINT, {
           cache: 'no-store',
           headers: {
@@ -1847,12 +1411,6 @@
         if (data.fields && data.fields.payload && data.fields.payload.stringValue) {
           const parsed = JSON.parse(data.fields.payload.stringValue);
 
-          // 1. Cargar y sincronizar empresas de la nube
-          if (parsed.companies && Array.isArray(parsed.companies) && parsed.companies.length > 0) {
-            config.companies = parsed.companies;
-          }
-
-          // 2. Cargar tareas unificadas
           let cloudTasks = [];
           if (parsed.tasks && Array.isArray(parsed.tasks)) {
             cloudTasks = parsed.tasks.map(sanitizeTask);
@@ -1860,68 +1418,39 @@
             cloudTasks = parsed.tasksByProfile.patricio.map(sanitizeTask);
           }
 
-          let needsRepairSync = false;
           if (cloudTasks.length > 0) {
-            tasks = cloudTasks;
-
-            // RECUPERACIÓN Y BLINDAJE DE REVCARDINAL:
-            // Si la tarea task-7 fue renombrada accidentalmente a UNICO u otra empresa, se restaura a RevCardinal
-            let revTask = tasks.find(t => t.id === "task-7" || (t.desc && t.desc.toLowerCase().includes("tarjeta de presentación")));
-            if (revTask) {
-              if (revTask.company !== "RevCardinal") {
-                revTask.company = "RevCardinal";
-                needsRepairSync = true;
+            const currentSig = JSON.stringify(tasks);
+            const newSig = JSON.stringify(cloudTasks);
+            if (currentSig !== newSig) {
+              tasks = cloudTasks;
+                            populateDropdowns();
+              renderKPIs();
+              renderTable();
+              if (document.getElementById('viewerProfilesSelector')) {
+                renderViewerProfilesSelector();
               }
-            } else if (!tasks.some(t => t.company === "RevCardinal")) {
-              // Si fue eliminada de la nube, se reinyecta la tarea original de RevCardinal
-              const originalRev = PATRICIO_INITIAL_TASKS.find(t => t.id === "task-7");
-              if (originalRev) {
-                tasks.push(sanitizeTask(originalRev));
-                needsRepairSync = true;
-              }
-            }
-
-            tasks.forEach(t => {
-              if (t.company && !config.companies.includes(t.company)) {
-                config.companies.push(t.company);
-              }
-            });
-            if (!config.companies.includes("RevCardinal")) {
-              config.companies.push("RevCardinal");
-              needsRepairSync = true;
             }
           } else if (tasks.length === 0) {
             tasks = PATRICIO_INITIAL_TASKS.map(sanitizeTask);
+                        populateDropdowns();
+            renderKPIs();
+            renderTable();
           }
 
-          // 3. Cargar perfiles
+          // Actualizar perfiles
           if (parsed.profiles && Array.isArray(parsed.profiles)) {
             profiles = parsed.profiles.filter(p => p && p.id !== 'developer' && p.name.toLowerCase() !== 'developer');
           }
           if (!profiles.some(p => p.id === 'patricio')) profiles.unshift(DEFAULT_PROFILES[0]);
           if (!profiles.some(p => p.id === 'viewer' || p.isViewer)) profiles.push(DEFAULT_PROFILES[1]);
 
+          // Empresas
+          if (parsed.companies && Array.isArray(parsed.companies)) {
+            config.companies = parsed.companies;
+          }
+
           saveLocalState();
-
-          const taskModalEl = document.getElementById('taskModal');
-          const isModalOpen = taskModalEl && !taskModalEl.classList.contains('hidden');
-
-          // Solo repoblar select del modal si el modal NO está abierto para no resetear inputs activos del usuario
-          if (!isModalOpen) {
-            populateDropdowns();
-          }
-          renderVariantsUI();
-          renderKPIs();
-          renderTable();
-          updateGamificationUI();
-          if (document.getElementById('viewerProfilesSelector')) {
-            renderViewerProfilesSelector();
-          }
           updateSyncBadge("En línea", "green");
-
-          if (needsRepairSync) {
-            await saveToCloud();
-          }
         }
       } catch (err) {
         console.error("Fallo de sincronización nube:", err);
@@ -1932,7 +1461,7 @@
     async function saveToCloud() {
       const currentUser = profiles.find(p => p.id === currentUserId);
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) {
-        return;
+        return; // El Viewer nunca modifica la nube
       }
 
       updateSyncBadge("Guardando...", "yellow");
@@ -1978,7 +1507,7 @@
       }
     }
 
-    // Heartbeat de Presencia
+    // Heartbeat de Presencia (Ojo)
     async function updatePresence() {
       try {
         const now = Date.now();
@@ -2036,6 +1565,9 @@
       }
     }
 
+    // =========================================================================
+    // 🎖️ ESTILOS: COLORIMETRÍA Y RANGOS SUBOFICIALES (MILITARES)
+    // =========================================================================
     function getProgressStyle(percent) {
       if (percent <= 0) return { stroke: "#64748B", text: "text-slate-400" };
       if (percent <= 35) return { stroke: "#FACC15", text: "text-yellow-400" };
@@ -2066,7 +1598,7 @@
       const p = String(priority || "Media").trim();
       if (p === "Máxima") {
         return `
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30" title="Prioridad Máxima">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30" title="Prioridad Máxima (Sargento)">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 17l6-5 6 5"/><path d="M6 12l6-5 6 5"/><path d="M6 7l6-5 6 5"/>
             </svg>
@@ -2074,7 +1606,7 @@
         `;
       } else if (p === "Media") {
         return `
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30" title="Prioridad Media">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30" title="Prioridad Media (Cabo)">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 15l6-5 6 5"/><path d="M6 10l6-5 6 5"/>
             </svg>
@@ -2082,7 +1614,7 @@
         `;
       } else {
         return `
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 border border-slate-700/50" title="Prioridad Mínima">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 border border-slate-700/50" title="Prioridad Mínima (Soldado)">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 14l6-5 6 5"/>
             </svg>
@@ -2118,9 +1650,7 @@
         date: String(t.date || "").trim(),
         details: String(t.details || "-").trim(),
         progress: progressClean,
-        userId: t.userId || 'patricio',
-        updatedAt: t.updatedAt || Date.now(),
-        completedAt: t.completedAt || ((statusClean === "Finalizado" || progressClean >= 100) ? (t.updatedAt || Date.now()) : null)
+        updatedAt: t.updatedAt || Date.now()
       };
     }
 
@@ -2180,51 +1710,22 @@
     }
 
     function populateDropdowns() {
-      // 1. Filtro de Empresas (Preserva valor seleccionado)
       const filterComp = document.getElementById('filterCompany');
-      if (filterComp) {
-        const prevFilterComp = filterComp.value;
-        filterComp.innerHTML = '<option value="">Todas las empresas</option>' + 
-          config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (prevFilterComp && config.companies.includes(prevFilterComp)) {
-          filterComp.value = prevFilterComp;
-        }
-      }
+      filterComp.innerHTML = '<option value="">Todas las empresas</option>' + 
+        config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
 
-      // 2. Filtro de Prioridades (Preserva valor seleccionado)
       const filterPrio = document.getElementById('filterPriority');
-      if (filterPrio) {
-        const prevFilterPrio = filterPrio.value;
-        filterPrio.innerHTML = '<option value="">Todas las prioridades</option>' + 
-          config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-        if (prevFilterPrio) filterPrio.value = prevFilterPrio;
-      }
+      filterPrio.innerHTML = '<option value="">Todas las prioridades</option>' + 
+        config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
-      // 3. Dropdown de Empresa en Modal Tarea (PRESERVA selección para que NO salte a UNICO)
       const taskComp = document.getElementById('taskCompany');
-      if (taskComp) {
-        const prevTaskComp = taskComp.value;
-        taskComp.innerHTML = config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (prevTaskComp && config.companies.includes(prevTaskComp)) {
-          taskComp.value = prevTaskComp;
-        }
-      }
+      taskComp.innerHTML = config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
 
-      // 4. Dropdown de Estado en Modal Tarea
       const taskStat = document.getElementById('taskStatus');
-      if (taskStat) {
-        const prevTaskStat = taskStat.value;
-        taskStat.innerHTML = config.statuses.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-        if (prevTaskStat) taskStat.value = prevTaskStat;
-      }
+      taskStat.innerHTML = config.statuses.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
 
-      // 5. Dropdown de Prioridad en Modal Tarea
       const taskPrio = document.getElementById('taskPriority');
-      if (taskPrio) {
-        const prevTaskPrio = taskPrio.value;
-        taskPrio.innerHTML = config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-        if (prevTaskPrio) taskPrio.value = prevTaskPrio;
-      }
+      taskPrio.innerHTML = config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
     }
 
     function renderTable() {
@@ -2242,25 +1743,25 @@
         return matchesSearch && matchesComp && matchesPrio && matchesStatus;
       });
 
-      // ORDENAMIENTO JERÁRQUICO GAMIFICADO:
-      // 1. Tareas finalizadas (100%) al fondo absoluto
-      // 2. Nivel de avance en el proceso: entre más avanzado esté el proceso más abajo va (Pendiente 0% arriba -> Proceso 25% -> Revisión 50% -> Aprobado 75%)
-      // 3. Dentro de cada estado de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
-      // 4. Fecha más antigua primero como desempate
       filtered.sort((a, b) => {
+        // 1. Tareas finalizadas (100%) siempre al fondo absoluto
         const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
         const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
         if (isDoneA && !isDoneB) return 1;
         if (!isDoneA && isDoneB) return -1;
 
+        // 2. Entre más avanzado esté el proceso, más abajo va (menor progreso arriba)
+        // (Pendiente 0% arriba -> Proceso 25% -> Revisión 50% -> Aprobado 75% más abajo)
         const progA = (a.progress !== undefined) ? Number(a.progress) : 0;
         const progB = (b.progress !== undefined) ? Number(b.progress) : 0;
         if (progA !== progB) return progA - progB;
 
+        // 3. Dentro de cada estado de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
         const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
         const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
         if (diffPrio !== 0) return diffPrio;
 
+        // 4. Desempate por fecha: más antiguas primero
         if (a.date && b.date) return a.date.localeCompare(b.date);
         if (a.date && !b.date) return -1;
         if (!a.date && b.date) return 1;
@@ -2289,33 +1790,6 @@
         else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
         else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
 
-        // DÍAS TRANSCURRIDOS
-        const days = calculateTaskDays(task);
-        let daysHtml = '<span class="text-slate-600">-</span>';
-        if (days !== null) {
-          let dayColor = "text-slate-300";
-          if (task.status === "Finalizado" && days <= 1) {
-            dayColor = "text-amber-400 font-extrabold";
-          } else if (days <= 3) {
-            dayColor = "text-emerald-400 font-bold";
-          } else if (days > 7) {
-            dayColor = "text-rose-400";
-          }
-          daysHtml = `<span class="inline-block px-2.5 py-0.5 rounded-lg bg-white/[0.04] text-xs ${dayColor} border border-white/[0.05]">${days} d</span>`;
-        }
-
-        // DETALLES: Si está en Revisión, borra texto y muestra animación bucle de puntos suspensivos
-        let detailsHtml = '<span class="text-slate-600">-</span>';
-        if (task.status === "Revisión") {
-          detailsHtml = `
-            <span class="inline-flex items-center gap-1 text-xs font-bold text-lime-400 font-mono tracking-widest" title="En proceso de revisión">
-              <span class="ellipsis-loop"></span>
-            </span>
-          `;
-        } else if (task.details && task.details !== "-") {
-          detailsHtml = task.details;
-        }
-
         return `
           <tr ${isViewer ? '' : `onclick="onRowClick(event, '${task.id}')"`} class="table-row-card ${isViewer ? '' : 'interactive'} group" title="${isViewer ? 'Modo Solo Lectura' : 'Click para editar'}">
             <td class="py-3 px-4 text-center">
@@ -2340,11 +1814,8 @@
             <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
               ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
             </td>
-            <td class="py-3 px-4 text-xs whitespace-nowrap text-center">
-              ${daysHtml}
-            </td>
             <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
-              ${detailsHtml}
+              ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
             </td>
             ${isViewer ? '' : `
               <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
@@ -2373,12 +1844,6 @@
       const currentUser = profiles.find(p => p.id === currentUserId);
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
 
-      // Asegurar que las empresas estén actualizadas en el select antes de abrir
-      if (task && task.company && !config.companies.includes(task.company)) {
-        config.companies.push(task.company);
-      }
-      populateDropdowns();
-
       document.getElementById('taskForm').reset();
       if (task) {
         document.getElementById('modalTitleText').innerText = "Editar Tarea";
@@ -2388,7 +1853,7 @@
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
         document.getElementById('taskDate').value = task.date;
-        document.getElementById('taskDetails').value = (task.details && task.details !== "-") ? task.details : "";
+        document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
         document.getElementById('taskId').value = "";
@@ -2397,8 +1862,6 @@
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const dd = String(now.getDate()).padStart(2, '0');
         document.getElementById('taskDate').value = `${yyyy}-${mm}-${dd}`;
-        document.getElementById('taskDesc').value = "";
-        document.getElementById('taskDetails').value = "";
       }
       document.getElementById('taskModal').classList.remove('hidden');
     }
@@ -2425,17 +1888,10 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const existing = tasks.find(t => t.id === id);
-      let completedAt = existing ? existing.completedAt : null;
-      if (status === "Finalizado" || progress >= 100) {
-        if (!completedAt) completedAt = Date.now();
-      } else {
-        completedAt = null; // Si se desmarca de Finalizado, se descuentan los puntos
-      }
+      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details });
 
-      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, progress, details, completedAt });
       const authorId = (currentUserId && currentUserId !== 'viewer') ? currentUserId : 'patricio';
-      const taskWithUser = { ...taskObj, userId: authorId, completedAt };
+      const taskWithUser = { ...taskObj, userId: authorId };
 
       const masterIdx = tasks.findIndex(t => t.id === id);
       if (masterIdx !== -1) {
@@ -2444,11 +1900,10 @@
         tasks.unshift(taskWithUser);
       }
 
-      closeTaskModal();
+            closeTaskModal();
       populateDropdowns();
       renderKPIs();
       renderTable();
-      updateGamificationUI();
       await saveToCloud();
     }
 
@@ -2463,9 +1918,8 @@
 
       if (confirm("¿Eliminar este trabajo?")) {
         tasks = tasks.filter(t => t.id !== id);
-        renderKPIs();
+                renderKPIs();
         renderTable();
-        updateGamificationUI();
         await saveToCloud();
       }
     }
@@ -2553,7 +2007,6 @@
             populateDropdowns();
             renderTable();
             renderKPIs();
-            updateGamificationUI();
             await saveToCloud();
             alert("¡Datos importados y sincronizados con éxito!");
           } else {
@@ -2575,7 +2028,7 @@
     loadFromCloud();
     updatePresence();
 
-    // Auto-polling en tiempo real cada 4 segundos
+    // Auto-polling en tiempo real cada 6 segundos para sincronización instantánea entre dispositivos
     setInterval(() => {
       if (!document.hidden) loadFromCloud(true);
     }, 4000);
@@ -2583,6 +2036,7 @@
     // Heartbeat de presencia cada 25 segundos
     setInterval(updatePresence, 25000);
 
+    // Sincronizar inmediatamente al enfocar la pestaña o desbloquear la pantalla
     window.addEventListener('focus', () => {
       loadFromCloud(true);
       updatePresence();

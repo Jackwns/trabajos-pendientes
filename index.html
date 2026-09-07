@@ -196,7 +196,7 @@
       animation: waveLiquid 3s ease-in-out infinite;
     }
 
-    /* Resplandor neón dorado para insignia militar táctica */
+    /* Resplandor neón dorado para insignia de sprint y excelencia creativa */
     .military-gold-neon {
       box-shadow: 0 0 22px rgba(251, 191, 36, 0.4);
       border-color: rgba(251, 191, 36, 0.85);
@@ -228,10 +228,10 @@
       </div>
 
       <h3 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400 tracking-tight uppercase mb-1">¡Subiste de Nivel!</h3>
-      <p class="text-xs text-slate-300 mb-4">Has desbloqueado una nueva insignia de rango:</p>
+      <p class="text-xs text-slate-300 mb-4">Has ascendido a una nueva categoría profesional:</p>
 
       <div class="py-3.5 px-4 rounded-2xl bg-white/[0.04] border border-white/10 mb-5">
-        <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Nuevo Rango Alcanzado</span>
+        <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Nuevo Rango Profesional</span>
         <div id="levelUpModalNum" class="text-4xl font-black text-white tracking-tight mt-1 mb-0.5">Nv 2</div>
         <span id="levelUpModalRank" class="text-xs font-bold text-cyan-300">Oficial Táctico</span>
       </div>
@@ -451,7 +451,7 @@
                 <th class="py-3.5 px-4">Estado</th>
                 <th class="py-3.5 px-4 text-center">Prioridad</th>
                 <th class="py-3.5 px-4">Fecha Ingreso</th>
-                <th class="py-3.5 px-4 text-center w-20">Días</th>
+                <th class="py-3.5 px-4 text-center w-24">Días Hábiles</th>
                 <th class="py-3.5 px-4">Detalles</th>
                 <th id="thActions" class="py-3.5 px-4 text-center w-24">Acciones</th>
               </tr>
@@ -580,7 +580,7 @@
           <div class="flex items-center justify-between mb-2">
             <div>
               <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block">Progreso de Nivel</span>
-              <span id="gamificationRankName" class="text-sm font-black text-white">Nivel 1 • Cadete</span>
+              <span id="gamificationRankName" class="text-sm font-black text-white">Nivel 1 • Recluta Creativo</span>
             </div>
             <div class="text-right">
               <span id="gamificationXpFraction" class="text-xs font-bold text-cyan-400">0 / 500 XP</span>
@@ -598,7 +598,7 @@
           </div>
         </div>
 
-        <!-- 🎖️ INSIGNIA MILITAR: OPERACIÓN RELÁMPAGO (1 DÍA) -->
+        <!-- 🏆 INSIGNIA PROFESIONAL: SPRINT CREATIVO (1 DÍA HÁBIL) -->
         <div id="militaryBadgeCard" class="p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500">
           
           <!-- Insignia: Estrella con dos alas de tres plumas cuadriculadas -->
@@ -620,11 +620,11 @@
           <!-- Descripción y Contador de la Insignia -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <span id="militaryBadgeTitle" class="text-xs font-black uppercase tracking-wider text-slate-400">Insignia Operación Relámpago</span>
-              <span id="militaryBadgeTag" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-white/5 border border-white/10 uppercase">Militar</span>
+              <span id="militaryBadgeTitle" class="text-xs font-black uppercase tracking-wider text-slate-400">Insignia Sprint Creativo</span>
+              <span id="militaryBadgeTag" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-white/5 border border-white/10 uppercase text-slate-400">Sprint</span>
             </div>
             <p id="militaryBadgeDesc" class="text-xs text-slate-400 mt-0.5 leading-snug">
-              0 trabajos de prioridad máxima finalizados en 1 solo día.
+              0 trabajos de prioridad máxima finalizados en 1 solo día hábil.
             </p>
           </div>
 
@@ -1057,10 +1057,20 @@
         }
       }
 
-      const startMid = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
-      const endMid = new Date(end.getFullYear(), end.getMonth(), end.getDate()).getTime();
-      const diffDays = Math.round((endMid - startMid) / (1000 * 60 * 60 * 24));
-      return Math.max(1, diffDays + 1); // 1 d si fue el mismo día, 2 d al siguiente, etc.
+      const curr = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+      const target = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+      if (curr.getTime() > target.getTime()) return 0;
+
+      let businessDays = 0;
+      while (curr.getTime() <= target.getTime()) {
+        const dayOfWeek = curr.getDay(); // 0 = Domingo, 6 = Sábado
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+          businessDays++;
+        }
+        curr.setDate(curr.getDate() + 1);
+      }
+      return businessDays;
     }
 
     // =========================================================================
@@ -1146,13 +1156,18 @@
     }
 
     function getRankTitle(level) {
-      if (level <= 1) return "Cadete";
-      if (level <= 3) return "Operador Táctico";
-      if (level <= 6) return "Especialista";
-      if (level <= 10) return "Comandante";
-      if (level <= 20) return "Capitán de Flujo";
-      if (level <= 50) return "General Mayor";
-      return "Mariscal Supremo";
+      if (level < 5) return "Recluta Creativo";
+      if (level < 10) return "Cadete de Diseño";
+      if (level < 15) return "Diseñador Junior";
+      if (level < 20) return "Diseñador Operativo";
+      if (level < 25) return "Diseñador Senior";
+      if (level < 30) return "Especialista Creativo";
+      if (level < 35) return "Oficial de Diseño";
+      if (level < 40) return "Director Creativo";
+      if (level < 45) return "Comandante Creativo";
+      if (level < 50) return "Estratega Visual";
+      if (level < 55) return "Director de Operaciones Creativas";
+      return "Maestro de Arte";
     }
 
     function updateGamificationUI() {
@@ -1236,7 +1251,7 @@
       if (barFill) barFill.style.width = `${info.percent}%`;
       if (compCountEl) compCountEl.innerText = `${info.completedCount} finalizados`;
 
-      // Insignia Militar Operación Relámpago
+            // Insignia Sprint Creativo (Entrega en 1 día hábil)
       const badgeCard = document.getElementById('militaryBadgeCard');
       const badgeDesc = document.getElementById('militaryBadgeDesc');
       const badgeTitle = document.getElementById('militaryBadgeTitle');
@@ -1245,17 +1260,22 @@
       if (badgeCard && badgeDesc) {
         if (count >= 1) {
           badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-amber-500/10 border-amber-400 text-amber-400 military-gold-neon ring-1 ring-amber-400/40";
-          if (badgeTitle) badgeTitle.className = "text-xs font-black uppercase tracking-wider text-amber-300";
-          badgeDesc.innerText = `${count} ${count === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados'} en 1 solo día.`;
+          if (badgeTitle) {
+            badgeTitle.className = "text-xs font-black uppercase tracking-wider text-amber-300";
+            badgeTitle.innerText = "Insignia Sprint Creativo";
+          }
+          badgeDesc.innerText = `${count} ${count === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados'} en 1 solo día hábil.`;
           badgeDesc.className = "text-xs text-amber-200/90 mt-0.5 leading-snug font-medium";
         } else {
           badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500";
-          if (badgeTitle) badgeTitle.className = "text-xs font-black uppercase tracking-wider text-slate-500";
-          badgeDesc.innerText = "0 trabajos de prioridad máxima finalizados en 1 solo día.";
+          if (badgeTitle) {
+            badgeTitle.className = "text-xs font-black uppercase tracking-wider text-slate-500";
+            badgeTitle.innerText = "Insignia Sprint Creativo";
+          }
+          badgeDesc.innerText = "0 trabajos de prioridad máxima finalizados en 1 solo día hábil.";
           badgeDesc.className = "text-xs text-slate-500 mt-0.5 leading-snug";
         }
-      }
-    }
+      }    }
 
     // Alternar Sección "Cuenta" dentro de Mi Perfil
     function toggleAccountSettings() {
@@ -2013,7 +2033,7 @@
       const p = String(priority || "Media").trim();
       if (p === "Máxima") {
         return `
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30" title="Prioridad Máxima (Sargento)">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30" title="Prioridad Máxima">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 17l6-5 6 5"/><path d="M6 12l6-5 6 5"/><path d="M6 7l6-5 6 5"/>
             </svg>
@@ -2021,7 +2041,7 @@
         `;
       } else if (p === "Media") {
         return `
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30" title="Prioridad Media (Cabo)">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30" title="Prioridad Media">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 15l6-5 6 5"/><path d="M6 10l6-5 6 5"/>
             </svg>
@@ -2029,7 +2049,7 @@
         `;
       } else {
         return `
-          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 border border-slate-700/50" title="Prioridad Mínima (Soldado)">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-800/60 text-slate-400 border border-slate-700/50" title="Prioridad Mínima">
             <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 14l6-5 6 5"/>
             </svg>
@@ -2227,7 +2247,7 @@
         if (task.status === "Revisión") {
           detailsHtml = `
             <span class="inline-flex items-center gap-1 text-xs font-bold text-lime-400 font-mono tracking-widest" title="En proceso de revisión">
-              <span class="ellipsis-loop">.</span>
+              <span class="ellipsis-loop"></span>
             </span>
           `;
         } else if (task.details && task.details !== "-") {

@@ -1860,13 +1860,36 @@
             cloudTasks = parsed.tasksByProfile.patricio.map(sanitizeTask);
           }
 
+          let needsRepairSync = false;
           if (cloudTasks.length > 0) {
             tasks = cloudTasks;
+
+            // RECUPERACIÓN Y BLINDAJE DE REVCARDINAL:
+            // Si la tarea task-7 fue renombrada accidentalmente a UNICO u otra empresa, se restaura a RevCardinal
+            let revTask = tasks.find(t => t.id === "task-7" || (t.desc && t.desc.toLowerCase().includes("tarjeta de presentación")));
+            if (revTask) {
+              if (revTask.company !== "RevCardinal") {
+                revTask.company = "RevCardinal";
+                needsRepairSync = true;
+              }
+            } else if (!tasks.some(t => t.company === "RevCardinal")) {
+              // Si fue eliminada de la nube, se reinyecta la tarea original de RevCardinal
+              const originalRev = PATRICIO_INITIAL_TASKS.find(t => t.id === "task-7");
+              if (originalRev) {
+                tasks.push(sanitizeTask(originalRev));
+                needsRepairSync = true;
+              }
+            }
+
             tasks.forEach(t => {
               if (t.company && !config.companies.includes(t.company)) {
                 config.companies.push(t.company);
               }
             });
+            if (!config.companies.includes("RevCardinal")) {
+              config.companies.push("RevCardinal");
+              needsRepairSync = true;
+            }
           } else if (tasks.length === 0) {
             tasks = PATRICIO_INITIAL_TASKS.map(sanitizeTask);
           }
@@ -1880,7 +1903,13 @@
 
           saveLocalState();
 
-          populateDropdowns();
+          const taskModalEl = document.getElementById('taskModal');
+          const isModalOpen = taskModalEl && !taskModalEl.classList.contains('hidden');
+
+          // Solo repoblar select del modal si el modal NO está abierto para no resetear inputs activos del usuario
+          if (!isModalOpen) {
+            populateDropdowns();
+          }
           renderVariantsUI();
           renderKPIs();
           renderTable();
@@ -1889,6 +1918,10 @@
             renderViewerProfilesSelector();
           }
           updateSyncBadge("En línea", "green");
+
+          if (needsRepairSync) {
+            await saveToCloud();
+          }
         }
       } catch (err) {
         console.error("Fallo de sincronización nube:", err);
@@ -2147,22 +2180,51 @@
     }
 
     function populateDropdowns() {
+      // 1. Filtro de Empresas (Preserva valor seleccionado)
       const filterComp = document.getElementById('filterCompany');
-      filterComp.innerHTML = '<option value="">Todas las empresas</option>' + 
-        config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (filterComp) {
+        const prevFilterComp = filterComp.value;
+        filterComp.innerHTML = '<option value="">Todas las empresas</option>' + 
+          config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (prevFilterComp && config.companies.includes(prevFilterComp)) {
+          filterComp.value = prevFilterComp;
+        }
+      }
 
+      // 2. Filtro de Prioridades (Preserva valor seleccionado)
       const filterPrio = document.getElementById('filterPriority');
-      filterPrio.innerHTML = '<option value="">Todas las prioridades</option>' + 
-        config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+      if (filterPrio) {
+        const prevFilterPrio = filterPrio.value;
+        filterPrio.innerHTML = '<option value="">Todas las prioridades</option>' + 
+          config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+        if (prevFilterPrio) filterPrio.value = prevFilterPrio;
+      }
 
+      // 3. Dropdown de Empresa en Modal Tarea (PRESERVA selección para que NO salte a UNICO)
       const taskComp = document.getElementById('taskCompany');
-      taskComp.innerHTML = config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (taskComp) {
+        const prevTaskComp = taskComp.value;
+        taskComp.innerHTML = config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (prevTaskComp && config.companies.includes(prevTaskComp)) {
+          taskComp.value = prevTaskComp;
+        }
+      }
 
+      // 4. Dropdown de Estado en Modal Tarea
       const taskStat = document.getElementById('taskStatus');
-      taskStat.innerHTML = config.statuses.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+      if (taskStat) {
+        const prevTaskStat = taskStat.value;
+        taskStat.innerHTML = config.statuses.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        if (prevTaskStat) taskStat.value = prevTaskStat;
+      }
 
+      // 5. Dropdown de Prioridad en Modal Tarea
       const taskPrio = document.getElementById('taskPriority');
-      taskPrio.innerHTML = config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+      if (taskPrio) {
+        const prevTaskPrio = taskPrio.value;
+        taskPrio.innerHTML = config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+        if (prevTaskPrio) taskPrio.value = prevTaskPrio;
+      }
     }
 
     function renderTable() {
@@ -2311,6 +2373,12 @@
       const currentUser = profiles.find(p => p.id === currentUserId);
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
 
+      // Asegurar que las empresas estén actualizadas en el select antes de abrir
+      if (task && task.company && !config.companies.includes(task.company)) {
+        config.companies.push(task.company);
+      }
+      populateDropdowns();
+
       document.getElementById('taskForm').reset();
       if (task) {
         document.getElementById('modalTitleText').innerText = "Editar Tarea";
@@ -2329,6 +2397,8 @@
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const dd = String(now.getDate()).padStart(2, '0');
         document.getElementById('taskDate').value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('taskDesc').value = "";
+        document.getElementById('taskDetails').value = "";
       }
       document.getElementById('taskModal').classList.remove('hidden');
     }

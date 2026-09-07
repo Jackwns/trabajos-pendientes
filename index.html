@@ -653,7 +653,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- 📜 JAVASCRIPT: MOTOR DE SINCRONIZACIÓN Y PERFILES                     -->
+  <!-- 📜 JAVASCRIPT: ARQUITECTURA MODULAR TASKFLOW V13                     -->
   <!-- ===================================================================== -->
   <script>
     const FIREBASE_PROJECT_ID = "trabajos-pendientes-59380";
@@ -1574,6 +1574,34 @@
     }
 
     // =========================================================================
+    // 📅 UTILIDADES DE FECHAS: FORMATO DD/MM/AAAA Y MANEJO DE INPUTS
+    // =========================================================================
+    function formatDateDisplay(dateStr) {
+      if (!dateStr) return '<span class="text-slate-600">-</span>';
+      const str = String(dateStr).trim();
+      // Si viene en formato ISO/estándar YYYY-MM-DD
+      const parts = str.split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        const [yyyy, mm, dd] = parts;
+        return `${dd}/${mm}/${yyyy}`;
+      }
+      // Si ya viene en formato DD/MM/AAAA o similar
+      return str;
+    }
+
+    function toInputDateFormat(dateStr) {
+      if (!dateStr) return "";
+      const str = String(dateStr).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+      const parts = str.split('/');
+      if (parts.length === 3) {
+        const [dd, mm, yyyy] = parts;
+        return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+      }
+      return "";
+    }
+
+    // =========================================================================
     // 🎖️ ESTILOS: COLORIMETRÍA Y RANGOS SUBOFICIALES (MILITARES)
     // =========================================================================
     function getProgressStyle(percent) {
@@ -1760,24 +1788,43 @@
       });
 
       filtered.sort((a, b) => {
-        // 1. Tareas finalizadas (100%) siempre al fondo absoluto
         const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
         const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
+
+        // 1. SI AMBAS ESTÁN FINALIZADAS:
+        // Orden dentro de los realizados: de los últimos realizados hasta los más antiguos (descendente)
+        if (isDoneA && isDoneB) {
+          const dateA = a.completedDate || a.date || "";
+          const dateB = b.completedDate || b.date || "";
+          if (dateA && dateB) {
+            const cmp = dateB.localeCompare(dateA); // Descendente: más reciente arriba
+            if (cmp !== 0) return cmp;
+          } else if (dateA && !dateB) {
+            return -1; // Con fecha de finalizado va antes que sin fecha
+          } else if (!dateA && dateB) {
+            return 1;
+          }
+          // Si empatan en fecha, desempatar por última modificación (más reciente primero)
+          return (b.updatedAt || 0) - (a.updatedAt || 0);
+        }
+
+        // 2. Tareas finalizadas siempre al fondo absoluto respecto a las no finalizadas
         if (isDoneA && !isDoneB) return 1;
         if (!isDoneA && isDoneB) return -1;
 
-        // 2. Nivel de avance en el proceso: entre más avanzado esté el proceso más abajo va
+        // 3. TAREAS ACTIVAS (EN CURSO):
+        // Nivel de avance en el proceso: entre más avanzado esté el proceso más abajo va
         // (Pendiente 0% arriba -> Proceso 25% -> Revisión 50% -> Aprobado 75% más abajo)
         const progA = (a.progress !== undefined) ? Number(a.progress) : 0;
         const progB = (b.progress !== undefined) ? Number(b.progress) : 0;
         if (progA !== progB) return progA - progB;
 
-        // 3. Dentro de cada estado de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
+        // 4. Dentro de cada nivel de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
         const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
         const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
         if (diffPrio !== 0) return diffPrio;
 
-        // 4. Criterio por fecha para desempatar: más antiguas primero
+        // 5. Criterio por fecha para desempatar tareas en curso: más antiguas primero para evitar rezagos
         if (a.date && b.date) return a.date.localeCompare(b.date);
         if (a.date && !b.date) return -1;
         if (!a.date && b.date) return 1;
@@ -1828,10 +1875,10 @@
               ${renderPriorityRank(task.priority)}
             </td>
             <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
-              ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
+              ${formatDateDisplay(task.date)}
             </td>
             <td class="py-3 px-4 text-xs font-semibold ${task.completedDate ? 'text-cyan-400' : 'text-slate-600'} whitespace-nowrap">
-              ${task.completedDate ? task.completedDate : '-'}
+              ${task.completedDate ? formatDateDisplay(task.completedDate) : '<span class="text-slate-600">-</span>'}
             </td>
             <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
               ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
@@ -1890,8 +1937,8 @@
         document.getElementById('taskDesc').value = task.desc;
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
-        document.getElementById('taskDate').value = task.date;
-        document.getElementById('taskCompletedDate').value = task.completedDate || "";
+        document.getElementById('taskDate').value = toInputDateFormat(task.date);
+        document.getElementById('taskCompletedDate').value = toInputDateFormat(task.completedDate);
         document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";

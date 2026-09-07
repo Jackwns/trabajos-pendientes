@@ -345,6 +345,7 @@
                 <th class="py-3.5 px-4">Estado</th>
                 <th class="py-3.5 px-4 text-center">Prioridad</th>
                 <th class="py-3.5 px-4">Fecha Ingreso</th>
+                <th class="py-3.5 px-4">Fecha Finalizado</th>
                 <th class="py-3.5 px-4">Detalles</th>
                 <th id="thActions" class="py-3.5 px-4 text-center w-24">Acciones</th>
               </tr>
@@ -553,9 +554,15 @@
             <select id="taskPriority" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></select>
           </div>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
-          <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
+            <input type="date" id="taskDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha de Finalizado</label>
+            <input type="date" id="taskCompletedDate" class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+          </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-300 mb-1">Detalles / Observaciones</label>
@@ -729,6 +736,7 @@
             "status": "Finalizado",
             "priority": "Máxima",
             "date": "2026-09-02",
+            "completedDate": "2026-09-02",
             "details": "-",
             "progress": 100,
             "updatedAt": 1788525676222
@@ -1594,30 +1602,6 @@
       `;
     }
 
-    function formatDateDisplay(d) {
-      if (!d) return '<span class="text-slate-600">-</span>';
-      const str = String(d).trim();
-      if (!str || str === "-") return '<span class="text-slate-600">-</span>';
-      if (str.includes('/')) return str; // Ya viene en formato DD/MM/AAAA
-      const parts = str.split('-');
-      if (parts.length === 3 && parts[0].length === 4) {
-        return `${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}`;
-      }
-      return str;
-    }
-
-    function toInputDateFormat(d) {
-      if (!d) return "";
-      const str = String(d).trim();
-      if (str.includes('/')) {
-        const parts = str.split('/');
-        if (parts.length === 3 && parts[2].length === 4) {
-          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-        }
-      }
-      return str;
-    }
-
     function renderPriorityRank(priority) {
       const p = String(priority || "Media").trim();
       if (p === "Máxima") {
@@ -1665,7 +1649,13 @@
       };
       const progressClean = (statusMap[statusClean] !== undefined) ? statusMap[statusClean] : (Number(t.progress) || 0);
 
-      const isDone = (statusClean === "Finalizado" || progressClean >= 100);
+      let compDate = String(t.completedDate || "").trim();
+      if (statusClean === "Finalizado" && !compDate) {
+        compDate = String(t.date || "").trim();
+      } else if (statusClean !== "Finalizado") {
+        compDate = "";
+      }
+
       return {
         id: String(t.id || ("task-" + Date.now())),
         company: String(t.company || "").trim(),
@@ -1673,10 +1663,10 @@
         status: statusClean,
         priority: String(t.priority || "Media").trim(),
         date: String(t.date || "").trim(),
+        completedDate: compDate,
         details: String(t.details || "-").trim(),
         progress: progressClean,
-        completedAt: t.completedAt ? Number(t.completedAt) : (isDone ? (Number(t.updatedAt) || Date.now()) : null),
-        updatedAt: Number(t.updatedAt) || Date.now()
+        updatedAt: t.updatedAt || Date.now()
       };
     }
 
@@ -1770,44 +1760,24 @@
       });
 
       filtered.sort((a, b) => {
+        // 1. Tareas finalizadas (100%) siempre al fondo absoluto
         const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
         const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
-
-        // 1. Tareas finalizadas al fondo de la tabla
         if (isDoneA && !isDoneB) return 1;
         if (!isDoneA && isDoneB) return -1;
 
-        // 2. Si ambos están finalizados: ordenar de los últimos realizados hasta los más antiguos (más recientes primero)
-        if (isDoneA && isDoneB) {
-          const dateA = a.completedDate || a.date || "";
-          const dateB = b.completedDate || b.date || "";
-          if (dateA && dateB && dateA !== dateB) {
-            return dateB.localeCompare(dateA); // Fecha más reciente primero
-          }
-          if (dateA && !dateB) return -1;
-          if (!dateA && dateB) return 1;
-
-          const timeA = a.completedAt || a.updatedAt || 0;
-          const timeB = b.completedAt || b.updatedAt || 0;
-          if (timeA !== timeB) {
-            return timeB - timeA;
-          }
-          return 0;
-        }
-
-        // 3. Tareas activas:
-        // Entre más avanzado esté el proceso, más abajo va (menor progreso arriba)
+        // 2. Nivel de avance en el proceso: entre más avanzado esté el proceso más abajo va
         // (Pendiente 0% arriba -> Proceso 25% -> Revisión 50% -> Aprobado 75% más abajo)
         const progA = (a.progress !== undefined) ? Number(a.progress) : 0;
         const progB = (b.progress !== undefined) ? Number(b.progress) : 0;
         if (progA !== progB) return progA - progB;
 
-        // 4. Dentro de cada nivel de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
+        // 3. Dentro de cada estado de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
         const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
         const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
         if (diffPrio !== 0) return diffPrio;
 
-        // 5. Desempate por fecha para tareas activas: más antiguas primero para evitar atrasos
+        // 4. Criterio por fecha para desempatar: más antiguas primero
         if (a.date && b.date) return a.date.localeCompare(b.date);
         if (a.date && !b.date) return -1;
         if (!a.date && b.date) return 1;
@@ -1857,11 +1827,11 @@
             <td class="py-3 px-4 whitespace-nowrap text-center">
               ${renderPriorityRank(task.priority)}
             </td>
-            <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap font-mono">
-              ${formatDateDisplay(task.date)}
+            <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
+              ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
             </td>
-            <td class="py-3 px-4 text-xs font-semibold font-mono ${task.completedDate ? 'text-cyan-400' : 'text-slate-600'} whitespace-nowrap">
-              ${formatDateDisplay(task.completedDate)}
+            <td class="py-3 px-4 text-xs font-semibold ${task.completedDate ? 'text-cyan-400' : 'text-slate-600'} whitespace-nowrap">
+              ${task.completedDate ? task.completedDate : '-'}
             </td>
             <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
               ${task.details ? task.details : '<span class="text-slate-600">-</span>'}
@@ -1889,6 +1859,25 @@
       editTask(id);
     }
 
+    function setupTaskStatusChangeListener() {
+      const statusSelect = document.getElementById('taskStatus');
+      const compDateInput = document.getElementById('taskCompletedDate');
+      if (!statusSelect || !compDateInput) return;
+
+      statusSelect.onchange = function() {
+        const norm = normalizeStatus(this.value);
+        if (norm === "Finalizado") {
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          compDateInput.value = `${yyyy}-${mm}-${dd}`;
+        } else {
+          compDateInput.value = "";
+        }
+      };
+    }
+
     function openTaskModal(task = null) {
       const currentUser = profiles.find(p => p.id === currentUserId);
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
@@ -1901,7 +1890,8 @@
         document.getElementById('taskDesc').value = task.desc;
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
-        document.getElementById('taskDate').value = toInputDateFormat(task.date);
+        document.getElementById('taskDate').value = task.date;
+        document.getElementById('taskCompletedDate').value = task.completedDate || "";
         document.getElementById('taskDetails').value = task.details || "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
@@ -1911,8 +1901,10 @@
         const mm = String(now.getMonth() + 1).padStart(2, '0');
         const dd = String(now.getDate()).padStart(2, '0');
         document.getElementById('taskDate').value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('taskCompletedDate').value = "";
       }
       document.getElementById('taskModal').classList.remove('hidden');
+      setupTaskStatusChangeListener();
     }
 
     function closeTaskModal() {
@@ -1930,6 +1922,7 @@
       const status = document.getElementById('taskStatus').value;
       const priority = document.getElementById('taskPriority').value;
       const date = document.getElementById('taskDate').value;
+      let completedDate = document.getElementById('taskCompletedDate').value;
       const details = document.getElementById('taskDetails').value;
 
       const statusMap = {
@@ -1937,21 +1930,21 @@
       };
       const progress = statusMap[status] !== undefined ? statusMap[status] : 0;
 
-      const existingTask = tasks.find(t => t.id === id);
-      const isNowDone = (status === "Finalizado" || progress >= 100);
-      const wasDone = existingTask && (existingTask.status === "Finalizado" || existingTask.progress >= 100);
-      let completedAt = existingTask ? existingTask.completedAt : null;
-      if (isNowDone && (!wasDone || !completedAt)) {
-        completedAt = Date.now();
-      } else if (!isNowDone) {
-        completedAt = null;
+      // Si el estado es Finalizado y no tenía fecha de finalizado, se asigna la fecha de hoy
+      if (status === "Finalizado") {
+        if (!completedDate) {
+          const now = new Date();
+          const yyyy = now.getFullYear();
+          const mm = String(now.getMonth() + 1).padStart(2, '0');
+          const dd = String(now.getDate()).padStart(2, '0');
+          completedDate = `${yyyy}-${mm}-${dd}`;
+        }
+      } else {
+        // Al sacarle el realizado por otro estado se blanquea
+        completedDate = "";
       }
 
-      const taskObj = sanitizeTask({
-        id, company, desc, status, priority, date, progress, details,
-        completedAt: completedAt,
-        updatedAt: Date.now()
-      });
+      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, completedDate, progress, details });
 
       const authorId = (currentUserId && currentUserId !== 'viewer') ? currentUserId : 'patricio';
       const taskWithUser = { ...taskObj, userId: authorId };

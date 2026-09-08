@@ -186,13 +186,14 @@
       animation: neonBorderPulse 2.2s infinite ease-in-out;
     }
 
-    /* Animación de líquido para burbuja móvil */
+    /* Animación de líquido para burbuja móvil (anclado en la base para evitar fondos negros) */
     @keyframes waveLiquid {
-      0% { transform: translateY(0) scaleY(1); }
-      50% { transform: translateY(-2px) scaleY(1.08); }
-      100% { transform: translateY(0) scaleY(1); }
+      0% { transform: scaleY(1); }
+      50% { transform: scaleY(1.08); }
+      100% { transform: scaleY(1); }
     }
     .liquid-anim {
+      transform-origin: bottom center;
       animation: waveLiquid 3s ease-in-out infinite;
     }
 
@@ -296,9 +297,9 @@
                 <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
               </span>
 
-              <!-- 🌊 BURBUJA LÍQUIDA MÓVIL (Nivel con líquido llenándose, no satura) -->
-              <div onclick="openUserProfileModal()" id="mobileLiquidBubble" class="sm:hidden relative w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-dark-900 shadow-md shadow-cyan-500/20 shrink-0 cursor-pointer active:scale-95 transition-transform" title="Nivel y Experiencia (Click para ver detalles)">
-                <div id="mobileLiquidFill" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-fuchsia-600 via-pink-500 to-cyan-400 liquid-anim transition-all duration-700 ease-out" style="height: 25%;"></div>
+              <!-- 🌊 BURBUJA LÍQUIDA MÓVIL (Nivel con líquido llenándose sin cortes negros en la base) -->
+              <div onclick="openUserProfileModal()" id="mobileLiquidBubble" style="-webkit-mask-image: -webkit-radial-gradient(white, black); clip-path: circle(50% at 50% 50%);" class="sm:hidden relative w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-dark-900 shadow-md shadow-cyan-500/20 shrink-0 cursor-pointer active:scale-95 transition-transform" title="Nivel y Experiencia (Click para ver detalles)">
+                <div id="mobileLiquidFill" class="absolute -bottom-2 -left-2 -right-2 bg-gradient-to-t from-fuchsia-600 via-pink-500 to-cyan-400 liquid-anim transition-all duration-700 ease-out" style="height: calc(25% + 8px);"></div>
                 <span id="mobileLiquidLevelText" class="absolute inset-0 flex items-center justify-center font-black text-white text-[11px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.95)] z-10 select-none">Nv 1</span>
               </div>
 
@@ -939,7 +940,7 @@
         desc: "Crear placa para contratacion de administrativo",
         status: "Finalizado",
         priority: "Máxima",
-        date: "2026-09-02",
+        date: "02-09-2026",
         details: "-",
         progress: 100,
         updatedAt: 1788525676222,
@@ -975,7 +976,7 @@
         desc: "Armar placa individual para el club San Martín",
         status: "Revisión",
         priority: "Media",
-        date: "2026-09-01",
+        date: "01-09-2026",
         details: "-",
         progress: 50,
         updatedAt: 1788526319217
@@ -1039,6 +1040,108 @@
     let selectedObservedUserId = "patricio";
     let activeStatusFilter = "";
 
+    
+    // =========================================================================
+    // 📅 UTILIDADES PARA FORMATO DE FECHAS EN DD-MM-YYYY
+    // =========================================================================
+    function toDDMMYYYY(dateInput) {
+      if (!dateInput) return "";
+      if (typeof dateInput === 'number') {
+        const d = new Date(dateInput);
+        if (isNaN(d.getTime())) return "";
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+      }
+      const str = String(dateInput).trim();
+      if (!str || str === "-") return "";
+      
+      if (/^\d{2}-\d{2}-\d{4}$/.test(str)) return str;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) return str.replace(/\//g, '-');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        const [y, m, d] = str.split('-');
+        return `${d}-${m}-${y}`;
+      }
+      if (/^\d{4}\/\d{2}\/\d{2}$/.test(str)) {
+        const [y, m, d] = str.split('/');
+        return `${d}-${m}-${y}`;
+      }
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+      }
+      return str;
+    }
+
+    function toYYYYMMDD(dateInput) {
+      if (!dateInput) return "";
+      if (typeof dateInput === 'number') {
+        const d = new Date(dateInput);
+        if (isNaN(d.getTime())) return "";
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      if (dateInput instanceof Date) {
+        if (isNaN(dateInput.getTime())) return "";
+        const yyyy = dateInput.getFullYear();
+        const mm = String(dateInput.getMonth() + 1).padStart(2, '0');
+        const dd = String(dateInput.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      const str = String(dateInput).trim();
+      if (!str || str === "-") return "";
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+      if (/^\d{2}-\d{2}-\d{4}$/.test(str)) {
+        const [d, m, y] = str.split('-');
+        return `${y}-${m}-${d}`;
+      }
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+        const [d, m, y] = str.split('/');
+        return `${y}-${m}-${d}`;
+      }
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+      return str;
+    }
+
+    function parseDate(dateInput) {
+      if (!dateInput) return null;
+      if (typeof dateInput === 'number') {
+        const d = new Date(dateInput);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      if (dateInput instanceof Date) {
+        return isNaN(dateInput.getTime()) ? null : dateInput;
+      }
+      const str = String(dateInput).trim();
+      if (!str || str === "-") return null;
+
+      if (/^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(str)) {
+        const [d, m, y] = str.split(/[-\/]/).map(Number);
+        const date = new Date(y, m - 1, d, 12, 0, 0);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      if (/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.test(str)) {
+        const [y, m, d] = str.split(/[-\/]/).map(Number);
+        const date = new Date(y, m - 1, d, 12, 0, 0);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      const d = new Date(str);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
     function saveLocalState() {
       localStorage.setItem('taskflow_profiles', JSON.stringify(profiles));
       localStorage.setItem('taskflow_tasks_unified', JSON.stringify(tasks));
@@ -1050,18 +1153,14 @@
     // =========================================================================
     function calculateTaskDays(task) {
       if (!task.date) return null;
-      const parts = String(task.date).split('-');
-      if (parts.length < 3) return null;
-      const start = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-      if (isNaN(start.getTime())) return null;
+      const start = parseDate(task.date);
+      if (!start) return null;
 
       let end = new Date();
       if (task.status === "Finalizado" || (task.progress !== undefined && task.progress >= 100)) {
         if (task.completedDate) {
-          const compParts = String(task.completedDate).split('-');
-          if (compParts.length >= 3) {
-            end = new Date(Number(compParts[0]), Number(compParts[1]) - 1, Number(compParts[2]));
-          }
+          const parsedComp = parseDate(task.completedDate);
+          if (parsedComp) end = parsedComp;
         } else if (task.completedAt) {
           end = new Date(task.completedAt);
         } else if (task.updatedAt) {
@@ -1205,10 +1304,18 @@
       if (xpPctEl) xpPctEl.innerText = `(${info.percent}%)`;
       if (barFillEl) barFillEl.style.width = `${info.percent}%`;
 
-      // 2. Burbuja Líquida Móvil
+      // 2. Burbuja Líquida Móvil (asegura cobertura total en la base)
       const mobFill = document.getElementById('mobileLiquidFill');
       const mobText = document.getElementById('mobileLiquidLevelText');
-      if (mobFill) mobFill.style.height = `${info.percent}%`;
+      if (mobFill) {
+        if (info.percent <= 0) {
+          mobFill.style.height = '0%';
+          mobFill.style.display = 'none';
+        } else {
+          mobFill.style.display = 'block';
+          mobFill.style.height = `calc(${info.percent}% + 8px)`;
+        }
+      }
       if (mobText) mobText.innerText = `Nv ${info.level}`;
 
       // 3. Verificación de Subida de Nivel (Cartel Neón)
@@ -2125,13 +2232,10 @@
       let compAt = t.completedAt || (isDone ? (t.updatedAt || Date.now()) : null);
       let compDate = t.completedDate || null;
       if (isDone && !compDate && compAt) {
-        const d = new Date(compAt);
-        if (!isNaN(d.getTime())) {
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          compDate = `${yyyy}-${mm}-${dd}`;
-        }
+        compDate = toDDMMYYYY(compAt);
+      }
+      if (compDate) {
+        compDate = toDDMMYYYY(compDate);
       }
       if (!isDone) {
         compAt = null;
@@ -2144,7 +2248,7 @@
         desc: String(t.desc || "").trim(),
         status: statusClean,
         priority: String(t.priority || "Media").trim(),
-        date: String(t.date || "").trim(),
+        date: toDDMMYYYY(t.date),
         completedDate: compDate,
         details: String(t.details || "-").trim(),
         progress: progressClean,
@@ -2210,7 +2314,6 @@
     }
 
     function populateDropdowns() {
-      // 1. Filtro de Empresas (Preserva valor seleccionado)
       const filterComp = document.getElementById('filterCompany');
       if (filterComp) {
         const prevFilterComp = filterComp.value;
@@ -2221,7 +2324,6 @@
         }
       }
 
-      // 2. Filtro de Prioridades (Preserva valor seleccionado)
       const filterPrio = document.getElementById('filterPriority');
       if (filterPrio) {
         const prevFilterPrio = filterPrio.value;
@@ -2230,7 +2332,6 @@
         if (prevFilterPrio) filterPrio.value = prevFilterPrio;
       }
 
-      // 3. Dropdown de Empresa en Modal Tarea (PRESERVA selección para que NO salte a UNICO)
       const taskComp = document.getElementById('taskCompany');
       if (taskComp) {
         const prevTaskComp = taskComp.value;
@@ -2240,7 +2341,6 @@
         }
       }
 
-      // 4. Dropdown de Estado en Modal Tarea
       const taskStat = document.getElementById('taskStatus');
       if (taskStat) {
         const prevTaskStat = taskStat.value;
@@ -2248,7 +2348,6 @@
         if (prevTaskStat) taskStat.value = prevTaskStat;
       }
 
-      // 5. Dropdown de Prioridad en Modal Tarea
       const taskPrio = document.getElementById('taskPriority');
       if (taskPrio) {
         const prevTaskPrio = taskPrio.value;
@@ -2272,11 +2371,6 @@
         return matchesSearch && matchesComp && matchesPrio && matchesStatus;
       });
 
-      // ORDENAMIENTO JERÁRQUICO GAMIFICADO:
-      // 1. Tareas finalizadas (100%) al fondo absoluto
-      // 2. Nivel de avance en el proceso: entre más avanzado esté el proceso más abajo va (Pendiente 0% arriba -> Proceso 25% -> Revisión 50% -> Aprobado 75%)
-      // 3. Dentro de cada estado de avance: prioridad antes que fecha para arriba (Máxima > Media > Mínima)
-      // 4. Fecha más antigua primero como desempate
       filtered.sort((a, b) => {
         const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
         const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
@@ -2291,9 +2385,14 @@
         const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
         if (diffPrio !== 0) return diffPrio;
 
-        if (a.date && b.date) return a.date.localeCompare(b.date);
-        if (a.date && !b.date) return -1;
-        if (!a.date && b.date) return 1;
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        if (dateA && dateB) {
+          const diff = dateA.getTime() - dateB.getTime();
+          if (diff !== 0) return diff;
+        }
+        if (dateA && !dateB) return -1;
+        if (!dateA && dateB) return 1;
 
         return 0;
       });
@@ -2319,7 +2418,6 @@
         else if (task.progress <= 85) statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
         else statusBadgeClass = "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30";
 
-        // FECHA DE FINALIZACIÓN
         let completedDateHtml = '<span class="text-slate-600">-</span>';
         if (task.status === "Finalizado" || (task.progress !== undefined && task.progress >= 100)) {
           const compDate = task.completedDate || (task.completedAt ? (() => {
@@ -2332,11 +2430,10 @@
           })() : null);
 
           if (compDate) {
-            completedDateHtml = `<span class="inline-block px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-300 font-medium border border-cyan-500/20 text-xs">${compDate}</span>`;
+            completedDateHtml = `<span class="inline-block px-2.5 py-0.5 rounded-lg bg-cyan-500/10 text-cyan-300 font-medium border border-cyan-500/20 text-xs">${toDDMMYYYY(compDate)}</span>`;
           }
         }
 
-        // DÍAS TRANSCURRIDOS
         const days = calculateTaskDays(task);
         let daysHtml = '<span class="text-slate-600">-</span>';
         if (days !== null) {
@@ -2351,7 +2448,6 @@
           daysHtml = `<span class="inline-block px-2.5 py-0.5 rounded-lg bg-white/[0.04] text-xs ${dayColor} border border-white/[0.05]">${days} d</span>`;
         }
 
-        // DETALLES: Si está en Revisión, borra texto y muestra animación bucle de puntos suspensivos
         let detailsHtml = '<span class="text-slate-600">-</span>';
         if (task.status === "Revisión") {
           detailsHtml = `
@@ -2384,10 +2480,10 @@
             <td class="py-3 px-4 whitespace-nowrap text-center">
               ${renderPriorityRank(task.priority)}
             </td>
-            <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap">
-              ${task.date ? task.date : '<span class="text-slate-600">-</span>'}
+            <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap font-mono">
+              ${task.date ? toDDMMYYYY(task.date) : '<span class="text-slate-600">-</span>'}
             </td>
-            <td class="py-3 px-4 text-xs whitespace-nowrap">
+            <td class="py-3 px-4 text-xs whitespace-nowrap font-mono">
               ${completedDateHtml}
             </td>
             <td class="py-3 px-4 text-xs whitespace-nowrap text-center">
@@ -2423,7 +2519,6 @@
       const currentUser = profiles.find(p => p.id === currentUserId);
       if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
 
-      // Asegurar que las empresas estén actualizadas en el select antes de abrir
       if (task && task.company && !config.companies.includes(task.company)) {
         config.companies.push(task.company);
       }
@@ -2437,31 +2532,25 @@
         document.getElementById('taskDesc').value = task.desc;
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
-        document.getElementById('taskDate').value = task.date;
+        document.getElementById('taskDate').value = toYYYYMMDD(task.date);
 
         let cDate = task.completedDate || "";
         if (!cDate && task.completedAt && (task.status === "Finalizado" || task.progress >= 100)) {
-          const d = new Date(task.completedAt);
-          if (!isNaN(d.getTime())) {
-            cDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-          }
+          cDate = toYYYYMMDD(task.completedAt);
+        } else if (cDate) {
+          cDate = toYYYYMMDD(cDate);
         }
         document.getElementById('taskCompletedDate').value = cDate;
         document.getElementById('taskDetails').value = (task.details && task.details !== "-") ? task.details : "";
       } else {
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
         document.getElementById('taskId').value = "";
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        document.getElementById('taskDate').value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('taskDate').value = toYYYYMMDD(new Date());
         document.getElementById('taskCompletedDate').value = "";
         document.getElementById('taskDesc').value = "";
         document.getElementById('taskDetails').value = "";
       }
 
-      // Auto-asistente: Si se cambia el estado a Finalizado en el modal, autocompletar la fecha de hoy
       const taskStatusSelect = document.getElementById('taskStatus');
       if (taskStatusSelect && !taskStatusSelect.dataset.listenerAttached) {
         taskStatusSelect.dataset.listenerAttached = "true";
@@ -2469,11 +2558,7 @@
           const cDateInput = document.getElementById('taskCompletedDate');
           if (e.target.value === "Finalizado") {
             if (!cDateInput.value) {
-              const now = new Date();
-              const yyyy = now.getFullYear();
-              const mm = String(now.getMonth() + 1).padStart(2, '0');
-              const dd = String(now.getDate()).padStart(2, '0');
-              cDateInput.value = `${yyyy}-${mm}-${dd}`;
+              cDateInput.value = toYYYYMMDD(new Date());
             }
           } else {
             cDateInput.value = "";
@@ -2497,7 +2582,8 @@
       const desc = document.getElementById('taskDesc').value;
       const status = document.getElementById('taskStatus').value;
       const priority = document.getElementById('taskPriority').value;
-      const date = document.getElementById('taskDate').value;
+      const dateVal = document.getElementById('taskDate').value;
+      const date = toDDMMYYYY(dateVal);
       const details = document.getElementById('taskDetails').value;
 
       const statusMap = {
@@ -2508,23 +2594,15 @@
       const completedDateVal = document.getElementById('taskCompletedDate').value;
       const existing = tasks.find(t => t.id === id);
       let completedAt = existing ? existing.completedAt : null;
-      let completedDate = completedDateVal || null;
+      let completedDate = toDDMMYYYY(completedDateVal);
 
       if (status === "Finalizado" || progress >= 100) {
         if (completedDate) {
-          const parts = completedDate.split('-');
-          if (parts.length === 3) {
-            completedAt = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0).getTime();
-          } else {
-            completedAt = completedAt || Date.now();
-          }
+          const parsed = parseDate(completedDate);
+          completedAt = parsed ? parsed.getTime() : (completedAt || Date.now());
         } else {
-          const now = new Date();
-          const yyyy = now.getFullYear();
-          const mm = String(now.getMonth() + 1).padStart(2, '0');
-          const dd = String(now.getDate()).padStart(2, '0');
-          completedDate = `${yyyy}-${mm}-${dd}`;
-          completedAt = now.getTime();
+          completedDate = toDDMMYYYY(new Date());
+          completedAt = Date.now();
         }
       } else {
         completedAt = null;
@@ -2627,7 +2705,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, tasks, profiles }, null, 2));
       const a = document.createElement('a');
       a.setAttribute("href", dataStr);
-      a.setAttribute("download", `taskflow_${new Date().toISOString().slice(0,10)}.json`);
+      a.setAttribute("download", `taskflow_${toDDMMYYYY(new Date())}.json`);
       document.body.appendChild(a);
       a.click();
       a.remove();

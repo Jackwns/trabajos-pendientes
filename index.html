@@ -389,7 +389,7 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-1.5">
               <div class="flex items-center gap-2">
-                <span class="text-xs uppercase font-extrabold tracking-wider text-white">Experiencia</span>
+                <span id="desktopXpLabel" class="text-xs uppercase font-extrabold tracking-wider text-white">Experiencia</span>
                 <span id="desktopXpRankTitle" class="text-[11px] text-cyan-300 font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">Cadete</span>
               </div>
               <div class="text-xs font-semibold">
@@ -551,7 +551,7 @@
       <!-- Header Modal -->
       <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <span>Mi Perfil</span>
+          <span id="profileModalHeaderTitle">Mi Perfil</span>
           <span id="profileModalRoleBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">Art Director</span>
         </h3>
         <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white p-1">✕</button>
@@ -581,7 +581,7 @@
         <div class="p-3.5 rounded-2xl bg-dark-850/80 border border-white/[0.06] shadow-inner">
           <div class="flex items-center justify-between mb-2">
             <div>
-              <span class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block">Progreso de Nivel</span>
+              <span id="gamificationProgressLabel" class="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block">Progreso de Nivel</span>
               <span id="gamificationRankName" class="text-sm font-black text-white">Nivel 1 • Recluta Creativo</span>
             </div>
             <div class="text-right">
@@ -922,7 +922,7 @@
       }
     ];
 
-    const PATRICIO_INITIAL_TASKS = [
+        const PATRICIO_INITIAL_TASKS = [
       {
         id: "task-1",
         company: "UNICO",
@@ -932,6 +932,7 @@
         date: "",
         details: "Terminar de Postear por Facebook",
         progress: 75,
+        userId: "patricio",
         updatedAt: 1788526382133
       },
       {
@@ -943,6 +944,7 @@
         date: "02-09-2026",
         details: "-",
         progress: 100,
+        userId: "patricio",
         updatedAt: 1788525676222,
         completedAt: 1788525676222
       },
@@ -955,6 +957,7 @@
         date: "",
         details: "Falta corroborar copies",
         progress: 100,
+        userId: "patricio",
         updatedAt: 1788526335985,
         completedAt: 1788526335985
       },
@@ -967,6 +970,7 @@
         date: "",
         details: "En espera de respuesta",
         progress: 100,
+        userId: "patricio",
         updatedAt: 1788526328059,
         completedAt: 1788526328059
       },
@@ -979,6 +983,7 @@
         date: "01-09-2026",
         details: "-",
         progress: 50,
+        userId: "patricio",
         updatedAt: 1788526319217
       },
       {
@@ -990,6 +995,7 @@
         date: "",
         details: "-",
         progress: 25,
+        userId: "patricio",
         updatedAt: 1788525676222
       },
       {
@@ -1001,6 +1007,7 @@
         date: "",
         details: "-",
         progress: 100,
+        userId: "patricio",
         updatedAt: 1788526314869,
         completedAt: 1788526314869
       },
@@ -1013,6 +1020,7 @@
         date: "",
         details: "-",
         progress: 0,
+        userId: "patricio",
         updatedAt: 1788525676222
       }
     ];
@@ -1039,6 +1047,22 @@
     let tasks = JSON.parse(localStorage.getItem('taskflow_tasks_unified')) || PATRICIO_INITIAL_TASKS;
     let selectedObservedUserId = "patricio";
     let activeStatusFilter = "";
+    // =========================================================================
+    // 👤 GESTIÓN DE TAREAS ACTIVAS POR USUARIO (TABLAS INDEPENDIENTES)
+    // =========================================================================
+    function getActiveUserId() {
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) {
+        return selectedObservedUserId || 'patricio';
+      }
+      return currentUserId || 'patricio';
+    }
+
+    function getActiveTasks() {
+      const activeId = getActiveUserId();
+      return tasks.filter(t => (t.userId || 'patricio') === activeId);
+    }
+
 
     
     // =========================================================================
@@ -1283,10 +1307,13 @@
 
     function updateGamificationUI() {
       const currentUser = profiles.find(p => p.id === currentUserId);
-      const targetUserId = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer))
+      const isViewer = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer));
+      const targetUserId = isViewer
         ? (selectedObservedUserId || 'patricio')
         : (currentUserId || 'patricio');
 
+      const targetUser = profiles.find(p => p.id === targetUserId) || profiles[0];
+      const targetName = targetUser ? targetUser.name : 'Patricio';
       const info = getUserGamification(targetUserId);
 
       // 1. Barra Desktop
@@ -1296,6 +1323,7 @@
       const xpNextEl = document.getElementById('desktopXpNext');
       const xpPctEl = document.getElementById('desktopXpPercent');
       const barFillEl = document.getElementById('desktopXpBarFill');
+      const desktopXpLabel = document.getElementById('desktopXpLabel');
 
       if (lvlNumEl) lvlNumEl.innerText = info.level;
       if (rankTitleEl) rankTitleEl.innerText = getRankTitle(info.level);
@@ -1303,10 +1331,14 @@
       if (xpNextEl) xpNextEl.innerText = `${info.nextLevelXP} XP`;
       if (xpPctEl) xpPctEl.innerText = `(${info.percent}%)`;
       if (barFillEl) barFillEl.style.width = `${info.percent}%`;
+      if (desktopXpLabel) {
+        desktopXpLabel.innerText = isViewer ? `Experiencia de ${targetName}` : 'Experiencia';
+      }
 
       // 2. Burbuja Líquida Móvil (asegura cobertura total en la base)
       const mobFill = document.getElementById('mobileLiquidFill');
       const mobText = document.getElementById('mobileLiquidLevelText');
+      const mobBubble = document.getElementById('mobileLiquidBubble');
       if (mobFill) {
         if (info.percent <= 0) {
           mobFill.style.height = '0%';
@@ -1317,14 +1349,21 @@
         }
       }
       if (mobText) mobText.innerText = `Nv ${info.level}`;
-
-      // 3. Verificación de Subida de Nivel (Cartel Neón)
-      const storageKey = `taskflow_last_level_${targetUserId}`;
-      const prevLevel = parseInt(localStorage.getItem(storageKey) || "0", 10);
-      if (prevLevel > 0 && info.level > prevLevel) {
-        triggerLevelUpCelebration(info.level);
+      if (mobBubble) {
+        mobBubble.title = isViewer
+          ? `Nivel de ${targetName} (${info.percent}% - Observando)`
+          : `Nivel y Experiencia (Nv ${info.level} - ${info.percent}%)`;
       }
-      localStorage.setItem(storageKey, String(info.level));
+
+      // 3. Verificación de Subida de Nivel (Cartel Neón) - Solo para el usuario dueño de la cuenta, no en modo visor
+      if (!isViewer) {
+        const storageKey = `taskflow_last_level_${targetUserId}`;
+        const prevLevel = parseInt(localStorage.getItem(storageKey) || "0", 10);
+        if (prevLevel > 0 && info.level > prevLevel) {
+          triggerLevelUpCelebration(info.level);
+        }
+        localStorage.setItem(storageKey, String(info.level));
+      }
 
       // Actualizar datos del Modal de Perfil si está abierto
       renderProfileModalGamification(info);
@@ -1348,14 +1387,18 @@
 
     function renderProfileModalGamification(infoPassed = null) {
       const currentUser = profiles.find(p => p.id === currentUserId);
-      const targetUserId = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer))
+      const isViewer = (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer));
+      const targetUserId = isViewer
         ? (selectedObservedUserId || 'patricio')
         : (currentUserId || 'patricio');
 
+      const targetUser = profiles.find(p => p.id === targetUserId) || profiles[0];
+      const targetName = targetUser ? targetUser.name : 'Patricio';
       const info = infoPassed || getUserGamification(targetUserId);
 
       const lvlTag = document.getElementById('profileModalLevelTag');
       const totalXpEl = document.getElementById('profileModalTotalXp');
+      const progressLabel = document.getElementById('gamificationProgressLabel');
       const rankNameEl = document.getElementById('gamificationRankName');
       const xpFracEl = document.getElementById('gamificationXpFraction');
       const xpPctText = document.getElementById('gamificationXpPercentText');
@@ -1363,14 +1406,25 @@
       const compCountEl = document.getElementById('gamificationCompletedCount');
 
       if (lvlTag) lvlTag.innerText = `Nv ${info.level}`;
-      if (totalXpEl) totalXpEl.innerText = `${info.totalXP} XP Total`;
-      if (rankNameEl) rankNameEl.innerText = `Nivel ${info.level} • ${getRankTitle(info.level)}`;
+      if (totalXpEl) {
+        totalXpEl.innerText = isViewer ? `${info.totalXP} XP de ${targetName}` : `${info.totalXP} XP Total`;
+      }
+      if (progressLabel) {
+        progressLabel.innerText = isViewer ? `Progreso de Nivel de ${targetName}` : 'Progreso de Nivel';
+      }
+      if (rankNameEl) {
+        rankNameEl.innerText = isViewer
+          ? `Nivel ${info.level} • ${getRankTitle(info.level)} (${targetName})`
+          : `Nivel ${info.level} • ${getRankTitle(info.level)}`;
+      }
       if (xpFracEl) xpFracEl.innerText = `${info.currentLevelXP} / ${info.nextLevelXP} XP`;
       if (xpPctText) xpPctText.innerText = `(${info.percent}%)`;
       if (barFill) barFill.style.width = `${info.percent}%`;
-      if (compCountEl) compCountEl.innerText = `${info.completedCount} finalizados`;
+      if (compCountEl) {
+        compCountEl.innerText = isViewer ? `${info.completedCount} finalizados por ${targetName}` : `${info.completedCount} finalizados`;
+      }
 
-            // Insignia Sprint Creativo (Entrega en 1 día hábil)
+      // Insignia Sprint Creativo (Entrega en 1 día hábil)
       const badgeCard = document.getElementById('militaryBadgeCard');
       const badgeDesc = document.getElementById('militaryBadgeDesc');
       const badgeTitle = document.getElementById('militaryBadgeTitle');
@@ -1381,20 +1435,26 @@
           badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-amber-500/10 border-amber-400 text-amber-400 military-gold-neon ring-1 ring-amber-400/40";
           if (badgeTitle) {
             badgeTitle.className = "text-xs font-black uppercase tracking-wider text-amber-300";
-            badgeTitle.innerText = "Insignia Sprint Creativo";
+            badgeTitle.innerText = isViewer ? `Insignia Sprint Creativo (${targetName})` : "Insignia Sprint Creativo";
           }
-          badgeDesc.innerText = `${count} ${count === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados'} en 1 solo día hábil.`;
+          const taskWord = count === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados';
+          badgeDesc.innerText = isViewer
+            ? `${count} ${taskWord} en 1 solo día hábil por ${targetName}.`
+            : `${count} ${taskWord} en 1 solo día hábil.`;
           badgeDesc.className = "text-xs text-amber-200/90 mt-0.5 leading-snug font-medium";
         } else {
           badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500";
           if (badgeTitle) {
             badgeTitle.className = "text-xs font-black uppercase tracking-wider text-slate-500";
-            badgeTitle.innerText = "Insignia Sprint Creativo";
+            badgeTitle.innerText = isViewer ? `Insignia Sprint Creativo (${targetName})` : "Insignia Sprint Creativo";
           }
-          badgeDesc.innerText = "0 trabajos de prioridad máxima finalizados en 1 solo día hábil.";
+          badgeDesc.innerText = isViewer
+            ? `0 trabajos de prioridad máxima finalizados en 1 solo día hábil por ${targetName}.`
+            : "0 trabajos de prioridad máxima finalizados en 1 solo día hábil.";
           badgeDesc.className = "text-xs text-slate-500 mt-0.5 leading-snug";
         }
-      }    }
+      }
+    }
 
     // Alternar Sección "Cuenta" dentro de Mi Perfil
     function toggleAccountSettings() {
@@ -1771,15 +1831,40 @@
     // ⚙️ MODAL DE PERFIL (PERSONALIZACIÓN Y CUENTA)
     // =========================================================================
     function openUserProfileModal() {
-      const user = profiles.find(p => p.id === currentUserId) || DEFAULT_PROFILES[0];
-      const isViewer = (user.id === 'viewer' || user.isViewer);
+      const currentUser = profiles.find(p => p.id === currentUserId) || DEFAULT_PROFILES[0];
+      const isViewer = (currentUser.id === 'viewer' || currentUser.isViewer);
 
-      document.getElementById('profileEditNameTitle').innerText = user.name;
-      document.getElementById('profileEditRoleTitle').innerText = user.role;
-      document.getElementById('profileModalRoleBadge').innerText = user.role || 'Miembro';
-      document.getElementById('editProfileName').value = user.name;
-      document.getElementById('editProfileRole').value = user.role;
-      document.getElementById('profileEditAvatarPreview').innerHTML = renderUserAvatarHtml(user);
+      const targetUserId = isViewer ? (selectedObservedUserId || 'patricio') : currentUserId;
+      const targetUser = profiles.find(p => p.id === targetUserId) || currentUser;
+
+      const modalHeaderTitle = document.getElementById('profileModalHeaderTitle');
+      const roleBadge = document.getElementById('profileModalRoleBadge');
+      const nameTitle = document.getElementById('profileEditNameTitle');
+      const roleTitle = document.getElementById('profileEditRoleTitle');
+      const avatarPreview = document.getElementById('profileEditAvatarPreview');
+
+      if (isViewer) {
+        if (modalHeaderTitle) modalHeaderTitle.innerHTML = `<span class="text-emerald-400">Consola Viewer</span> • Datos de ${targetUser.name}`;
+        if (roleBadge) {
+          roleBadge.innerText = `Supervisando a ${targetUser.name}`;
+          roleBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+        }
+        if (nameTitle) nameTitle.innerText = targetUser.name;
+        if (roleTitle) roleTitle.innerText = `${targetUser.role || 'Miembro'} • (Observando como Viewer)`;
+        if (avatarPreview) avatarPreview.innerHTML = renderUserAvatarHtml(targetUser);
+      } else {
+        if (modalHeaderTitle) modalHeaderTitle.innerText = 'Mi Perfil';
+        if (roleBadge) {
+          roleBadge.innerText = currentUser.role || 'Miembro';
+          roleBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30';
+        }
+        if (nameTitle) nameTitle.innerText = currentUser.name;
+        if (roleTitle) roleTitle.innerText = currentUser.role;
+        if (avatarPreview) avatarPreview.innerHTML = renderUserAvatarHtml(currentUser);
+      }
+
+      document.getElementById('editProfileName').value = currentUser.name;
+      document.getElementById('editProfileRole').value = currentUser.role;
 
       const accordion = document.getElementById('accountAccordionSection');
       if (isViewer) {
@@ -2276,12 +2361,13 @@
     // 📊 RENDERIZADO DE KPIs Y TABLA
     // =========================================================================
     function renderKPIs() {
-      const total = tasks.length;
-      const pendientes = tasks.filter(t => t.status === "Pendiente").length;
-      const proceso = tasks.filter(t => t.status === "Proceso").length;
-      const revision = tasks.filter(t => t.status === "Revisión").length;
-      const aprobados = tasks.filter(t => t.status === "Aprobado").length;
-      const finalizados = tasks.filter(t => t.status === "Finalizado").length;
+      const userTasks = getActiveTasks();
+      const total = userTasks.length;
+      const pendientes = userTasks.filter(t => t.status === "Pendiente").length;
+      const proceso = userTasks.filter(t => t.status === "Proceso").length;
+      const revision = userTasks.filter(t => t.status === "Revisión").length;
+      const aprobados = userTasks.filter(t => t.status === "Aprobado").length;
+      const finalizados = userTasks.filter(t => t.status === "Finalizado").length;
 
       const items = [
         { label: "Total", filterKey: "", value: total, text: "text-white", iconBg: "bg-white/[0.04]", iconColor: "text-slate-300", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>` },
@@ -2361,7 +2447,8 @@
       const compFilter = document.getElementById('filterCompany').value;
       const prioFilter = document.getElementById('filterPriority').value;
 
-      let filtered = tasks.filter(t => {
+      const userTasks = getActiveTasks();
+      let filtered = userTasks.filter(t => {
         const matchesSearch = t.company.toLowerCase().includes(search) || 
                               t.desc.toLowerCase().includes(search) || 
                               (t.details && t.details.toLowerCase().includes(search));
@@ -2610,7 +2697,8 @@
       }
 
       const taskObj = sanitizeTask({ id, company, desc, status, priority, date, completedDate, progress, details, completedAt });
-      const authorId = (currentUserId && currentUserId !== 'viewer') ? currentUserId : 'patricio';
+      const activeId = getActiveUserId();
+      const authorId = existing ? (existing.userId || activeId) : activeId;
       const taskWithUser = { ...taskObj, userId: authorId, completedDate, completedAt };
 
       const masterIdx = tasks.findIndex(t => t.id === id);

@@ -339,8 +339,9 @@
           </button>
 
           <!-- BURBUJA DE PERFIL ARRIBA A LA DERECHA -->
-          <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all overflow-hidden shrink-0 active:scale-95 shadow-md">
+          <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all shrink-0 active:scale-95 shadow-md">
             <div id="navbarAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden"></div>
+            <span id="navbarResetAlertDot" class="hidden absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-dark-950 shadow-[0_0_8px_rgba(251,191,36,0.9)] z-20" title="Solicitud de clave pendiente"></span>
           </button>
 
         </div>
@@ -637,6 +638,26 @@
       <!-- ================================================================= -->
       <!-- 🔘 BOTÓN "CUENTA" (DESPLIEGA AJUSTES DE PERFIL Y CONTRASEÑA)       -->
       <!-- ================================================================= -->
+      
+      <!-- ================================================================= -->
+      <!-- 👑 SECCIÓN ADMINISTRACIÓN DE CUENTAS (EXCLUSIVO PARA PATRICIO)    -->
+      <!-- ================================================================= -->
+      <div id="patricioAdminSection" class="hidden mb-5">
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-dark-850/90 border border-cyan-500/30 shadow-xl">
+          <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-white/[0.06]">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+              <h5 class="text-xs font-black uppercase tracking-wider text-white">Gestión de Cuentas (Admin)</h5>
+            </div>
+            <span class="text-[10px] text-cyan-300 font-extrabold px-2 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-500/30">Control Maestro</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">
+            Como administrador puedes restablecer contraseñas a <strong class="text-slate-200 font-mono">12345678</strong> o eliminar cuentas de miembros:
+          </p>
+          <div id="patricioAdminProfilesList" class="space-y-2.5 max-h-56 overflow-y-auto custom-scroll pr-1"></div>
+        </div>
+      </div>
+
       <div id="accountAccordionSection" class="mb-5">
         <button type="button" onclick="toggleAccountSettings()" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.035] hover:bg-white/[0.07] border border-white/[0.08] text-xs font-extrabold text-slate-200 transition-all active:scale-[0.99] shadow-sm">
           <div class="flex items-center gap-2">
@@ -721,12 +742,17 @@
         </div>
       </div>
 
-      <!-- Footer: Cerrar Sesión y Salir (Se mantienen exactamente en su posición) -->
-      <div class="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-        <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
-          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          Cerrar Sesión
-        </button>
+      <!-- Footer: Cerrar Sesión, Eliminar Cuenta Propia y Salir -->
+      <div class="flex items-center justify-between pt-3 border-t border-white/[0.06] flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Cerrar Sesión
+          </button>
+          <button id="deleteOwnAccountBtn" onclick="deleteOwnAccount()" class="hidden text-xs font-bold text-rose-400/90 hover:text-rose-300 hover:bg-rose-500/15 px-3 py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">
+            Eliminar Cuenta
+          </button>
+        </div>
         <button onclick="closeUserProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] rounded-xl">
           Listo
         </button>
@@ -1579,6 +1605,110 @@
     // =========================================================================
     // 📺 PANTALLA SELECTOR DE PERFILES NETFLIX
     // =========================================================================
+    
+    // =========================================================================
+    // 👑 FUNCIONES DE ADMINISTRACIÓN Y RESETEO DE CLAVE (PODER DE PATRICIO)
+    // =========================================================================
+    function renderPatricioAdminProfilesList() {
+      const container = document.getElementById('patricioAdminProfilesList');
+      if (!container) return;
+
+      const manageableProfiles = profiles.filter(p => p && p.id !== 'patricio' && p.id !== 'viewer' && !p.isViewer);
+
+      if (manageableProfiles.length === 0) {
+        container.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] text-center">
+            <p class="text-xs text-slate-500">No hay otras cuentas registradas aún.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = manageableProfiles.map(p => {
+        const hasResetReq = !!p.resetRequested;
+        return `
+          <div class="p-2.5 sm:p-3 rounded-xl bg-dark-900 border ${hasResetReq ? 'border-amber-400/50 shadow-[0_0_12px_rgba(251,191,36,0.15)] ring-1 ring-amber-400/30' : 'border-white/[0.06]'} flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-full overflow-hidden border border-white/15 shrink-0">
+                ${renderUserAvatarHtml(p, 'w-full h-full rounded-full')}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-xs font-bold text-white truncate">${p.name}</span>
+                  ${hasResetReq ? '<span class="text-[9px] font-black uppercase text-amber-300 bg-amber-500/20 border border-amber-400/40 px-1.5 py-0.2 rounded animate-pulse">Solicitó Clave</span>' : ''}
+                </div>
+                <span class="text-[10px] text-slate-400 truncate block">${p.role || 'Miembro'}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+              <button onclick="adminResetPassword('${p.id}')" class="px-2.5 py-1.5 text-[11px] font-bold rounded-lg ${hasResetReq ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40 hover:bg-amber-500/35 shadow-[0_0_10px_rgba(251,191,36,0.2)]' : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/20'} transition-all active:scale-95" title="Restablecer contraseña a 12345678">
+                Resetear a 12345678
+              </button>
+              <button onclick="adminDeleteProfile('${p.id}')" class="px-2.5 py-1.5 text-[11px] font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 rounded-lg transition-all active:scale-95 flex items-center gap-1" title="Eliminar cuenta">
+                <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Eliminar</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function adminResetPassword(profileId) {
+      const p = profiles.find(item => item.id === profileId);
+      if (!p) return;
+      if (!confirm(`¿Restablecer la contraseña de "${p.name}" a 12345678?`)) return;
+
+      p.password = "12345678";
+      p.resetRequested = false;
+      saveLocalState();
+      await saveToCloud();
+
+      renderPatricioAdminProfilesList();
+      renderNetflixScreen();
+      showToast(`Clave de "${p.name}" restablecida a 12345678`);
+    }
+
+    async function adminDeleteProfile(profileId) {
+      const p = profiles.find(item => item.id === profileId);
+      if (!p) return;
+      if (p.id === 'patricio' || p.id === 'viewer' || p.isViewer) {
+        alert("Esta cuenta protegida no puede eliminarse.");
+        return;
+      }
+      if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente la cuenta de "${p.name}"?`)) return;
+
+      profiles = profiles.filter(item => item.id !== profileId);
+      saveLocalState();
+      await saveToCloud();
+
+      renderPatricioAdminProfilesList();
+      renderNetflixScreen();
+      if (document.getElementById('viewerProfilesSelector')) {
+        renderViewerProfilesSelector();
+      }
+      showToast(`Cuenta de "${p.name}" eliminada`);
+    }
+
+    async function deleteOwnAccount() {
+      const user = profiles.find(p => p.id === currentUserId);
+      if (!user || user.id === 'patricio' || user.id === 'viewer' || user.isViewer) {
+        alert("Esta cuenta no puede ser eliminada.");
+        return;
+      }
+      if (!confirm(`¿Eliminar tu cuenta "${user.name}" permanentemente? Esta acción cerrará tu sesión.`)) return;
+
+      const name = user.name;
+      profiles = profiles.filter(p => p.id !== currentUserId);
+      saveLocalState();
+      await saveToCloud();
+      logoutProfile();
+      showToast(`Tu cuenta "${name}" ha sido eliminada`);
+    }
+
     function renderNetflixScreen() {
       const container = document.getElementById('netflixProfilesContainer');
       const maxUsers = 20;
@@ -1656,7 +1786,7 @@
       selectedProfileForLogin.resetRequested = true;
       saveLocalState();
       await saveToCloud();
-      alert(`Solicitud registrada para "${selectedProfileForLogin.name}". Podrá ser reasignada a 12345678.`);
+      alert(`Solicitud registrada para "${selectedProfileForLogin.name}". Patricio podrá restablecer tu clave a 12345678.`);
       closeProfilePasswordModal();
       renderNetflixScreen();
     }
@@ -1809,6 +1939,14 @@
       renderKPIs();
       renderTable();
       updateGamificationUI();
+
+      // Alerta en la campana/avatar de Patricio si hay solicitudes de clave pendientes
+      const hasPendingReset = (currentUser.id === 'patricio') && profiles.some(p => p && p.resetRequested && p.id !== 'patricio' && p.id !== 'viewer');
+      const alertDot = document.getElementById('navbarResetAlertDot');
+      if (alertDot) {
+        if (hasPendingReset) alertDot.classList.remove('hidden');
+        else alertDot.classList.add('hidden');
+      }
     }
 
     function logoutProfile() {
@@ -1833,6 +1971,7 @@
     function openUserProfileModal() {
       const currentUser = profiles.find(p => p.id === currentUserId) || DEFAULT_PROFILES[0];
       const isViewer = (currentUser.id === 'viewer' || currentUser.isViewer);
+      const isPatricio = (currentUser.id === 'patricio');
 
       const targetUserId = isViewer ? (selectedObservedUserId || 'patricio') : currentUserId;
       const targetUser = profiles.find(p => p.id === targetUserId) || currentUser;
@@ -1853,7 +1992,7 @@
         if (roleTitle) roleTitle.innerText = `${targetUser.role || 'Miembro'} • (Observando como Viewer)`;
         if (avatarPreview) avatarPreview.innerHTML = renderUserAvatarHtml(targetUser);
       } else {
-        if (modalHeaderTitle) modalHeaderTitle.innerText = 'Mi Perfil';
+        if (modalHeaderTitle) modalHeaderTitle.innerText = isPatricio ? 'Mi Perfil • Administrador' : 'Mi Perfil';
         if (roleBadge) {
           roleBadge.innerText = currentUser.role || 'Miembro';
           roleBadge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30';
@@ -1863,14 +2002,33 @@
         if (avatarPreview) avatarPreview.innerHTML = renderUserAvatarHtml(currentUser);
       }
 
-      document.getElementById('editProfileName').value = currentUser.name;
-      document.getElementById('editProfileRole').value = currentUser.role;
+      const editNameEl = document.getElementById('editProfileName');
+      const editRoleEl = document.getElementById('editProfileRole');
+      if (editNameEl) editNameEl.value = currentUser.name;
+      if (editRoleEl) editRoleEl.value = currentUser.role;
 
       const accordion = document.getElementById('accountAccordionSection');
-      if (isViewer) {
-        if (accordion) accordion.classList.add('hidden');
-      } else {
-        if (accordion) accordion.classList.remove('hidden');
+      if (accordion) {
+        if (isViewer) accordion.classList.add('hidden');
+        else accordion.classList.remove('hidden');
+      }
+
+      // Sección de administración de usuarios (EXCLUSIVA PARA PATRICIO)
+      const adminSec = document.getElementById('patricioAdminSection');
+      if (adminSec) {
+        if (isPatricio) {
+          adminSec.classList.remove('hidden');
+          renderPatricioAdminProfilesList();
+        } else {
+          adminSec.classList.add('hidden');
+        }
+      }
+
+      // Botón de eliminar propia cuenta (solo para usuarios creados, nunca Patricio ni Viewer)
+      const delOwnBtn = document.getElementById('deleteOwnAccountBtn');
+      if (delOwnBtn) {
+        if (!isViewer && !isPatricio) delOwnBtn.classList.remove('hidden');
+        else delOwnBtn.classList.add('hidden');
       }
 
       // Cerrar acordeón por defecto al abrir
@@ -1879,25 +2037,33 @@
       if (wrapper) wrapper.classList.add('hidden');
       if (arrow) arrow.innerText = '▼';
 
-      // Paleta de 8 colores
+      // Paleta de 8 colores (corregido: usa currentUser.color)
       const colorsContainer = document.getElementById('electricColorsPicker');
-      colorsContainer.innerHTML = ELECTRIC_COLORS.map(c => {
-        const isSelected = (user.color === c.hex);
-        return `
-          <button type="button" onclick="selectElectricColor('${c.hex}')"
-            class="w-8 h-8 rounded-full transition-transform ${isSelected ? 'scale-125 ring-2 ring-white shadow-lg' : 'hover:scale-110'}"
-            style="background-color: ${c.hex};" title="${c.name}">
-          </button>
-        `;
-      }).join('');
+      if (colorsContainer) {
+        const userCol = currentUser.color || '#06B6D4';
+        colorsContainer.innerHTML = ELECTRIC_COLORS.map(c => {
+          const isSelected = (userCol === c.hex);
+          return `
+            <button type="button" onclick="selectElectricColor('${c.hex}')"
+              class="w-8 h-8 rounded-full transition-transform ${isSelected ? 'scale-125 ring-2 ring-white shadow-lg' : 'hover:scale-110'}"
+              style="background-color: ${c.hex};" title="${c.name}">
+            </button>
+          `;
+        }).join('');
+      }
 
-      document.getElementById('changePassOld').value = "";
-      document.getElementById('changePassNew').value = "";
-      document.getElementById('changePassNewRep').value = "";
-      document.getElementById('changePassMsg').classList.add('hidden');
+      const passOld = document.getElementById('changePassOld');
+      const passNew = document.getElementById('changePassNew');
+      const passRep = document.getElementById('changePassNewRep');
+      const passMsg = document.getElementById('changePassMsg');
+      if (passOld) passOld.value = "";
+      if (passNew) passNew.value = "";
+      if (passRep) passRep.value = "";
+      if (passMsg) passMsg.classList.add('hidden');
 
       renderProfileModalGamification();
-      document.getElementById('userProfileModal').classList.remove('hidden');
+      const modalEl = document.getElementById('userProfileModal');
+      if (modalEl) modalEl.classList.remove('hidden');
     }
 
     function closeUserProfileModal() {
@@ -2022,7 +2188,7 @@
       user.resetRequested = true;
       saveLocalState();
       await saveToCloud();
-      alert("Solicitud de reseteo registrada.");
+      alert("Solicitud registrada. Patricio podrá restablecer tu contraseña a 12345678.");
       closeUserProfileModal();
     }
 

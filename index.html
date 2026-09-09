@@ -2705,17 +2705,57 @@
       filtered.sort((a, b) => {
         const isDoneA = (a.status === "Finalizado" || (a.progress !== undefined && a.progress >= 100));
         const isDoneB = (b.status === "Finalizado" || (b.progress !== undefined && b.progress >= 100));
+
+        // 1. Tareas activas siempre arriba, tareas finalizadas siempre al fondo
         if (isDoneA && !isDoneB) return 1;
         if (!isDoneA && isDoneB) return -1;
 
+        // 2. ORDENAMIENTO EXCLUSIVO PARA TRABAJOS FINALIZADOS:
+        // Primero el más reciente finalizado y el más antiguo al final
+        if (isDoneA && isDoneB) {
+          const getFinalizedTime = (task) => {
+            if (task.completedDate) {
+              const p = parseDate(task.completedDate);
+              if (p) {
+                const subDay = task.completedAt ? (Number(task.completedAt) % 86400000) : (task.updatedAt ? (Number(task.updatedAt) % 86400000) : 0);
+                return p.getTime() + subDay;
+              }
+            }
+            if (task.completedAt) {
+              const num = Number(task.completedAt);
+              if (!isNaN(num) && num > 0) return num;
+            }
+            if (task.updatedAt) {
+              const num = Number(task.updatedAt);
+              if (!isNaN(num) && num > 0) return num;
+            }
+            if (task.date) {
+              const p = parseDate(task.date);
+              if (p) return p.getTime();
+            }
+            return 0;
+          };
+
+          const timeA = getFinalizedTime(a);
+          const timeB = getFinalizedTime(b);
+          if (timeA !== timeB) {
+            return timeB - timeA; // Descendente: más reciente primero, más antiguo al final
+          }
+          return (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0);
+        }
+
+        // 3. ORDENAMIENTO PARA TRABAJOS ACTIVOS (EN CURSO):
+        // A. Nivel de avance: entre más avanzado el proceso más abajo va (Pendiente -> Proceso -> Revisión -> Aprobado)
         const progA = (a.progress !== undefined) ? Number(a.progress) : 0;
         const progB = (b.progress !== undefined) ? Number(b.progress) : 0;
         if (progA !== progB) return progA - progB;
 
+        // B. Prioridad: Máxima > Media > Mínima
         const prioWeights = { "Máxima": 3, "Media": 2, "Mínima": 1 };
         const diffPrio = (prioWeights[b.priority] || 0) - (prioWeights[a.priority] || 0);
         if (diffPrio !== 0) return diffPrio;
 
+        // C. Fecha de ingreso más antigua arriba para desempatar
         const dateA = parseDate(a.date);
         const dateB = parseDate(b.date);
         if (dateA && dateB) {

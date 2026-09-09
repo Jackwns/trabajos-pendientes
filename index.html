@@ -438,13 +438,19 @@
           <select id="filterPriority" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
             <option value="">Todas las prioridades</option>
           </select>
+          <select id="filterDifficulty" onchange="renderTable()" class="flex-1 sm:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
+            <option value="">Todas las dificultades</option>
+            <option value="Baja">Dificultad Baja</option>
+            <option value="Media">Dificultad Media</option>
+            <option value="Alta">Dificultad Alta</option>
+          </select>
         </div>
       </div>
 
       <!-- TABLA CON SCROLL HORIZONTAL ENCAPSULADO Y NUEVA COLUMNA DÍAS -->
       <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl w-full">
         <div class="overflow-x-auto custom-scroll w-full">
-          <table class="w-full text-left border-collapse min-w-[960px]">
+          <table class="w-full text-left border-collapse min-w-[1020px]">
             <thead>
               <tr class="border-b border-white/[0.05] bg-white/[0.015] text-slate-400 text-[11px] uppercase tracking-wider font-semibold select-none">
                 <th class="py-3.5 px-4 w-16 text-center">Progreso</th>
@@ -452,6 +458,7 @@
                 <th class="py-3.5 px-4">Descripción del Trabajo</th>
                 <th class="py-3.5 px-4">Estado</th>
                 <th class="py-3.5 px-4 text-center">Prioridad</th>
+                <th class="py-3.5 px-4 text-center">Dificultad</th>
                 <th class="py-3.5 px-4">Fecha Ingreso</th>
                 <th class="py-3.5 px-4">Fecha Finalización</th>
                 <th class="py-3.5 px-4 text-center w-24">Días Hábiles</th>
@@ -595,8 +602,7 @@
           <div class="w-full h-3 bg-dark-950 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
             <div id="gamificationModalBarFill" class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-fuchsia-500 shadow-[0_0_12px_rgba(217,70,239,0.5)] transition-all duration-700" style="width: 0%;"></div>
           </div>
-          <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2">
-            <span>2 trabajos Máxima en 3d = +500 XP</span>
+          <div class="flex items-center justify-end text-[10px] text-slate-400 mt-2">
             <span id="gamificationCompletedCount">0 finalizados</span>
           </div>
         </div>
@@ -712,7 +718,7 @@
           </div>
 
           <!-- Cambiar Contraseña -->
-          <div id="changePassSection" class="space-y-3 text-xs">
+          <div id="changePassSection" class="space-y-3 text-xs pb-3 border-b border-white/[0.06]">
             <h5 class="text-xs font-bold uppercase tracking-wider text-slate-300">Cambiar Contraseña</h5>
             <div>
               <label class="block text-slate-400 mb-1">Contraseña Anterior</label>
@@ -739,20 +745,26 @@
             </div>
           </div>
 
+          <!-- Zona de Peligro: Eliminar Cuenta Propia (dentro de Ajustes de Cuenta) -->
+          <div id="deleteOwnAccountWrapper" class="hidden flex items-center justify-between pt-1">
+            <div>
+              <span class="text-xs font-bold text-rose-400 block">Eliminar Cuenta</span>
+              <span class="text-[10px] text-slate-500">Eliminar permanentemente este perfil</span>
+            </div>
+            <button id="deleteOwnAccountBtn" type="button" onclick="deleteOwnAccount()" class="text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-xl border border-rose-500/30 transition-all active:scale-95">
+              Eliminar Cuenta
+            </button>
+          </div>
+
         </div>
       </div>
 
-      <!-- Footer: Cerrar Sesión, Eliminar Cuenta Propia y Salir -->
+      <!-- Footer: Cerrar Sesión y Salir -->
       <div class="flex items-center justify-between pt-3 border-t border-white/[0.06] flex-wrap gap-2">
-        <div class="flex items-center gap-2">
-          <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-            Cerrar Sesión
-          </button>
-          <button id="deleteOwnAccountBtn" onclick="deleteOwnAccount()" class="hidden text-xs font-bold text-rose-400/90 hover:text-rose-300 hover:bg-rose-500/15 px-3 py-2 rounded-xl border border-rose-500/30 transition-all active:scale-95">
-            Eliminar Cuenta
-          </button>
-        </div>
+        <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          Cerrar Sesión
+        </button>
         <button onclick="closeUserProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] rounded-xl">
           Listo
         </button>
@@ -778,14 +790,22 @@
           <label class="block text-xs font-semibold text-slate-300 mb-1">Descripción del Trabajo</label>
           <textarea id="taskDesc" required rows="2" placeholder="Ej: Diseñar placas..." class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></textarea>
         </div>
-        <div class="grid grid-cols-2 gap-2.5">
+        <div class="grid grid-cols-3 gap-2 sm:gap-2.5">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Estado</label>
-            <select id="taskStatus" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></select>
+            <select id="taskStatus" required class="w-full text-xs sm:text-sm border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Prioridad</label>
-            <select id="taskPriority" required class="w-full text-sm border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></select>
+            <select id="taskPriority" required class="w-full text-xs sm:text-sm border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Dificultad</label>
+            <select id="taskDifficulty" required class="w-full text-xs sm:text-sm border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+              <option value="Baja">Baja</option>
+              <option value="Media" selected>Media</option>
+              <option value="Alta">Alta</option>
+            </select>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
@@ -955,6 +975,7 @@
         desc: "Crear página de Facebook e Instagram y armar placas para feed + historias",
         status: "Aprobado",
         priority: "Máxima",
+        difficulty: "Media",
         date: "",
         details: "Terminar de Postear por Facebook",
         progress: 75,
@@ -967,6 +988,7 @@
         desc: "Crear placa para contratacion de administrativo",
         status: "Finalizado",
         priority: "Máxima",
+        difficulty: "Media",
         date: "02-09-2026",
         details: "-",
         progress: 100,
@@ -980,6 +1002,7 @@
         desc: "Realizar 3 posts sobre el edificio de Las Piedras",
         status: "Finalizado",
         priority: "Máxima",
+        difficulty: "Media",
         date: "",
         details: "Falta corroborar copies",
         progress: 100,
@@ -993,6 +1016,7 @@
         desc: "Modificar placas madre con logo de la concesionaria",
         status: "Finalizado",
         priority: "Máxima",
+        difficulty: "Media",
         date: "",
         details: "En espera de respuesta",
         progress: 100,
@@ -1006,6 +1030,7 @@
         desc: "Armar placa individual para el club San Martín",
         status: "Revisión",
         priority: "Media",
+        difficulty: "Media",
         date: "01-09-2026",
         details: "-",
         progress: 50,
@@ -1018,6 +1043,7 @@
         desc: "Realizar edición de video de quedada",
         status: "Proceso",
         priority: "Media",
+        difficulty: "Media",
         date: "",
         details: "-",
         progress: 25,
@@ -1030,6 +1056,7 @@
         desc: "Con las fotos de Cande de la obra de Alta Vista hacer placas de venta en pozo torre 2 (1, 2 y 3 dorm)",
         status: "Finalizado",
         priority: "Media",
+        difficulty: "Media",
         date: "",
         details: "-",
         progress: 100,
@@ -1043,6 +1070,7 @@
         desc: "Armar tarjeta de presentación con QR a la página oficial",
         status: "Pendiente",
         priority: "Mínima",
+        difficulty: "Media",
         date: "",
         details: "-",
         progress: 0,
@@ -1249,17 +1277,23 @@
       if (prio === "Media") baseXP = 150;
       else if (prio === "Mínima") baseXP = 90;
 
+      // Multiplicador de Dificultad: Baja = 0.7x (-30%), Media = 1.0x (base), Alta = 1.4x (+40% bonus)
+      const diff = String(task.difficulty || "Media").trim();
+      let diffMult = 1.0;
+      if (diff === "Baja") diffMult = 0.7;
+      else if (diff === "Alta") diffMult = 1.4;
+
       // Si aún no tiene fecha de inicio, suma puntaje base provisional (al ingresar la fecha se ajusta)
       if (days === null) {
-        return Math.round(baseXP * 0.4);
+        return Math.round(baseXP * 0.4 * diffMult);
       }
 
       // Multiplicador por velocidad de entrega en días:
-      // <= 1 día: 1.2x (300 XP en Máxima)
-      // 2 - 3 días: 1.0x (250 XP en Máxima -> 2 tareas = 500 XP = 1 Nivel)
-      // 4 - 5 días: 0.8x (200 XP)
-      // 6 - 7 días: 0.65x (162 XP)
-      // > 7 días: 0.5x (125 XP)
+      // <= 1 día: 1.2x
+      // 2 - 3 días: 1.0x
+      // 4 - 5 días: 0.8x
+      // 6 - 7 días: 0.65x
+      // > 7 días: 0.5x
       let mult = 1.0;
       if (days <= 1) mult = 1.2;
       else if (days <= 3) mult = 1.0;
@@ -1267,7 +1301,7 @@
       else if (days <= 7) mult = 0.65;
       else mult = 0.5;
 
-      return Math.round(baseXP * mult);
+      return Math.round(baseXP * mult * diffMult);
     }
 
     // Obtener información de Gamificación por Perfil (Patricio u otro usuario)
@@ -2024,11 +2058,11 @@
         }
       }
 
-      // Botón de eliminar propia cuenta (solo para usuarios creados, nunca Patricio ni Viewer)
-      const delOwnBtn = document.getElementById('deleteOwnAccountBtn');
-      if (delOwnBtn) {
-        if (!isViewer && !isPatricio) delOwnBtn.classList.remove('hidden');
-        else delOwnBtn.classList.add('hidden');
+      // Botón de eliminar propia cuenta (solo para usuarios creados dentro de Ajustes de Cuenta)
+      const delOwnWrap = document.getElementById('deleteOwnAccountWrapper');
+      if (delOwnWrap) {
+        if (!isViewer && !isPatricio) delOwnWrap.classList.remove('hidden');
+        else delOwnWrap.classList.add('hidden');
       }
 
       // Cerrar acordeón por defecto al abrir
@@ -2432,6 +2466,41 @@
       `;
     }
 
+        function renderDifficultySpeedometer(diff) {
+      const d = String(diff || "Media").trim();
+      if (d === "Alta") {
+        return `
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30" title="Dificultad Alta">
+            <svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+              <path d="m12 14 4.5-4.5" stroke-width="2.5" />
+              <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+            </svg>
+          </span>
+        `;
+      } else if (d === "Baja") {
+        return `
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" title="Dificultad Baja">
+            <svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+              <path d="m12 14-4.5-4.5" stroke-width="2.5" />
+              <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+            </svg>
+          </span>
+        `;
+      } else {
+        return `
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30" title="Dificultad Media">
+            <svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+              <line x1="12" y1="14" x2="12" y2="7" stroke-width="2.5" />
+              <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+            </svg>
+          </span>
+        `;
+      }
+    }
+
     function renderPriorityRank(priority) {
       const p = String(priority || "Media").trim();
       if (p === "Máxima") {
@@ -2493,12 +2562,18 @@
         compDate = null;
       }
 
+      let validDifficulty = String(t.difficulty || "Media").trim();
+      if (!["Baja", "Media", "Alta"].includes(validDifficulty)) {
+        validDifficulty = "Media";
+      }
+
       return {
         id: String(t.id || ("task-" + Date.now())),
         company: String(t.company || "").trim(),
         desc: String(t.desc || "").trim(),
         status: statusClean,
         priority: String(t.priority || "Media").trim(),
+        difficulty: validDifficulty,
         date: toDDMMYYYY(t.date),
         completedDate: compDate,
         details: String(t.details || "-").trim(),
@@ -2612,6 +2687,8 @@
       const search = document.getElementById('searchInput').value.toLowerCase();
       const compFilter = document.getElementById('filterCompany').value;
       const prioFilter = document.getElementById('filterPriority').value;
+      const diffFilterEl = document.getElementById('filterDifficulty');
+      const diffFilter = diffFilterEl ? diffFilterEl.value : "";
 
       const userTasks = getActiveTasks();
       let filtered = userTasks.filter(t => {
@@ -2620,8 +2697,9 @@
                               (t.details && t.details.toLowerCase().includes(search));
         const matchesComp = !compFilter || t.company === compFilter;
         const matchesPrio = !prioFilter || t.priority === prioFilter;
+        const matchesDiff = !diffFilter || t.difficulty === diffFilter;
         let matchesStatus = !activeStatusFilter || (t.status === activeStatusFilter);
-        return matchesSearch && matchesComp && matchesPrio && matchesStatus;
+        return matchesSearch && matchesComp && matchesPrio && matchesDiff && matchesStatus;
       });
 
       filtered.sort((a, b) => {
@@ -2733,6 +2811,9 @@
             <td class="py-3 px-4 whitespace-nowrap text-center">
               ${renderPriorityRank(task.priority)}
             </td>
+            <td class="py-3 px-4 whitespace-nowrap text-center">
+              ${renderDifficultySpeedometer(task.difficulty)}
+            </td>
             <td class="py-3 px-4 text-xs text-slate-400 whitespace-nowrap font-mono">
               ${task.date ? toDDMMYYYY(task.date) : '<span class="text-slate-600">-</span>'}
             </td>
@@ -2785,6 +2866,9 @@
         document.getElementById('taskDesc').value = task.desc;
         document.getElementById('taskStatus').value = task.status;
         document.getElementById('taskPriority').value = task.priority;
+        if (document.getElementById('taskDifficulty')) {
+          document.getElementById('taskDifficulty').value = task.difficulty || "Media";
+        }
         document.getElementById('taskDate').value = toYYYYMMDD(task.date);
 
         let cDate = task.completedDate || "";
@@ -2799,6 +2883,9 @@
         document.getElementById('modalTitleText').innerText = "Nueva Tarea";
         document.getElementById('taskId').value = "";
         document.getElementById('taskDate').value = toYYYYMMDD(new Date());
+        if (document.getElementById('taskDifficulty')) {
+          document.getElementById('taskDifficulty').value = "Media";
+        }
         document.getElementById('taskCompletedDate').value = "";
         document.getElementById('taskDesc').value = "";
         document.getElementById('taskDetails').value = "";
@@ -2835,6 +2922,7 @@
       const desc = document.getElementById('taskDesc').value;
       const status = document.getElementById('taskStatus').value;
       const priority = document.getElementById('taskPriority').value;
+      const difficulty = document.getElementById('taskDifficulty') ? document.getElementById('taskDifficulty').value : "Media";
       const dateVal = document.getElementById('taskDate').value;
       const date = toDDMMYYYY(dateVal);
       const details = document.getElementById('taskDetails').value;
@@ -2862,7 +2950,7 @@
         completedDate = null;
       }
 
-      const taskObj = sanitizeTask({ id, company, desc, status, priority, date, completedDate, progress, details, completedAt });
+      const taskObj = sanitizeTask({ id, company, desc, status, priority, difficulty, date, completedDate, progress, details, completedAt });
       const activeId = getActiveUserId();
       const authorId = existing ? (existing.userId || activeId) : activeId;
       const taskWithUser = { ...taskObj, userId: authorId, completedDate, completedAt };

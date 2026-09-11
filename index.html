@@ -497,9 +497,9 @@
             </div>
 
             <!-- Contador de Trabajos Hechos Hoy (Click para abrir Mini Calendario) -->
-            <div id="desktopDailyCounter" onclick="openDailyCalendarModal()" class="h-14 min-w-[76px] px-3.5 rounded-2xl border flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 group" title="Click para ver el calendario de entregas">
+            <div id="desktopDailyCounter" onclick="openDailyCalendarModal()" class="h-14 min-w-[76px] px-3.5 rounded-2xl border-2 flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 group" title="Click para ver el calendario de entregas">
               <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 block leading-none mb-1">Hoy hechos</span>
-              <span class="text-xl font-black text-slate-400 leading-none">0</span>
+              <span class="text-2xl font-black text-white leading-none mt-0.5 tracking-tight">0</span>
             </div>
           </div>
 
@@ -2037,45 +2037,45 @@
       if (isWeekend) {
         // EN FIN DE SEMANA
         if (completedToday === 0) {
-          // 0 trabajos: en gris, dice "Ve a descansar"
-          dailyStyleClass = "bg-dark-900/80 border-slate-700/60 text-slate-400";
+          // 0 trabajos: en gris, hover brilla como el nivel (con resplandor cyan)
+          dailyStyleClass = "bg-dark-900/80 border-slate-700/60 text-slate-400 hover:border-cyan-400 hover:shadow-[0_0_22px_rgba(6,182,212,0.45)]";
           dailyDesktopHtml = `
             <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 block leading-none mb-1">Fin de semana</span>
             <span class="text-xs font-bold text-slate-400 leading-tight">Ve a descansar</span>
           `;
           dailyMobileHtml = `Ve a descansar`;
         } else {
-          // 1 o más trabajos: en ROJO
-          dailyStyleClass = "bg-rose-500/20 border-rose-500 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.65)] ring-1 ring-rose-400/50 animate-pulse";
+          // 1 o más trabajos: en ROJO, hover brilla intensamente, número blanco en desktop
+          dailyStyleClass = "bg-rose-500/20 border-rose-500 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.65)] ring-1 ring-rose-400/50 hover:border-rose-400 hover:shadow-[0_0_28px_rgba(244,63,94,0.85)] animate-pulse";
           dailyDesktopHtml = `
             <span class="text-[9px] uppercase tracking-wider font-black text-rose-300 block leading-none mb-1">Ve a descansar</span>
-            <span class="text-xl font-black text-rose-400 leading-none">${completedToday}</span>
+            <span class="text-2xl font-black text-white leading-none mt-0.5 tracking-tight">${completedToday}</span>
           `;
           dailyMobileHtml = `Ve a descansar (${completedToday})`;
         }
       } else {
         // DÍA DE SEMANA (Lunes a Viernes)
         if (completedToday === 0) {
-          // 0 trabajos: en gris, título "Hoy hechos" y abajo el número solo
-          dailyStyleClass = "bg-dark-900/80 border-slate-700/60 text-slate-400";
+          // 0 trabajos: en gris, hover brilla como el nivel (con resplandor cyan), número en blanco
+          dailyStyleClass = "bg-dark-900/80 border-slate-700/60 text-slate-400 hover:border-cyan-400 hover:shadow-[0_0_22px_rgba(6,182,212,0.45)]";
           dailyDesktopHtml = `
             <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 block leading-none mb-1">Hoy hechos</span>
-            <span class="text-xl font-black text-slate-400 leading-none">0</span>
+            <span class="text-2xl font-black text-white leading-none mt-0.5 tracking-tight">0</span>
           `;
           dailyMobileHtml = `0 hoy`;
         } else {
-          // 1 o más trabajos: borde con glow MAGENTA, título "Hoy hechos" y abajo el número solo
-          dailyStyleClass = "bg-fuchsia-500/15 border-fuchsia-500 text-fuchsia-300 shadow-[0_0_22px_rgba(217,70,239,0.65)] ring-1 ring-fuchsia-400/40";
+          // 1 o más trabajos: borde con glow MAGENTA, hover brilla intensamente, número en blanco como el nivel
+          dailyStyleClass = "bg-fuchsia-500/15 border-fuchsia-500 text-fuchsia-300 shadow-[0_0_22px_rgba(217,70,239,0.65)] ring-1 ring-fuchsia-400/40 hover:border-fuchsia-400 hover:shadow-[0_0_30px_rgba(217,70,239,0.85)]";
           dailyDesktopHtml = `
             <span class="text-[9px] uppercase tracking-wider font-black text-fuchsia-300 block leading-none mb-1">Hoy hechos</span>
-            <span class="text-xl font-black text-fuchsia-400 leading-none">${completedToday}</span>
+            <span class="text-2xl font-black text-white leading-none mt-0.5 tracking-tight">${completedToday}</span>
           `;
           dailyMobileHtml = `${completedToday} hoy`;
         }
       }
 
       if (deskDailyEl) {
-        deskDailyEl.className = `h-14 min-w-[72px] px-3 rounded-2xl border flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-300 ${dailyStyleClass}`;
+        deskDailyEl.className = `h-14 min-w-[76px] px-3.5 rounded-2xl border-2 flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 group ${dailyStyleClass}`;
         deskDailyEl.innerHTML = dailyDesktopHtml;
         deskDailyEl.title = isWeekend
           ? `Fin de semana: ${completedToday} trabajos finalizados hoy. ¡Ve a descansar!`

@@ -202,6 +202,110 @@
       box-shadow: 0 0 22px rgba(251, 191, 36, 0.4);
       border-color: rgba(251, 191, 36, 0.85);
     }
+
+    /* ===================================================================== */
+    /* 🎖️ ESTILOS DE INSIGNIAS: NIVELES Y COLORES METÁLICOS                   */
+    /* ===================================================================== */
+    /* 1. Gris Oscuro (0 en ambas) */
+    .badge-tier-none {
+      background: rgba(16, 23, 38, 0.65);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      color: #64748B;
+    }
+    .badge-tier-none .badge-icon {
+      color: #475569;
+      filter: none;
+    }
+    .badge-tier-none .badge-title { color: #94A3B8; }
+    .badge-tier-none .badge-tag {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #64748B;
+    }
+    .badge-tier-none .badge-desc { color: #64748B; }
+
+    /* 2. Bronce (1 a 3 en ambas) */
+    .badge-tier-bronze {
+      background: rgba(46, 25, 12, 0.7);
+      border: 1px solid rgba(205, 127, 50, 0.75);
+      box-shadow: 0 0 20px rgba(205, 127, 50, 0.3);
+      color: #D97706;
+    }
+    .badge-tier-bronze .badge-icon {
+      color: #CD7F32;
+      filter: drop-shadow(0 0 8px rgba(205, 127, 50, 0.65));
+    }
+    .badge-tier-bronze .badge-title { color: #F59E0B; }
+    .badge-tier-bronze .badge-tag {
+      background: rgba(205, 127, 50, 0.22);
+      border: 1px solid rgba(205, 127, 50, 0.6);
+      color: #FBBF24;
+    }
+    .badge-tier-bronze .badge-desc { color: #FDE68A; opacity: 0.92; }
+
+    /* 3. Plata (4 a 12 en sprint, 4 a 6 en récord diario) */
+    .badge-tier-silver {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 0 22px rgba(203, 213, 225, 0.4);
+      color: #E2E8F0;
+    }
+    .badge-tier-silver .badge-icon {
+      color: #F1F5F9;
+      filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.75));
+    }
+    .badge-tier-silver .badge-title { color: #FFFFFF; }
+    .badge-tier-silver .badge-tag {
+      background: rgba(226, 232, 240, 0.2);
+      border: 1px solid rgba(226, 232, 240, 0.65);
+      color: #F8FAFC;
+    }
+    .badge-tier-silver .badge-desc { color: #E2E8F0; opacity: 0.95; }
+
+    /* 4. Oro (13 a 24 en sprint, 7 a 9 en récord diario) */
+    .badge-tier-gold {
+      background: rgba(55, 40, 10, 0.75);
+      border: 1px solid rgba(251, 191, 36, 0.9);
+      box-shadow: 0 0 26px rgba(251, 191, 36, 0.55);
+      color: #FBBF24;
+    }
+    .badge-tier-gold .badge-icon {
+      color: #FCD34D;
+      filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.85));
+    }
+    .badge-tier-gold .badge-title { color: #FDE68A; }
+    .badge-tier-gold .badge-tag {
+      background: rgba(251, 191, 36, 0.25);
+      border: 1px solid rgba(251, 191, 36, 0.75);
+      color: #FEF08A;
+    }
+    .badge-tier-gold .badge-desc { color: #FEF3C7; opacity: 0.95; }
+
+    /* 5. Platino (Blanco con glow: +25 en sprint, +10 en récord diario) */
+    .badge-tier-platinum {
+      background: rgba(255, 255, 255, 0.12);
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 0 32px rgba(255, 255, 255, 0.8), inset 0 0 16px rgba(255, 255, 255, 0.3);
+      color: #FFFFFF;
+    }
+    .badge-tier-platinum .badge-icon {
+      color: #FFFFFF;
+      filter: drop-shadow(0 0 14px rgba(255, 255, 255, 1));
+    }
+    .badge-tier-platinum .badge-title {
+      color: #FFFFFF;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.85);
+    }
+    .badge-tier-platinum .badge-tag {
+      background: rgba(255, 255, 255, 0.32);
+      border: 1px solid #FFFFFF;
+      color: #FFFFFF;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
+    }
+    .badge-tier-platinum .badge-desc {
+      color: #FFFFFF;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
   </style>
 </head>
 <body class="selection:bg-cyan-500 selection:text-black">
@@ -607,12 +711,12 @@
           </div>
         </div>
 
-        <!-- 🏆 INSIGNIA PROFESIONAL: SPRINT CREATIVO (1 DÍA HÁBIL) -->
-        <div id="militaryBadgeCard" class="p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500">
+        <!-- 🏆 INSIGNIA 1: SPRINT CREATIVO (1 DÍA HÁBIL - ACUMULATIVO) -->
+        <div id="militaryBadgeCard" class="p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 badge-tier-none">
           
           <!-- Insignia: Estrella con dos alas de tres plumas cuadriculadas -->
           <div id="militaryBadgeIconWrapper" class="w-16 h-12 flex items-center justify-center shrink-0">
-            <svg class="w-16 h-10 fill-current transition-all" viewBox="0 0 96 60">
+            <svg class="w-16 h-10 fill-current transition-all badge-icon" viewBox="0 0 96 60">
               <!-- Estrella Central -->
               <polygon points="48,14 51.5,23 61,23 53.5,29 56.5,38 48,32.5 39.5,38 42.5,29 35,23 44.5,23" />
               <!-- Ala Izquierda: 3 plumas cuadriculadas/geométricas -->
@@ -629,11 +733,43 @@
           <!-- Descripción y Contador de la Insignia -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <span id="militaryBadgeTitle" class="text-xs font-black uppercase tracking-wider text-slate-400">Insignia Sprint Creativo</span>
-              <span id="militaryBadgeTag" class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-white/5 border border-white/10 uppercase text-slate-400">Sprint</span>
+              <span id="militaryBadgeTitle" class="badge-title text-xs font-black uppercase tracking-wider text-slate-400">Insignia Sprint Creativo</span>
+              <span id="militaryBadgeTag" class="badge-tag text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase">SPRINT</span>
             </div>
-            <p id="militaryBadgeDesc" class="text-xs text-slate-400 mt-0.5 leading-snug">
+            <p id="militaryBadgeDesc" class="badge-desc text-xs text-slate-400 mt-0.5 leading-snug">
               0 trabajos de prioridad máxima finalizados en 1 solo día hábil.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- ⚡ INSIGNIA 2: RÉCORD DIARIO (MÁXIMA ENTREGA EN 1 SOLO DÍA) -->
+        <div id="dailyRecordBadgeCard" class="p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 badge-tier-none">
+          
+          <!-- Insignia: Rayo Central con dos alas de tres plumas a los costados -->
+          <div id="dailyRecordBadgeIconWrapper" class="w-16 h-12 flex items-center justify-center shrink-0">
+            <svg class="w-16 h-10 fill-current transition-all badge-icon" viewBox="0 0 96 60">
+              <!-- Rayo Central -->
+              <polygon points="50,11 41,28 48,28 44,49 56,25 49,25" />
+              <!-- Ala Izquierda: 3 plumas cuadriculadas/geométricas -->
+              <polygon points="36,21 16,14 12,19 35,25" />
+              <polygon points="35,27 12,25 8,30 33,33" />
+              <polygon points="34,35 16,37 14,42 35,40" />
+              <!-- Ala Derecha: 3 plumas cuadriculadas/geométricas -->
+              <polygon points="60,21 80,14 84,19 61,25" />
+              <polygon points="61,27 84,25 88,30 63,33" />
+              <polygon points="62,35 80,37 82,42 61,40" />
+            </svg>
+          </div>
+
+          <!-- Descripción y Contador de la Insignia -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span id="dailyRecordBadgeTitle" class="badge-title text-xs font-black uppercase tracking-wider text-slate-400">Insignia Récord Diario</span>
+              <span id="dailyRecordBadgeTag" class="badge-tag text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase">RÉCORD</span>
+            </div>
+            <p id="dailyRecordBadgeDesc" class="badge-desc text-xs text-slate-400 mt-0.5 leading-snug">
+              0 trabajos finalizados en un solo día.
             </p>
           </div>
 
@@ -921,7 +1057,7 @@
     }
 
     const DEFAULT_CONFIG = {
-      companies: ["UNICO", "Itraco", "Royal Enfield", "Alta Vista", "Hotel Bicentenario", "RevCardinal", "Bmw"],
+      companies: ["Alta Vista", "Bmw", "Hotel Bicentenario", "Itraco", "RevCardinal", "Royal Enfield", "UNICO"],
       statuses: [
         { name: "Pendiente", percent: 0 },
         { name: "Proceso", percent: 25 },
@@ -1265,6 +1401,28 @@
     // =========================================================================
     // 🎮 MOTOR DE GAMIFICACIÓN (XP, NIVELES Y ESCALA +1% POR NIVEL)
     // =========================================================================
+    
+    // =========================================================================
+    // 🎖️ ESCALA Y RANGOS METÁLICOS DE INSIGNIAS
+    // Sprint: 0 (Gris), 1-3 (Bronce), 4-12 (Plata), 13-24 (Oro), +25 (Platino)
+    // Récord Diario: 0 (Gris), 1-3 (Bronce), 4-6 (Plata), 7-9 (Oro), +10 (Platino)
+    // =========================================================================
+    function getSprintTier(count) {
+      if (!count || count <= 0) return { tier: "none", name: "Bloqueado", tag: "SPRINT", colorClass: "badge-tier-none" };
+      if (count <= 3) return { tier: "bronze", name: "Bronce", tag: "BRONCE", colorClass: "badge-tier-bronze" };
+      if (count <= 12) return { tier: "silver", name: "Plata", tag: "PLATA", colorClass: "badge-tier-silver" };
+      if (count <= 24) return { tier: "gold", name: "Oro", tag: "ORO", colorClass: "badge-tier-gold" };
+      return { tier: "platinum", name: "Platino", tag: "PLATINO", colorClass: "badge-tier-platinum" };
+    }
+
+    function getDailyRecordTier(count) {
+      if (!count || count <= 0) return { tier: "none", name: "Bloqueado", tag: "RÉCORD", colorClass: "badge-tier-none" };
+      if (count <= 3) return { tier: "bronze", name: "Bronce", tag: "BRONCE", colorClass: "badge-tier-bronze" };
+      if (count <= 6) return { tier: "silver", name: "Plata", tag: "PLATA", colorClass: "badge-tier-silver" };
+      if (count <= 9) return { tier: "gold", name: "Oro", tag: "ORO", colorClass: "badge-tier-gold" };
+      return { tier: "platinum", name: "Platino", tag: "PLATINO", colorClass: "badge-tier-platinum" };
+    }
+
     function calculateTaskXP(task) {
       if (task.status !== "Finalizado" && (!task.progress || task.progress < 100)) {
         return 0;
@@ -1311,7 +1469,8 @@
       
       let totalXP = 0;
       let completedCount = 0;
-      let fastPriorityCount = 0; // Prioridad Máxima en 1 solo día
+      let fastPriorityCount = 0; // Prioridad Máxima en 1 solo día (acumulativo)
+      const dailyCounts = {};    // Conteo de trabajos completados por fecha calendario
 
       userTasks.forEach(t => {
         if (t.status === "Finalizado" || (t.progress !== undefined && t.progress >= 100)) {
@@ -1322,8 +1481,27 @@
           if (String(t.priority || '').trim() === "Máxima" && days !== null && days <= 1) {
             fastPriorityCount++;
           }
+
+          // Agrupar por día calendario de finalización para la insignia de récord diario
+          let dayKey = "";
+          if (t.completedDate) {
+            dayKey = toDDMMYYYY(t.completedDate);
+          } else if (t.completedAt) {
+            dayKey = toDDMMYYYY(t.completedAt);
+          } else if (t.updatedAt) {
+            dayKey = toDDMMYYYY(t.updatedAt);
+          } else if (t.date) {
+            dayKey = toDDMMYYYY(t.date);
+          }
+          if (dayKey) {
+            dailyCounts[dayKey] = (dailyCounts[dayKey] || 0) + 1;
+          }
         }
       });
+
+      const maxDailyCompleted = Object.keys(dailyCounts).length > 0 
+        ? Math.max(...Object.values(dailyCounts)) 
+        : 0;
 
       // Cálculo de Nivel: Base 500 XP. En cada nivel sube un 1% (en Nivel 100 requiere 2 veces la cantidad)
       let level = 1;
@@ -1344,7 +1522,8 @@
             percent,
             totalXP,
             completedCount,
-            fastPriorityCount
+            fastPriorityCount,
+            maxDailyCompleted
           };
         }
       }
@@ -1484,34 +1663,59 @@
         compCountEl.innerText = isViewer ? `${info.completedCount} finalizados por ${targetName}` : `${info.completedCount} finalizados`;
       }
 
-      // Insignia Sprint Creativo (Entrega en 1 día hábil)
-      const badgeCard = document.getElementById('militaryBadgeCard');
-      const badgeDesc = document.getElementById('militaryBadgeDesc');
-      const badgeTitle = document.getElementById('militaryBadgeTitle');
-      const count = info.fastPriorityCount;
+      // 1. INSIGNIA SPRINT CREATIVO (Acumulativo de máxima prioridad en 1 día hábil)
+      const sprintCard = document.getElementById('militaryBadgeCard');
+      const sprintDesc = document.getElementById('militaryBadgeDesc');
+      const sprintTitle = document.getElementById('militaryBadgeTitle');
+      const sprintTag = document.getElementById('militaryBadgeTag');
+      const sprintCount = info.fastPriorityCount || 0;
+      const sprintTier = getSprintTier(sprintCount);
 
-      if (badgeCard && badgeDesc) {
-        if (count >= 1) {
-          badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-amber-500/10 border-amber-400 text-amber-400 military-gold-neon ring-1 ring-amber-400/40";
-          if (badgeTitle) {
-            badgeTitle.className = "text-xs font-black uppercase tracking-wider text-amber-300";
-            badgeTitle.innerText = isViewer ? `Insignia Sprint Creativo (${targetName})` : "Insignia Sprint Creativo";
-          }
-          const taskWord = count === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados';
-          badgeDesc.innerText = isViewer
-            ? `${count} ${taskWord} en 1 solo día hábil por ${targetName}.`
-            : `${count} ${taskWord} en 1 solo día hábil.`;
-          badgeDesc.className = "text-xs text-amber-200/90 mt-0.5 leading-snug font-medium";
+      if (sprintCard && sprintDesc) {
+        sprintCard.className = `p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 ${sprintTier.colorClass}`;
+        if (sprintTitle) {
+          sprintTitle.innerText = isViewer ? `Insignia Sprint Creativo (${targetName})` : "Insignia Sprint Creativo";
+        }
+        if (sprintTag) {
+          sprintTag.innerText = sprintTier.tag;
+        }
+        if (sprintCount > 0) {
+          const taskWord = sprintCount === 1 ? 'trabajo prioritario finalizado' : 'trabajos prioritarios finalizados';
+          sprintDesc.innerText = isViewer
+            ? `${sprintCount} ${taskWord} en 1 solo día hábil acumulados por ${targetName} (${sprintTier.name}).`
+            : `${sprintCount} ${taskWord} en 1 solo día hábil acumulados (${sprintTier.name}).`;
         } else {
-          badgeCard.className = "p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 bg-dark-850/60 border-slate-800 text-slate-500";
-          if (badgeTitle) {
-            badgeTitle.className = "text-xs font-black uppercase tracking-wider text-slate-500";
-            badgeTitle.innerText = isViewer ? `Insignia Sprint Creativo (${targetName})` : "Insignia Sprint Creativo";
-          }
-          badgeDesc.innerText = isViewer
+          sprintDesc.innerText = isViewer
             ? `0 trabajos de prioridad máxima finalizados en 1 solo día hábil por ${targetName}.`
             : "0 trabajos de prioridad máxima finalizados en 1 solo día hábil.";
-          badgeDesc.className = "text-xs text-slate-500 mt-0.5 leading-snug";
+        }
+      }
+
+      // 2. INSIGNIA RÉCORD DIARIO (Máxima entrega de trabajos totales en un solo día)
+      const dailyCard = document.getElementById('dailyRecordBadgeCard');
+      const dailyDesc = document.getElementById('dailyRecordBadgeDesc');
+      const dailyTitle = document.getElementById('dailyRecordBadgeTitle');
+      const dailyTag = document.getElementById('dailyRecordBadgeTag');
+      const dailyCount = info.maxDailyCompleted || 0;
+      const dailyTier = getDailyRecordTier(dailyCount);
+
+      if (dailyCard && dailyDesc) {
+        dailyCard.className = `p-3.5 rounded-2xl border transition-all duration-300 flex items-center gap-3.5 ${dailyTier.colorClass}`;
+        if (dailyTitle) {
+          dailyTitle.innerText = isViewer ? `Insignia Récord Diario (${targetName})` : "Insignia Récord Diario";
+        }
+        if (dailyTag) {
+          dailyTag.innerText = dailyTier.tag;
+        }
+        if (dailyCount > 0) {
+          const taskWord = dailyCount === 1 ? 'trabajo finalizado' : 'trabajos finalizados';
+          dailyDesc.innerText = isViewer
+            ? `Récord de ${dailyCount} ${taskWord} en un solo día por ${targetName} (${dailyTier.name}).`
+            : `Récord de ${dailyCount} ${taskWord} en un solo día (${dailyTier.name}).`;
+        } else {
+          dailyDesc.innerText = isViewer
+            ? `0 trabajos finalizados en un solo día por ${targetName}.`
+            : "0 trabajos finalizados en un solo día.";
         }
       }
     }
@@ -2254,6 +2458,7 @@
           // 1. Cargar y sincronizar empresas de la nube
           if (parsed.companies && Array.isArray(parsed.companies) && parsed.companies.length > 0) {
             config.companies = parsed.companies;
+            config.companies.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
           }
 
           // 2. Cargar tareas unificadas
@@ -2641,12 +2846,15 @@
     }
 
     function populateDropdowns() {
+      // Ordenamiento alfabético estricto A-Z de empresas en todos los selectores
+      const sortedCompanies = [...config.companies].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
       const filterComp = document.getElementById('filterCompany');
       if (filterComp) {
         const prevFilterComp = filterComp.value;
         filterComp.innerHTML = '<option value="">Todas las empresas</option>' + 
-          config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (prevFilterComp && config.companies.includes(prevFilterComp)) {
+          sortedCompanies.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (prevFilterComp && sortedCompanies.includes(prevFilterComp)) {
           filterComp.value = prevFilterComp;
         }
       }
@@ -2662,8 +2870,8 @@
       const taskComp = document.getElementById('taskCompany');
       if (taskComp) {
         const prevTaskComp = taskComp.value;
-        taskComp.innerHTML = config.companies.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (prevTaskComp && config.companies.includes(prevTaskComp)) {
+        taskComp.innerHTML = sortedCompanies.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (prevTaskComp && sortedCompanies.includes(prevTaskComp)) {
           taskComp.value = prevTaskComp;
         }
       }
@@ -3039,7 +3247,8 @@
 
     function renderVariantsUI() {
       const compList = document.getElementById('companiesList');
-      compList.innerHTML = config.companies.map(c => `
+      const sortedCompanies = [...config.companies].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+      compList.innerHTML = sortedCompanies.map(c => `
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] text-xs font-semibold text-slate-200 border border-white/[0.05]">
           ${c}
           <button onclick="removeCompany('${c}')" class="text-slate-500 hover:text-rose-400 font-bold ml-0.5">✕</button>
@@ -3052,6 +3261,7 @@
       const name = nameInput.value.trim();
       if (name && !config.companies.includes(name)) {
         config.companies.push(name);
+        config.companies.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         nameInput.value = "";
         saveLocalState();
         renderVariantsUI();

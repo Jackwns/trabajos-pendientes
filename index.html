@@ -406,18 +406,11 @@
           <div class="hidden md:block h-7 w-[1px] bg-white/[0.08] shrink-0 mx-0.5"></div>
 
           <!-- GAMIFICACIÓN PEGADA A LA IZQUIERDA (DERECHA DEL OJO):
-               1. HOY HECHOS (a la izquierda de nivel)
-               2. NIVEL
-               3. EXPERIENCIA (Rango + Barra) -->
+               1. NIVEL
+               2. EXPERIENCIA (Rango + Barra) -->
           <div id="headerGamificationLeft" class="hidden md:flex items-center gap-2.5 shrink-0">
             
-            <!-- 1. Hoy hechos (A LA IZQUIERDA DE NIVEL) -->
-            <div id="desktopDailyCounter" onclick="switchNavTab('calendar')" class="h-10 min-w-[66px] px-2 rounded-xl border-2 flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95" title="Click para ver entregas del día">
-              <span class="text-[7.5px] uppercase font-extrabold text-slate-500 block leading-none mb-0.5">Hoy hechos</span>
-              <span class="text-base font-black text-white leading-none tracking-tight">0</span>
-            </div>
-
-            <!-- 2. Nivel -->
+            <!-- 1. Nivel -->
             <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-dark-900 to-dark-800 border-2 border-cyan-400/60 flex flex-col items-center justify-center shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
               <span class="text-[8.5px] font-black uppercase text-cyan-400 leading-none">Nv</span>
               <span id="desktopXpLevelNum" class="text-base font-black text-white leading-none mt-0.5 tracking-tight">1</span>
@@ -445,14 +438,22 @@
 
         </div>
 
-        <!-- Derecha: Burbuja Móvil, Contador Móvil y Avatar Perfil -->
-        <div class="flex items-center gap-2 shrink-0">
+        <!-- Derecha: Hoy hechos Desktop (a la izquierda de la cuenta), Burbuja Móvil, Contador Móvil y Avatar Perfil -->
+        <div class="flex items-center gap-2.5 shrink-0">
+          <!-- Botón Hoy Hechos Desktop (a la derecha, a la izquierda de la cuenta) -->
+          <div id="desktopDailyCounter" onclick="switchNavTab('calendar')" class="hidden md:flex h-10 min-w-[70px] px-2.5 rounded-xl border-2 flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95" title="Click para ver entregas del día">
+            <span class="text-[7.5px] uppercase font-extrabold text-slate-500 block leading-none mb-0.5">Hoy hechos</span>
+            <span class="text-base font-black text-white leading-none tracking-tight">0</span>
+          </div>
+
+          <!-- Móvil: Nivel líquido y contador diario -->
           <div onclick="openUserProfileModal()" id="mobileLiquidBubble" style="-webkit-mask-image: -webkit-radial-gradient(white, black); clip-path: circle(50% at 50% 50%);" class="md:hidden relative w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-dark-900 shadow-md shadow-cyan-500/20 shrink-0 cursor-pointer active:scale-95 transition-transform" title="Nivel y Experiencia">
             <div id="mobileLiquidFill" class="absolute -bottom-2 -left-2 -right-2 bg-gradient-to-t from-fuchsia-600 via-pink-500 to-cyan-400 liquid-anim transition-all duration-700 ease-out" style="height: calc(25% + 8px);"></div>
             <span id="mobileLiquidLevelText" class="absolute inset-0 flex items-center justify-center font-black text-white text-[11px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.95)] z-10 select-none">Nv 1</span>
           </div>
           <div onclick="switchNavTab('calendar')" id="mobileDailyCounter" class="md:hidden px-2 py-1 rounded-xl border text-[10px] font-black shrink-0 transition-all flex items-center justify-center cursor-pointer active:scale-95 select-none" title="Trabajos de hoy">0 hoy</div>
 
+          <!-- Botón de Cuenta / Perfil -->
           <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all shrink-0 active:scale-95 shadow-md">
             <div id="navbarAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden"></div>
             <span id="navbarResetAlertDot" class="hidden absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-dark-950 shadow-[0_0_8px_rgba(251,191,36,0.9)] z-20" title="Solicitud de clave pendiente"></span>
@@ -702,15 +703,14 @@
             <div class="flex items-center justify-between pt-4 border-t border-white/[0.06] text-xs text-slate-400 flex-wrap gap-2">
               <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
-                  <span class="w-3 h-3 rounded-full bg-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.8)]"></span>
+                  <span class="w-3.5 h-3.5 rounded-md bg-fuchsia-600/70 border border-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.6)]"></span>
                   <span>Días de semana (Magenta)</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]"></span>
+                  <span class="w-3.5 h-3.5 rounded-md bg-rose-600/70 border border-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]"></span>
                   <span>Fines de semana (Rojo)</span>
                 </div>
               </div>
-              <span class="text-[11px] text-slate-500">El tamaño del círculo indica la cantidad de trabajos entregados (hasta 10)</span>
             </div>
           </div>
         </div>
@@ -792,7 +792,7 @@
             <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
             <h3 id="rightPanelHeaderTitle" class="text-xs font-black uppercase tracking-wider text-white">Detalles</h3>
           </div>
-          <button onclick="closeRightPanelMobile()" title="Cerrar panel" class="p-1 rounded-lg hover:bg-white/[0.05] text-slate-400 hover:text-white transition-all text-xs">
+          <button onclick="handleRightPanelCloseOrDeselect()" title="Deseleccionar / Cerrar" class="p-1.5 rounded-lg hover:bg-white/[0.08] text-slate-400 hover:text-white transition-all text-xs">
             <svg id="rightPanelToggleIcon" class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -1047,15 +1047,19 @@
             </div>
             <button id="deleteOwnAccountBtn" type="button" onclick="deleteOwnAccount()" class="text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-3 py-1.5 rounded-xl border border-rose-500/30 transition-all active:scale-95">Eliminar Cuenta</button>
           </div>
+
+          <!-- Botón Listo dentro de ajustes de cuenta -->
+          <div class="pt-2 flex justify-end border-t border-white/[0.04]">
+            <button type="button" onclick="toggleAccountSettings()" class="px-3.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] rounded-xl border border-white/[0.08]">Listo</button>
+          </div>
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-3 border-t border-white/[0.06] flex-wrap gap-2">
+      <div class="flex items-center justify-between pt-3 border-t border-white/[0.06]">
         <button onclick="logoutProfile()" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl hover:bg-rose-500/20 active:scale-95 transition-all">
           <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           Cerrar Sesión
         </button>
-        <button onclick="closeUserProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/[0.05] rounded-xl">Listo</button>
       </div>
     </div>
   </div>
@@ -1607,31 +1611,27 @@
         const isToday = (dateKey === todayStr);
         const isSelected = (dateKey === selectedCalendarDayKey);
 
-        let circleHtml = "";
+        let dayBoxStyle = "";
         if (count > 0) {
           const clamped = Math.min(10, count);
-          const pct = Math.round(70 + (clamped - 1) * (22 / 9));
-          const opacity = (0.45 + (clamped - 1) * (0.55 / 9)).toFixed(2);
-          const glowPx = Math.round(8 + clamped * 2);
+          const opacity = (0.35 + (clamped - 1) * (0.55 / 9)).toFixed(2);
+          const glowPx = Math.round(6 + clamped * 2);
           const rgb = isWeekend ? "239, 68, 68" : "217, 70, 239";
+          const borderColor = isWeekend ? "rgba(239, 68, 68, 0.9)" : "rgba(217, 70, 239, 0.9)";
 
-          circleHtml = `
-            <div class="absolute rounded-full pointer-events-none transition-all duration-300"
-                 style="width: ${pct}%; height: ${pct}%; background-color: rgb(${rgb}); opacity: ${opacity}; box-shadow: 0 0 ${glowPx}px rgba(${rgb}, 0.85);">
-            </div>
-          `;
+          dayBoxStyle = `background-color: rgba(${rgb}, ${opacity}); border: 1.5px solid ${borderColor}; box-shadow: 0 0 ${glowPx}px rgba(${rgb}, 0.5);`;
         }
 
-        const todayRing = isToday ? "ring-1 ring-cyan-400" : "";
+        const todayRing = isToday ? "ring-2 ring-cyan-400" : "";
         const selectedBorder = isSelected 
-          ? "border-2 border-white bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.25)] scale-105 z-20" 
-          : "border border-white/[0.05] bg-dark-850/60 hover:bg-dark-800/90 hover:border-cyan-400/40";
+          ? "ring-2 ring-white scale-105 z-20 shadow-[0_0_20px_rgba(255,255,255,0.4)]" 
+          : (count === 0 ? "border border-white/[0.05] bg-dark-850/60 hover:bg-dark-800/90 hover:border-cyan-400/40" : "hover:brightness-110");
 
         html += `
           <div onclick="selectCalendarDay('${dateKey}')"
-               class="w-full h-16 sm:h-20 rounded-2xl flex items-center justify-center relative cursor-pointer select-none transition-all duration-200 ${todayRing} ${selectedBorder}">
-            ${circleHtml}
-            <span class="relative z-10 text-sm sm:text-base font-black ${count > 0 ? "text-white" : (isWeekend ? "text-rose-300/80" : "text-slate-300")}">${d}</span>
+               style="${dayBoxStyle}"
+               class="w-full h-16 sm:h-20 rounded-2xl flex flex-col items-center justify-center relative cursor-pointer select-none transition-all duration-200 ${todayRing} ${selectedBorder}">
+            <span class="text-base sm:text-lg font-black ${count > 0 ? "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" : (isWeekend ? "text-rose-400/80" : "text-slate-300")}">${d}</span>
           </div>
         `;
       }
@@ -1755,8 +1755,13 @@
     }
 
     function renderEmptyTaskRightPanel() {
+      selectedTaskId = null;
+      renderTable();
       const title = document.getElementById('rightPanelHeaderTitle');
       const body = document.getElementById('rightPanelBody');
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      const isViewer = Boolean(currentUser && (currentUser.id === "viewer" || currentUser.isViewer));
+
       if (title) title.innerText = "Detalles de Tarea";
       if (body) {
         body.innerHTML = `
@@ -1765,16 +1770,20 @@
               <svg class="w-6 h-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
             </div>
             <p class="text-xs font-semibold text-slate-300 mb-1">Ninguna tarea seleccionada</p>
-            <p class="text-[11px] text-slate-500 mb-4">Haz clic en cualquier trabajo de la lista para editar sus detalles aquí en vivo.</p>
-            <button onclick="openNewTaskInRightPanel()" class="px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all">
-              + Crear Nueva Tarea
-            </button>
+            <p class="text-[11px] text-slate-500 mb-4">Haz clic en cualquier trabajo de la lista para examinar sus detalles aquí.</p>
+            ${isViewer ? '' : `
+              <button onclick="openNewTaskInRightPanel()" class="px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all">
+                + Crear Nueva Tarea
+              </button>
+            `}
           </div>
         `;
       }
     }
 
     function openNewTaskInRightPanel() {
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
       selectedTaskId = null;
       renderTable();
       openRightPanelMobile();
@@ -1847,11 +1856,14 @@
       const task = tasks.find(t => t.id === taskId);
       if (!task) return renderEmptyTaskRightPanel();
 
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      const isViewer = Boolean(currentUser && (currentUser.id === "viewer" || currentUser.isViewer));
+
       if (isRightPanelCollapsed) toggleRightPanelCollapse();
 
       const title = document.getElementById('rightPanelHeaderTitle');
       const body = document.getElementById('rightPanelBody');
-      if (title) title.innerText = "Editar Tarea";
+      if (title) title.innerText = isViewer ? "Detalles de Tarea (Viewer)" : "Editar Tarea";
 
       const sortedCompanies = [...config.companies].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
       const days = calculateTaskDays(task);
@@ -1865,37 +1877,44 @@
               ${renderCompanyIconHtml(task.company, "w-5 h-5")}
               <span class="font-bold text-white text-sm">${task.company}</span>
             </div>
-            ${days !== null ? `<span class="px-2 py-0.5 rounded-lg bg-white/[0.05] font-mono text-[10px] text-cyan-300 font-bold">${days} días hábiles</span>` : ''}
+            <div class="flex items-center gap-2">
+              ${days !== null ? `<span class="px-2 py-0.5 rounded-lg bg-white/[0.05] font-mono text-[10px] text-cyan-300 font-bold">${days} días hábiles</span>` : ''}
+              <button type="button" onclick="deselectTask()" title="Deseleccionar tarea" class="p-1 rounded-lg hover:bg-white/[0.1] text-slate-400 hover:text-white transition-all text-xs flex items-center justify-center">
+                <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
           </div>
           
           <div>
             <label class="block font-semibold text-slate-300 mb-1">Empresa / Cliente</label>
-            <select id="rpTaskCompany" required class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+            <select id="rpTaskCompany" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
               ${sortedCompanies.map(c => `<option value="${c}" ${c === task.company ? "selected" : ""}>${c}</option>`).join('')}
             </select>
           </div>
 
           <div>
             <label class="block font-semibold text-slate-300 mb-1">Descripción del Trabajo</label>
-            <textarea id="rpTaskDesc" required rows="3" class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">${task.desc}</textarea>
+            <textarea id="rpTaskDesc" ${isViewer ? 'readonly' : 'required'} rows="3" class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">${task.desc}</textarea>
           </div>
 
           <div class="grid grid-cols-3 gap-2">
             <div>
               <label class="block font-semibold text-slate-300 mb-1">Estado</label>
-              <select id="rpTaskStatus" onchange="handleRpStatusChange(this.value)" required class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+              <select id="rpTaskStatus" onchange="handleRpStatusChange(this.value)" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
                 ${config.statuses.map(s => `<option value="${s.name}" ${s.name === task.status ? "selected" : ""}>${s.name}</option>`).join('')}
               </select>
             </div>
             <div>
               <label class="block font-semibold text-slate-300 mb-1">Prioridad</label>
-              <select id="rpTaskPriority" required class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+              <select id="rpTaskPriority" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
                 ${config.priorities.map(p => `<option value="${p.name}" ${p.name === task.priority ? "selected" : ""}>${p.name}</option>`).join('')}
               </select>
             </div>
             <div>
               <label class="block font-semibold text-slate-300 mb-1">Dificultad</label>
-              <select id="rpTaskDifficulty" required class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+              <select id="rpTaskDifficulty" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
                 <option value="Baja" ${task.difficulty === "Baja" ? "selected" : ""}>Baja</option>
                 <option value="Media" ${task.difficulty === "Media" ? "selected" : ""}>Media</option>
                 <option value="Alta" ${task.difficulty === "Alta" ? "selected" : ""}>Alta</option>
@@ -1906,28 +1925,32 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
-              <input type="date" id="rpTaskDate" value="${toYYYYMMDD(task.date)}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+              <input type="date" id="rpTaskDate" ${isViewer ? 'readonly' : ''} value="${toYYYYMMDD(task.date)}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
             </div>
             <div>
               <label class="block font-semibold text-slate-300 mb-1">Fecha Finalización</label>
-              <input type="date" id="rpTaskCompletedDate" value="${toYYYYMMDD(task.completedDate || task.completedAt)}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+              <input type="date" id="rpTaskCompletedDate" ${isViewer ? 'readonly' : ''} value="${toYYYYMMDD(task.completedDate || task.completedAt)}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
             </div>
           </div>
 
           <div>
             <label class="block font-semibold text-slate-300 mb-1">Detalles / Observaciones</label>
-            <input type="text" id="rpTaskDetails" value="${(task.details && task.details !== '-') ? task.details : ''}" placeholder="Notas adicionales..." class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
+            <input type="text" id="rpTaskDetails" ${isViewer ? 'readonly' : ''} value="${(task.details && task.details !== '-') ? task.details : ''}" placeholder="Notas adicionales..." class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
           </div>
 
-          <div class="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
-            <button type="button" onclick="deleteTask('${task.id}')" class="px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all">
-              Eliminar
-            </button>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="renderEmptyTaskRightPanel()" class="px-3 py-2 text-slate-400 hover:text-white">Cerrar</button>
-              <button type="submit" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all">
-                Guardar
+          <div class="pt-3 border-t border-white/[0.06] flex items-center ${isViewer ? 'justify-end' : 'justify-between'} gap-2">
+            ${isViewer ? '' : `
+              <button type="button" onclick="deleteTask('${task.id}')" class="px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all">
+                Eliminar
               </button>
+            `}
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="deselectTask()" class="px-3 py-2 text-slate-400 hover:text-white">Cerrar</button>
+              ${isViewer ? '' : `
+                <button type="submit" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all">
+                  Guardar
+                </button>
+              `}
             </div>
           </div>
         </form>
@@ -2093,9 +2116,12 @@
       selectedCompanyForEdit = compName;
       openRightPanelMobile();
 
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      const isViewer = Boolean(currentUser && (currentUser.id === "viewer" || currentUser.isViewer));
+
       const title = document.getElementById("rightPanelHeaderTitle");
       const body = document.getElementById("rightPanelBody");
-      if (title) title.innerText = "Editar Empresa";
+      if (title) title.innerText = isViewer ? "Detalles de Empresa (Viewer)" : "Editar Empresa";
 
       const detail = getCompanyDetail(compName);
       const companyTasks = tasks.filter(t => t.company === compName);
@@ -2106,54 +2132,56 @@
             <div class="w-14 h-14 rounded-2xl bg-dark-900 border border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-md">
               ${renderCompanyIconHtml(compName, "w-8 h-8")}
             </div>
-            <div class="min-w-0">
+            <div class="min-w-0 flex-1">
               <span class="text-[10px] text-slate-400 uppercase font-extrabold block">Empresa</span>
               <h4 class="text-sm font-black text-white truncate">${compName}</h4>
               <span class="text-[11px] text-slate-400">${companyTasks.length} trabajos vinculados</span>
             </div>
           </div>
 
-          <div>
-            <label class="block font-semibold text-slate-300 mb-1">Nombre de la Empresa</label>
-            <input type="text" id="editCompanyNameInput" value="${compName}" class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400">
-          </div>
-
-          <div>
-            <label class="block font-semibold text-slate-300 mb-1.5">Color de Empresa (Paleta Eléctrica):</label>
-            <div class="flex flex-wrap gap-2">
-              ${ELECTRIC_COLORS.map(c => `
-                <button type="button" onclick="changeCompanyColor('${c.hex}')"
-                  class="w-7 h-7 rounded-full transition-transform ${detail.color === c.hex ? "scale-125 ring-2 ring-white shadow-lg" : "hover:scale-110"}"
-                  style="background-color: ${c.hex};" title="${c.name}">
-                </button>
-              `).join("")}
+          ${isViewer ? '' : `
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Nombre de la Empresa</label>
+              <input type="text" id="editCompanyNameInput" value="${compName}" class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-900 text-white outline-none focus:border-cyan-400">
             </div>
-          </div>
 
-          <div class="pt-2 border-t border-white/[0.06]">
-            <label class="block font-semibold text-slate-300 mb-1">Subir Icono PNG (16x16px)</label>
-            <p class="text-[10px] text-slate-500 mb-2">Al subir se comprimirá automáticamente a 16x16px. Si no se edita quedará con un vector de edificio del color seleccionado.</p>
-            <div class="flex items-center gap-2">
-              <button onclick="document.getElementById('companyIconUploadInput').click()" class="px-3 py-1.5 text-xs font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl border border-white/[0.08]">
-                ${detail.icon ? "Cambiar PNG" : "Subir PNG"}
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1.5">Color de Empresa (Paleta Eléctrica):</label>
+              <div class="flex flex-wrap gap-2">
+                ${ELECTRIC_COLORS.map(c => `
+                  <button type="button" onclick="changeCompanyColor('${c.hex}')"
+                    class="w-7 h-7 rounded-full transition-transform ${detail.color === c.hex ? "scale-125 ring-2 ring-white shadow-lg" : "hover:scale-110"}"
+                    style="background-color: ${c.hex};" title="${c.name}">
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-white/[0.06]">
+              <label class="block font-semibold text-slate-300 mb-1">Subir Icono PNG (16x16px)</label>
+              <p class="text-[10px] text-slate-500 mb-2">Al subir se comprimirá automáticamente a 16x16px. Si no se edita quedará con un vector de edificio del color seleccionado.</p>
+              <div class="flex items-center gap-2">
+                <button onclick="document.getElementById('companyIconUploadInput').click()" class="px-3 py-1.5 text-xs font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-xl border border-white/[0.08]">
+                  ${detail.icon ? "Cambiar PNG" : "Subir PNG"}
+                </button>
+                ${detail.icon ? `
+                  <button onclick="removeCompanyIcon()" class="px-2.5 py-1.5 text-xs text-rose-400 hover:text-rose-300">
+                    Quitar Icono
+                  </button>
+                ` : ""}
+              </div>
+              <input type="file" id="companyIconUploadInput" accept="image/png" class="hidden" onchange="handleCompanyIconUpload(event)">
+            </div>
+
+            <div class="pt-2 flex items-center justify-between border-t border-white/[0.06]">
+              <button onclick="deleteCompanyFromEdit('${compName}')" class="text-rose-400 hover:text-rose-300 text-xs font-bold">
+                Eliminar Empresa
               </button>
-              ${detail.icon ? `
-                <button onclick="removeCompanyIcon()" class="px-2.5 py-1.5 text-xs text-rose-400 hover:text-rose-300">
-                  Quitar Icono
-                </button>
-              ` : ""}
+              <button onclick="saveCompanyDetails('${compName}')" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 active:scale-95 transition-all">
+                Guardar Cambios
+              </button>
             </div>
-            <input type="file" id="companyIconUploadInput" accept="image/png" class="hidden" onchange="handleCompanyIconUpload(event)">
-          </div>
-
-          <div class="pt-2 flex items-center justify-between border-t border-white/[0.06]">
-            <button onclick="deleteCompanyFromEdit('${compName}')" class="text-rose-400 hover:text-rose-300 text-xs font-bold">
-              Eliminar Empresa
-            </button>
-            <button onclick="saveCompanyDetails('${compName}')" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 active:scale-95 transition-all">
-              Guardar Cambios
-            </button>
-          </div>
+          `}
 
           <div class="pt-3 border-t border-white/[0.06]">
             <h5 class="font-bold text-slate-300 mb-2">Trabajos en que participó (${companyTasks.length}):</h5>
@@ -2162,7 +2190,7 @@
             ` : `
               <div class="space-y-2 max-h-56 overflow-y-auto custom-scroll pr-1">
                 ${companyTasks.map(t => `
-                  <div onclick="switchNavTab('tasks'); renderTaskRightPanel('${t.id}')" class="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] cursor-pointer transition-all">
+                  <div onclick="switchNavTab('tasks'); onTaskRowClick('${t.id}')" class="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] cursor-pointer transition-all">
                     <div class="flex items-center justify-between gap-1 mb-0.5">
                       <span class="font-bold text-slate-200 truncate">${t.desc}</span>
                       <span class="text-[9px] font-bold text-cyan-400 shrink-0">${t.status}</span>
@@ -2177,6 +2205,12 @@
               </div>
             `}
           </div>
+
+          ${isViewer ? `
+            <div class="pt-2 flex justify-end border-t border-white/[0.06]">
+              <button onclick="renderEmptyCompanyRightPanel()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-xl">Cerrar</button>
+            </div>
+          ` : ''}
         </div>
       `;
     }
@@ -2344,6 +2378,36 @@
     }
 
     
+        function getLockIconSvg(isUnlocked, size = "w-3.5 h-3.5") {
+      if (isUnlocked) {
+        return `<svg class="${size} shrink-0 stroke-current text-cyan-400 inline-block" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" title="Desbloqueado"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+      } else {
+        return `<svg class="${size} shrink-0 stroke-current text-slate-500 inline-block" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" title="Bloqueado"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+      }
+    }
+
+    function deselectTask() {
+      selectedTaskId = null;
+      renderTable();
+      renderEmptyTaskRightPanel();
+    }
+
+    function handleRightPanelCloseOrDeselect() {
+      if (selectedTaskId) {
+        deselectTask();
+      } else if (selectedCompanyForEdit) {
+        selectedCompanyForEdit = null;
+        renderEmptyCompanyRightPanel();
+        renderCompaniesView();
+      }
+      if (window.innerWidth < 768) {
+        closeRightPanelMobile();
+      } else {
+        deselectTask();
+        renderEmptyTaskRightPanel();
+      }
+    }
+
     const RANKS_LIST = [
       { level: 1, name: "Recluta Creativo", shortName: "Recluta" },
       { level: 5, name: "Cadete de Diseño", shortName: "Cadete" },
@@ -2382,7 +2446,9 @@
                 ${isCurrent ? '<span class="text-[8px] font-black uppercase text-fuchsia-300 bg-fuchsia-500/20 px-1 rounded">Actual</span>' : ''}
               </div>
               <div class="text-xs font-bold text-white truncate mt-0.5">${r.name}</div>
-              <span class="text-[9px] ${isUnlocked ? 'text-cyan-300' : 'text-slate-500'} font-semibold">${isUnlocked ? 'Desbloqueado' : 'Bloqueado'}</span>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                ${getLockIconSvg(isUnlocked, "w-3.5 h-3.5")}
+              </div>
             </div>
           </div>
         `;
@@ -2426,9 +2492,9 @@
                   ${ach.name}
                 </span>
               </div>
-              <div class="mt-2 w-full">
-                <span class="inline-block px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase ${isUnlocked ? "bg-white/20 text-white border border-white/30" : "bg-white/[0.04] text-slate-500"}">
-                  ${isUnlocked ? "Desbloqueado" : "Bloqueado"}
+              <div class="mt-2 w-full flex items-center justify-center">
+                <span class="inline-flex items-center justify-center p-1 rounded-md ${isUnlocked ? "bg-white/20 text-white border border-white/30" : "bg-white/[0.04] text-slate-500"}" title="${isUnlocked ? "Desbloqueado" : "Bloqueado"}">
+                  ${getLockIconSvg(isUnlocked, "w-3.5 h-3.5")}
                 </span>
               </div>
             </div>
@@ -2493,8 +2559,8 @@
           <div class="p-3.5 rounded-2xl bg-dark-850 border border-white/[0.06] space-y-1.5">
             <div class="flex items-center justify-between">
               <span class="font-bold text-slate-400 text-[11px] uppercase">Estado:</span>
-              <span class="font-black uppercase text-xs ${isUnlocked ? "text-emerald-400" : "text-slate-500"}">
-                ${isUnlocked ? "✓ Desbloqueada" : "🔒 Bloqueada"}
+              <span class="font-black uppercase text-xs ${isUnlocked ? "text-emerald-400" : "text-slate-500"} flex items-center gap-1.5">
+                ${getLockIconSvg(isUnlocked, "w-4 h-4")}
               </span>
             </div>
             <div class="flex items-center justify-between">
@@ -2657,7 +2723,7 @@
       }
 
       if (deskDailyEl) {
-        deskDailyEl.className = `h-11 min-w-[70px] px-2.5 rounded-xl border-2 flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${dailyStyleClass}`;
+        deskDailyEl.className = `hidden md:flex h-11 min-w-[70px] px-2.5 rounded-xl border-2 flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${dailyStyleClass}`;
         deskDailyEl.innerHTML = dailyDesktopHtml;
       }
       if (mobDailyEl) {
@@ -2717,7 +2783,9 @@
               ${ach.iconSvg("w-7 h-7")}
             </div>
             <div class="min-w-0 flex-1">
-              <span class="text-[9px] font-black uppercase tracking-wider block opacity-90">${userTier.name}</span>
+              <span class="text-[9px] font-black uppercase tracking-wider block opacity-90">
+                ${isUnlocked ? userTier.name : getLockIconSvg(false, "w-3 h-3")}
+              </span>
               <h5 class="text-xs font-bold text-white truncate">${ach.name}</h5>
             </div>
           </div>
@@ -2939,6 +3007,10 @@
     }
 
     function onTaskRowClick(id) {
+      if (selectedTaskId === id) {
+        deselectTask();
+        return;
+      }
       selectedTaskId = id;
       renderTaskRightPanel(id);
       renderTable();
@@ -3228,11 +3300,16 @@
       const exportBtn = document.getElementById("exportBtn");
       const importBtn = document.getElementById("importBtn");
 
+      const quickAddComp = document.getElementById("newQuickCompanyInput")?.parentElement;
+      const navImportBtn = document.getElementById("navBtnImport");
+
       if (isViewer) {
         if (viewerBar) viewerBar.classList.remove("hidden");
         if (newTaskBtn) newTaskBtn.classList.add("hidden");
         if (exportBtn) exportBtn.classList.add("hidden");
         if (importBtn) importBtn.classList.add("hidden");
+        if (navImportBtn) navImportBtn.classList.add("hidden");
+        if (quickAddComp) quickAddComp.classList.add("hidden");
         if (!selectedObservedUserId || !profiles.find(p => p.id === selectedObservedUserId && p.id !== "viewer")) {
           selectedObservedUserId = "patricio";
         }
@@ -3244,6 +3321,8 @@
         if (newTaskBtn) newTaskBtn.classList.remove("hidden");
         if (exportBtn) exportBtn.classList.remove("hidden");
         if (importBtn) importBtn.classList.remove("hidden");
+        if (navImportBtn) navImportBtn.classList.remove("hidden");
+        if (quickAddComp) quickAddComp.classList.remove("hidden");
         document.getElementById("subHeaderUserRole").innerText = `${currentUser.name} • ${currentUser.role}`;
       }
 
@@ -3324,6 +3403,12 @@
       if (delOwnWrap) {
         if (!isViewer && !isPatricio) delOwnWrap.classList.remove("hidden");
         else delOwnWrap.classList.add("hidden");
+      }
+
+      const accountSec = document.getElementById("accountAccordionSection");
+      if (accountSec) {
+        if (isViewer) accountSec.classList.add("hidden");
+        else accountSec.classList.remove("hidden");
       }
 
       const colorsContainer = document.getElementById("electricColorsPicker");
@@ -3699,6 +3784,13 @@
 
     setInterval(() => { if (!document.hidden) loadFromCloud(true); }, 4000);
     setInterval(updatePresence, 25000);
+
+    
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && selectedTaskId) {
+        deselectTask();
+      }
+    });
 
     window.addEventListener("focus", () => { loadFromCloud(true); updatePresence(); });
     document.addEventListener("visibilitychange", () => { if (!document.hidden) { loadFromCloud(true); updatePresence(); } });

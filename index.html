@@ -1668,23 +1668,37 @@
 
       if (tabName === 'tasks') {
         renderTable();
-        if (selectedTaskId) renderTaskRightPanel(selectedTaskId);
-        else renderEmptyTaskRightPanel();
+        if (selectedTaskId) {
+          openRightPanel();
+          renderTaskRightPanel(selectedTaskId);
+        } else {
+          if (window.innerWidth >= 768) {
+            openRightPanel();
+            renderEmptyTaskRightPanel();
+          } else {
+            closeRightPanel();
+          }
+        }
       } else if (tabName === 'calendar') {
         renderCenterCalendar();
-        renderCalendarRightPanel(selectedCalendarDayKey || toDDMMYYYY(new Date()));
+        closeRightPanel();
       } else if (tabName === 'companies') {
         renderCompaniesView();
-        if (selectedCompanyForEdit) renderCompanyRightPanel(selectedCompanyForEdit);
-        else renderEmptyCompanyRightPanel();
+        if (selectedCompanyForEdit) {
+          openRightPanel();
+          renderCompanyRightPanel(selectedCompanyForEdit);
+        } else {
+          closeRightPanel();
+        }
       } else if (tabName === 'achievements') {
         renderAchievementsMatrix();
         const curInfo = getUserGamification(getActiveUserId());
         renderRanksHorizontalList(curInfo.level);
         if (selectedAchievementKey && selectedAchievementTier) {
+          openRightPanel();
           renderAchievementRightPanel(selectedAchievementKey, selectedAchievementTier);
         } else {
-          renderAchievementRightPanel('sprint', 'gold');
+          closeRightPanel();
         }
       }
     }
@@ -1712,7 +1726,7 @@
     }
 
     
-    function openRightPanelMobile() {
+    function openRightPanel() {
       const panel = document.getElementById('rightPanel');
       const backdrop = document.getElementById('rightPanelBackdrop');
       if (panel) {
@@ -1720,21 +1734,25 @@
         panel.classList.add('flex');
       }
       if (backdrop && window.innerWidth < 768) backdrop.classList.remove('hidden');
+      isRightPanelCollapsed = false;
     }
+    const openRightPanelMobile = openRightPanel;
 
-    function closeRightPanelMobile() {
+    function closeRightPanel() {
       const panel = document.getElementById('rightPanel');
       const backdrop = document.getElementById('rightPanelBackdrop');
-      if (window.innerWidth < 768) {
-        if (panel) {
-          panel.classList.add('hidden');
-          panel.classList.remove('flex');
-        }
-        if (backdrop) backdrop.classList.add('hidden');
-      } else {
-        toggleRightPanelCollapse();
+      const body = document.getElementById('rightPanelBody');
+      if (panel) {
+        panel.classList.add('hidden');
+        panel.classList.remove('flex');
+      }
+      if (backdrop) backdrop.classList.add('hidden');
+      isRightPanelCollapsed = true;
+      if (currentNavTab !== 'tasks' && body) {
+        body.innerHTML = "";
       }
     }
+    const closeRightPanelMobile = closeRightPanel;
 
     function openMobileMoreModal() {
       document.getElementById('mobileMoreModal').classList.remove('hidden');
@@ -1746,11 +1764,10 @@
 
     function toggleRightPanelCollapse() {
       const panel = document.getElementById('rightPanel');
-      isRightPanelCollapsed = !isRightPanelCollapsed;
-      if (isRightPanelCollapsed) {
-        panel.classList.add('hidden');
+      if (panel && !panel.classList.contains('hidden')) {
+        closeRightPanel();
       } else {
-        panel.classList.remove('hidden');
+        openRightPanel();
       }
     }
 
@@ -2201,7 +2218,7 @@
 
           ${isViewer ? `
             <div class="pt-2 flex justify-end border-t border-white/[0.06]">
-              <button onclick="renderEmptyCompanyRightPanel()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-xl">Cerrar</button>
+              <button onclick="handleRightPanelCloseOrDeselect()" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white rounded-xl">Cerrar</button>
             </div>
           ` : ''}
         </div>
@@ -2386,18 +2403,25 @@
     }
 
     function handleRightPanelCloseOrDeselect() {
-      if (selectedTaskId) {
-        deselectTask();
-      } else if (selectedCompanyForEdit) {
+      if (currentNavTab === 'tasks') {
+        if (selectedTaskId) {
+          deselectTask();
+        } else {
+          closeRightPanel();
+        }
+      } else if (currentNavTab === 'companies') {
         selectedCompanyForEdit = null;
-        renderEmptyCompanyRightPanel();
         renderCompaniesView();
-      }
-      if (window.innerWidth < 768) {
-        closeRightPanelMobile();
+        closeRightPanel();
+      } else if (currentNavTab === 'calendar') {
+        closeRightPanel();
+      } else if (currentNavTab === 'achievements') {
+        selectedAchievementKey = null;
+        selectedAchievementTier = null;
+        renderAchievementsMatrix();
+        closeRightPanel();
       } else {
-        deselectTask();
-        renderEmptyTaskRightPanel();
+        closeRightPanel();
       }
     }
 
@@ -3780,8 +3804,8 @@
 
     
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && selectedTaskId) {
-        deselectTask();
+      if (e.key === 'Escape') {
+        handleRightPanelCloseOrDeselect();
       }
     });
 

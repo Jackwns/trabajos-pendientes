@@ -277,6 +277,29 @@
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
+  
+    /* Corrección de brillo centrado en modo comprimido (w-16) */
+    #leftSidebar.w-16 .nav-tab-btn {
+      justify-content: center !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      width: 2.75rem !important;
+      height: 2.75rem !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+    #leftSidebar.w-16 .nav-tab-btn svg {
+      margin: 0 !important;
+    }
+
+    /* Indicador celeste en la izquierda del ítem seleccionado */
+    .table-row-card.selected-row {
+      background: rgba(6, 182, 212, 0.12) !important;
+      box-shadow: inset 4px 0 0 #06B6D4 !important;
+    }
+    .table-row-card.selected-row td:first-child {
+      border-left: 4px solid #06B6D4 !important;
+    }
   </style>
 </head>
 <body class="selection:bg-cyan-500 selection:text-black">
@@ -347,72 +370,89 @@
   </div>
 
   <!-- APLICACIÓN PRINCIPAL -->
-  <div id="appMainView" class="hidden min-h-screen flex flex-col w-full">
+  <div id="appMainView" class="hidden min-h-screen flex flex-col w-full pb-16 md:pb-0">
 
     <!-- 1. HEADER (ANCHO COMPLETO CON NIVELES, EXP Y TRABAJOS HECHOS) -->
     <header class="sticky top-0 z-40 glass-panel border-b border-white/[0.06] w-full shrink-0">
-      <div class="w-full px-3 sm:px-6 h-16 flex items-center justify-between gap-2.5">
+      <div class="w-full px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
         
-        <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
-            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-base font-bold text-white tracking-tight truncate">TaskFlow</span>
-              <button id="syncBadge" onclick="manualSync()" title="Click para forzar sincronización" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shrink-0 hover:border-emerald-400 transition-all active:scale-95 cursor-pointer">
-                <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                <span id="syncText" class="hidden sm:inline">En línea</span>
-              </button>
-              <span id="presenceBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 shrink-0 select-none" title="Dispositivos conectados">
-                <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
-              </span>
-
-              <div onclick="openUserProfileModal()" id="mobileLiquidBubble" style="-webkit-mask-image: -webkit-radial-gradient(white, black); clip-path: circle(50% at 50% 50%);" class="md:hidden relative w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-dark-900 shadow-md shadow-cyan-500/20 shrink-0 cursor-pointer active:scale-95 transition-transform" title="Nivel y Experiencia">
-                <div id="mobileLiquidFill" class="absolute -bottom-2 -left-2 -right-2 bg-gradient-to-t from-fuchsia-600 via-pink-500 to-cyan-400 liquid-anim transition-all duration-700 ease-out" style="height: calc(25% + 8px);"></div>
-                <span id="mobileLiquidLevelText" class="absolute inset-0 flex items-center justify-center font-black text-white text-[11px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.95)] z-10 select-none">Nv 1</span>
-              </div>
-              <div onclick="switchNavTab('calendar')" id="mobileDailyCounter" class="md:hidden px-2 py-1 rounded-xl border text-[10px] font-black shrink-0 transition-all flex items-center justify-center cursor-pointer active:scale-95 select-none" title="Trabajos de hoy">0 hoy</div>
+        <!-- Bloque Izquierdo: Logo + TaskFlow + Presencia Ojo + Gamificación (Hoy hechos a la izquierda de Nivel) -->
+        <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+          
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25 shrink-0">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </div>
-            <p id="subHeaderUserRole" class="text-[11px] text-slate-400 truncate hidden lg:block">Patricio • Art Director</p>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <span class="text-base font-bold text-white tracking-tight truncate">TaskFlow</span>
+                <button id="syncBadge" onclick="manualSync()" title="Click para forzar sincronización" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-dark-850 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0 hover:border-emerald-400 transition-all active:scale-95 cursor-pointer">
+                  <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                  <span id="syncText" class="hidden sm:inline">En línea</span>
+                </button>
+                <span id="presenceBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 shrink-0 select-none" title="Dispositivos conectados">
+                  <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span id="presenceCount" class="text-[11px] font-extrabold text-cyan-300">1</span>
+                </span>
+              </div>
+              <p id="subHeaderUserRole" class="text-[10px] text-slate-400 truncate hidden 2xl:block">Patricio • Art Director</p>
+            </div>
           </div>
+
+          <!-- Separador vertical sutil -->
+          <div class="hidden md:block h-7 w-[1px] bg-white/[0.08] shrink-0 mx-0.5"></div>
+
+          <!-- GAMIFICACIÓN PEGADA A LA IZQUIERDA (DERECHA DEL OJO):
+               1. HOY HECHOS (a la izquierda de nivel)
+               2. NIVEL
+               3. EXPERIENCIA (Rango + Barra) -->
+          <div id="headerGamificationLeft" class="hidden md:flex items-center gap-2.5 shrink-0">
+            
+            <!-- 1. Hoy hechos (A LA IZQUIERDA DE NIVEL) -->
+            <div id="desktopDailyCounter" onclick="switchNavTab('calendar')" class="h-10 min-w-[66px] px-2 rounded-xl border-2 flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95" title="Click para ver entregas del día">
+              <span class="text-[7.5px] uppercase font-extrabold text-slate-500 block leading-none mb-0.5">Hoy hechos</span>
+              <span class="text-base font-black text-white leading-none tracking-tight">0</span>
+            </div>
+
+            <!-- 2. Nivel -->
+            <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-dark-900 to-dark-800 border-2 border-cyan-400/60 flex flex-col items-center justify-center shrink-0 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+              <span class="text-[8.5px] font-black uppercase text-cyan-400 leading-none">Nv</span>
+              <span id="desktopXpLevelNum" class="text-base font-black text-white leading-none mt-0.5 tracking-tight">1</span>
+            </div>
+
+            <!-- 3. Experiencia y Rango -->
+            <div class="w-44 lg:w-56 shrink-0">
+              <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-1 truncate">
+                  <span id="desktopXpRankTitle" class="text-[9.5px] text-cyan-300 font-semibold px-1.5 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 truncate">Cadete</span>
+                </div>
+                <div class="text-[10px] font-semibold shrink-0">
+                  <span id="desktopXpCurrent" class="text-cyan-400 font-bold">0</span>
+                  <span class="text-slate-400">/</span>
+                  <span id="desktopXpNext" class="text-slate-300">500 XP</span>
+                  <span id="desktopXpPercent" class="text-fuchsia-400 font-bold ml-1">(0%)</span>
+                </div>
+              </div>
+              <div class="w-full h-2 bg-dark-950/90 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
+                <div id="desktopXpBarFill" class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.5)] transition-all duration-700 ease-out" style="width: 0%;"></div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
-        <!-- Niveles, EXP y Trabajos Hechos integrados en el Header -->
-        <div id="headerGamificationCenter" class="hidden md:flex items-center gap-3.5 flex-1 max-w-2xl px-2">
-          <div class="relative w-11 h-11 rounded-xl bg-gradient-to-tr from-dark-900 to-dark-800 border-2 border-cyan-400/60 flex flex-col items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-            <span class="text-[9px] font-black uppercase text-cyan-400 leading-none">Nv</span>
-            <span id="desktopXpLevelNum" class="text-lg font-black text-white leading-none mt-0.5 tracking-tight">1</span>
-          </div>
-
-          <div id="desktopDailyCounter" onclick="switchNavTab('calendar')" class="h-11 min-w-[70px] px-2.5 rounded-xl border-2 flex flex-col items-center justify-center shrink-0 text-center select-none transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95" title="Click para ver entregas del día">
-            <span class="text-[8px] uppercase font-extrabold text-slate-500 block leading-none mb-0.5">Hoy hechos</span>
-            <span class="text-lg font-black text-white leading-none tracking-tight">0</span>
-          </div>
-
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <div class="flex items-center gap-1.5 truncate">
-                <span id="desktopXpRankTitle" class="text-[10px] text-cyan-300 font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 truncate">Cadete</span>
-              </div>
-              <div class="text-[11px] font-semibold shrink-0">
-                <span id="desktopXpCurrent" class="text-cyan-400 font-bold">0</span>
-                <span class="text-slate-400"> / </span>
-                <span id="desktopXpNext" class="text-slate-300">500 XP</span>
-                <span id="desktopXpPercent" class="text-fuchsia-400 font-bold ml-1">(0%)</span>
-              </div>
-            </div>
-            <div class="w-full h-2.5 bg-dark-950/90 rounded-full overflow-hidden p-0.5 border border-white/10 shadow-inner">
-              <div id="desktopXpBarFill" class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-fuchsia-500 shadow-[0_0_12px_rgba(217,70,239,0.5)] transition-all duration-700 ease-out" style="width: 0%;"></div>
-            </div>
-          </div>
-        </div>
-
+        <!-- Derecha: Burbuja Móvil, Contador Móvil y Avatar Perfil -->
         <div class="flex items-center gap-2 shrink-0">
+          <div onclick="openUserProfileModal()" id="mobileLiquidBubble" style="-webkit-mask-image: -webkit-radial-gradient(white, black); clip-path: circle(50% at 50% 50%);" class="md:hidden relative w-9 h-9 rounded-full overflow-hidden border-2 border-cyan-400/50 bg-dark-900 shadow-md shadow-cyan-500/20 shrink-0 cursor-pointer active:scale-95 transition-transform" title="Nivel y Experiencia">
+            <div id="mobileLiquidFill" class="absolute -bottom-2 -left-2 -right-2 bg-gradient-to-t from-fuchsia-600 via-pink-500 to-cyan-400 liquid-anim transition-all duration-700 ease-out" style="height: calc(25% + 8px);"></div>
+            <span id="mobileLiquidLevelText" class="absolute inset-0 flex items-center justify-center font-black text-white text-[11px] drop-shadow-[0_1.5px_2.5px_rgba(0,0,0,0.95)] z-10 select-none">Nv 1</span>
+          </div>
+          <div onclick="switchNavTab('calendar')" id="mobileDailyCounter" class="md:hidden px-2 py-1 rounded-xl border text-[10px] font-black shrink-0 transition-all flex items-center justify-center cursor-pointer active:scale-95 select-none" title="Trabajos de hoy">0 hoy</div>
+
           <button id="navbarUserBtn" onclick="openUserProfileModal()" title="Mi Perfil" class="relative w-9 h-9 rounded-full p-0.5 border-2 border-white/20 hover:border-cyan-400 transition-all shrink-0 active:scale-95 shadow-md">
             <div id="navbarAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden"></div>
             <span id="navbarResetAlertDot" class="hidden absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-400 border-2 border-dark-950 shadow-[0_0_8px_rgba(251,191,36,0.9)] z-20" title="Solicitud de clave pendiente"></span>
@@ -436,7 +476,7 @@
     <div class="flex-1 flex overflow-hidden w-full relative">
 
       <!-- 2. PANEL IZQUIERDO: MENÚ VERTICAL -->
-      <aside id="leftSidebar" class="shrink-0 transition-all duration-300 glass-panel border-r border-white/[0.06] flex flex-col justify-between z-20 w-56">
+      <aside id="leftSidebar" class="hidden md:flex shrink-0 transition-all duration-300 glass-panel border-r border-white/[0.06] flex-col justify-between z-20 w-56">
         <div class="p-3 space-y-1.5">
           <div class="flex items-center justify-between px-2 py-1 mb-2 text-slate-400">
             <span id="sidebarTitleLabel" class="text-[10px] uppercase font-extrabold tracking-wider text-slate-500">Menú</span>
@@ -447,7 +487,7 @@
             </button>
           </div>
 
-          <!-- Tareas -->
+          <!-- 1. Tareas -->
           <button id="navBtnTasks" onclick="switchNavTab('tasks')" title="Tareas" class="nav-tab-btn nav-btn-active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all">
             <svg class="w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -458,7 +498,7 @@
             <span class="nav-btn-label truncate">Tareas</span>
           </button>
 
-          <!-- Calendario -->
+          <!-- 2. Calendario -->
           <button id="navBtnCalendar" onclick="switchNavTab('calendar')" title="Calendario" class="nav-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all">
             <svg class="w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -466,7 +506,7 @@
             <span class="nav-btn-label truncate">Calendario</span>
           </button>
 
-          <!-- Empresas -->
+          <!-- 3. Empresas -->
           <button id="navBtnCompanies" onclick="switchNavTab('companies')" title="Empresas" class="nav-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all">
             <svg class="w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
@@ -474,7 +514,7 @@
             <span class="nav-btn-label truncate">Empresas</span>
           </button>
 
-          <!-- Logros -->
+          <!-- 4. Logros -->
           <button id="navBtnAchievements" onclick="switchNavTab('achievements')" title="Logros" class="nav-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-bold text-slate-300 hover:text-white hover:bg-white/[0.04] transition-all">
             <svg class="w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <circle cx="12" cy="8" r="6" />
@@ -482,28 +522,39 @@
             </svg>
             <span class="nav-btn-label truncate">Logros</span>
           </button>
-        </div>
 
-        <div class="p-3 border-t border-white/[0.06] space-y-1">
-          <button onclick="manualSync()" title="Sincronizar con la nube" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-cyan-400 hover:bg-white/[0.04] transition-all">
+          <!-- LÍNEA DE SEPARADOR -->
+          <div class="my-2 border-t border-white/[0.08] w-full"></div>
+
+          <!-- 5. Sincronizar (DEBAJO DE LOGROS) -->
+          <button id="navBtnSync" onclick="manualSync()" title="Sincronizar con la nube" class="nav-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-cyan-400 hover:bg-white/[0.04] transition-all">
             <svg class="w-4 h-4 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
             <span class="nav-btn-label truncate">Sincronizar</span>
           </button>
-          <button id="exportBtn" onclick="exportData()" title="Descargar respaldo JSON" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-emerald-400 hover:bg-white/[0.04] transition-all">
+
+          <!-- 6. Exportar (DEBAJO DE LOGROS) -->
+          <button id="navBtnExport" onclick="exportData()" title="Descargar respaldo JSON" class="nav-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-emerald-400 hover:bg-white/[0.04] transition-all">
             <svg class="w-4 h-4 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
             <span class="nav-btn-label truncate">Exportar</span>
           </button>
-          <button id="importBtn" onclick="document.getElementById('importFileInput').click()" title="Cargar respaldo JSON" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-purple-400 hover:bg-white/[0.04] transition-all">
+
+          <!-- 7. Importar (DEBAJO DE LOGROS) -->
+          <button id="navBtnImport" onclick="document.getElementById('importFileInput').click()" title="Cargar respaldo JSON" class="nav-tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-purple-400 hover:bg-white/[0.04] transition-all">
             <svg class="w-4 h-4 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
             <span class="nav-btn-label truncate">Importar</span>
           </button>
+
           <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
+        </div>
+
+        <div class="p-2 border-t border-white/[0.06] text-center">
+          <span class="text-[9px] text-slate-600 block truncate">TaskFlow</span>
         </div>
       </aside>
 
@@ -524,34 +575,71 @@
             <button onclick="setStatusFilter('')" class="text-xs text-slate-500 hover:text-slate-300 underline">Limpiar</button>
           </div>
 
-          <div class="glass-panel p-3 rounded-2xl shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
-            <div class="flex items-center gap-2 flex-1">
-              <div class="flex items-center gap-2 flex-1 bg-white/[0.025] rounded-xl px-3 py-2 border border-white/[0.04]">
-                <svg class="w-4 h-4 text-slate-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="searchInput" placeholder="Buscar por cliente, descripción o detalles..." oninput="renderTable()"
+          <div class="glass-panel p-3 rounded-2xl shadow-xl space-y-2.5">
+            <!-- Fila 1: Buscador + Botón Nueva Tarea a su derecha -->
+            <div class="flex items-center gap-2 w-full">
+              <div class="flex items-center gap-2 flex-1 bg-white/[0.025] rounded-xl px-3 py-2 border border-white/[0.04] min-w-0">
+                <svg class="w-4 h-4 text-slate-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="searchInput" placeholder="Buscar trabajos..." oninput="renderTable()"
                   class="w-full text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-500 text-white">
               </div>
 
               <!-- BOTÓN NUEVA TAREA A LA DERECHA DEL BUSCADOR -->
-              <button id="newTaskBtn" onclick="openNewTaskInRightPanel()" title="Nueva Tarea" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0 active:scale-95">
+              <button id="newTaskBtn" onclick="openNewTaskInRightPanel()" title="Nueva Tarea" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-400 hover:to-cyan-400 rounded-xl shadow-lg shadow-cyan-500/25 transition-all shrink-0 active:scale-95">
                 <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                <span>Nueva Tarea</span>
+                <span class="hidden sm:inline">Nueva Tarea</span>
               </button>
             </div>
 
-            <div class="flex items-center gap-2">
-              <select id="filterCompany" onchange="renderTable()" class="flex-1 md:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-                <option value="">Todas las empresas</option>
-              </select>
-              <select id="filterPriority" onchange="renderTable()" class="flex-1 md:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-                <option value="">Todas las prioridades</option>
-              </select>
-              <select id="filterDifficulty" onchange="renderTable()" class="flex-1 md:flex-initial text-xs font-medium bg-dark-850 border border-white/[0.06] rounded-xl px-3 py-2 text-slate-300 outline-none">
-                <option value="">Todas las dificultades</option>
-                <option value="Baja">Dificultad Baja</option>
-                <option value="Media">Dificultad Media</option>
-                <option value="Alta">Dificultad Alta</option>
-              </select>
+            <!-- Fila 2: SECTOR DE FILTROS COMPRIMIDOS CON ÍCONO DE EMBUDO -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 w-full">
+              
+              <!-- Ícono de Embudo -->
+              <div class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-400 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.05] shrink-0" title="Filtros de búsqueda">
+                <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span class="hidden sm:inline">Filtros:</span>
+              </div>
+
+              <!-- 1. Filtro de Empresas (Ícono de Edificio + Select + Flechita abajo) -->
+              <div class="relative flex items-center bg-dark-850 border border-white/[0.08] rounded-xl px-2.5 py-1.5 gap-1.5 hover:border-cyan-400/40 transition-all shrink-0">
+                <svg class="w-3.5 h-3.5 text-slate-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" title="Empresas">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                <select id="filterCompany" onchange="renderTable()" class="bg-transparent text-xs text-slate-200 outline-none cursor-pointer appearance-none pr-3.5 max-w-[120px] sm:max-w-none truncate">
+                  <option value="">Empresas</option>
+                </select>
+                <span class="text-[9px] text-slate-500 pointer-events-none -ml-2.5">▼</span>
+              </div>
+
+              <!-- 2. Filtro de Prioridades (Ícono de Rango Sargento en gris + Select + Flechita abajo) -->
+              <div class="relative flex items-center bg-dark-850 border border-white/[0.08] rounded-xl px-2.5 py-1.5 gap-1.5 hover:border-cyan-400/40 transition-all shrink-0">
+                <svg class="w-3.5 h-3.5 text-slate-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" title="Prioridad">
+                  <path d="M6 15l6-5 6 5"/><path d="M6 10l6-5 6 5"/>
+                </svg>
+                <select id="filterPriority" onchange="renderTable()" class="bg-transparent text-xs text-slate-200 outline-none cursor-pointer appearance-none pr-3.5 max-w-[120px] sm:max-w-none truncate">
+                  <option value="">Prioridades</option>
+                </select>
+                <span class="text-[9px] text-slate-500 pointer-events-none -ml-2.5">▼</span>
+              </div>
+
+              <!-- 3. Filtro de Dificultad (Ícono de Velocímetro a medias en gris + Select + Flechita abajo) -->
+              <div class="relative flex items-center bg-dark-850 border border-white/[0.08] rounded-xl px-2.5 py-1.5 gap-1.5 hover:border-cyan-400/40 transition-all shrink-0">
+                <svg class="w-3.5 h-3.5 text-slate-400 stroke-current shrink-0" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" title="Dificultad">
+                  <path d="M3.34 19a10 10 0 1 1 17.32 0" />
+                  <line x1="12" y1="14" x2="12" y2="7" stroke-width="2.5" />
+                  <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+                </svg>
+                <select id="filterDifficulty" onchange="renderTable()" class="bg-transparent text-xs text-slate-200 outline-none cursor-pointer appearance-none pr-3.5 max-w-[120px] sm:max-w-none truncate">
+                  <option value="">Dificultades</option>
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                </select>
+                <span class="text-[9px] text-slate-500 pointer-events-none -ml-2.5">▼</span>
+              </div>
+
             </div>
           </div>
 
@@ -645,9 +733,30 @@
           <div id="companiesCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
 
-        <!-- SECCIÓN 4: VISTA LOGROS -->
+        <!-- SECCIÓN 4: VISTA LOGROS (CON LISTA HORIZONTAL DE RANGOS ARRIBA) -->
         <div id="viewAchievements" class="hidden space-y-4">
-          <div class="glass-panel p-5 rounded-2xl shadow-xl">
+          
+          <!-- LISTA HORIZONTAL SCROLLEABLE DE RANGOS MILITARES (ARRIBA DE LA MATRIZ) -->
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-xl">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-sm font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
+                  <svg class="w-4 h-4 text-cyan-400 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                  <span>Carrera de Rangos Profesionales</span>
+                </h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">
+                  Desplaza horizontalmente para ver todos los rangos militares desde Recluta hasta Maestro de Arte.
+                </p>
+              </div>
+            </div>
+
+            <!-- Barra Horizontal Scrolleable -->
+            <div id="ranksHorizontalScrollList" class="flex items-center gap-3 overflow-x-auto custom-scroll py-2 px-1 scroll-smooth"></div>
+          </div>
+
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-xl">
             <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
               <div>
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
@@ -674,14 +783,16 @@
 
       </main>
 
-      <!-- 4. PANEL DERECHO (DETALLES Y EDICIÓN) -->
-      <aside id="rightPanel" class="shrink-0 transition-all duration-300 glass-panel border-l border-white/[0.06] flex flex-col z-20 w-80 lg:w-96 overflow-y-auto custom-scroll">
+      <!-- 4. PANEL DERECHO (DESKTOP FIJO, MÓVIL DESLIZANTE SOLO AL HACER CLIC) -->
+      <div id="rightPanelBackdrop" onclick="closeRightPanelMobile()" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"></div>
+
+      <aside id="rightPanel" class="hidden md:flex fixed md:static inset-y-0 right-0 z-50 md:z-20 shrink-0 transition-all duration-300 glass-panel border-l border-white/[0.06] flex-col w-full sm:w-80 lg:w-96 overflow-y-auto custom-scroll shadow-2xl md:shadow-none">
         <div class="p-3.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
             <h3 id="rightPanelHeaderTitle" class="text-xs font-black uppercase tracking-wider text-white">Detalles</h3>
           </div>
-          <button onclick="toggleRightPanelCollapse()" title="Ocultar / Mostrar panel" class="p-1 rounded-lg hover:bg-white/[0.05] text-slate-400 hover:text-white transition-all text-xs">
+          <button onclick="closeRightPanelMobile()" title="Cerrar panel" class="p-1 rounded-lg hover:bg-white/[0.05] text-slate-400 hover:text-white transition-all text-xs">
             <svg id="rightPanelToggleIcon" class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -690,6 +801,72 @@
         <div id="rightPanelBody" class="p-4 flex-1"></div>
       </aside>
 
+    </div>
+
+    <!-- 📱 BARRA DE NAVEGACIÓN INFERIOR PARA TELÉFONOS (MENÚ IZQUIERDO ABAJO) -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-white/[0.08] px-2 py-1.5 flex items-center justify-around">
+      <button onclick="switchNavTab('tasks')" id="mobileNavTasks" class="flex flex-col items-center gap-0.5 text-cyan-400 py-1 px-2.5 rounded-xl bg-cyan-500/15">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+        <span class="text-[9px] font-bold">Tareas</span>
+      </button>
+      <button onclick="switchNavTab('calendar')" id="mobileNavCalendar" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white py-1 px-2.5 rounded-xl">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span class="text-[9px] font-bold">Calendario</span>
+      </button>
+      <button onclick="switchNavTab('companies')" id="mobileNavCompanies" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white py-1 px-2.5 rounded-xl">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
+        <span class="text-[9px] font-bold">Empresas</span>
+      </button>
+      <button onclick="switchNavTab('achievements')" id="mobileNavAchievements" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white py-1 px-2.5 rounded-xl">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <circle cx="12" cy="8" r="6" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+        <span class="text-[9px] font-bold">Logros</span>
+      </button>
+      <button onclick="openMobileMoreModal()" id="mobileNavMore" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-white py-1 px-2.5 rounded-xl">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+          <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+        </svg>
+        <span class="text-[9px] font-bold">Más</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- MODAL MÁS PARA MÓVIL (SINCRONIZAR, EXPORTAR, IMPORTAR) -->
+  <div id="mobileMoreModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-end justify-center hidden" onclick="closeMobileMoreModal()">
+    <div class="bg-dark-900 border-t border-white/[0.1] rounded-t-3xl w-full max-w-lg p-5 shadow-2xl animate-modal-pop" onclick="event.stopPropagation()">
+      <div class="w-12 h-1 rounded-full bg-white/20 mx-auto mb-4"></div>
+      <div class="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-4">
+        <h3 class="text-sm font-bold text-white">Opciones del Sistema</h3>
+        <button onclick="closeMobileMoreModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mb-2">
+        <button onclick="closeMobileMoreModal(); manualSync();" class="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all flex flex-col items-center">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-1.5">
+            <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </div>
+          <span class="text-xs font-bold text-white">Sincronizar</span>
+        </button>
+        <button onclick="closeMobileMoreModal(); exportData();" class="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all flex flex-col items-center">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-1.5">
+            <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          </div>
+          <span class="text-xs font-bold text-white">Exportar</span>
+        </button>
+        <button onclick="closeMobileMoreModal(); document.getElementById('importFileInput').click();" class="p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] text-center active:scale-95 transition-all flex flex-col items-center">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-1.5">
+            <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          </div>
+          <span class="text-xs font-bold text-white">Importar</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -919,7 +1096,8 @@
       { name: "Verde Lima", hex: "#84CC16" },
       { name: "Esmeralda Neón", hex: "#10B981" },
       { name: "Azul Cobalto", hex: "#2563EB" },
-      { name: "Naranja Eléctrico", hex: "#F97316" }
+      { name: "Naranja Eléctrico", hex: "#F97316" },
+      { name: "Blanco", hex: "#FFFFFF" }
     ];
 
     const DEFAULT_PROFILES = [
@@ -1159,8 +1337,18 @@
         name: "Maestro Operativo",
         descShort: "Total de trabajos finalizados acumulados con éxito.",
         iconSvg: (size = "w-10 h-10") => `
-          <svg class="${size} fill-current" viewBox="0 0 24 24">
-            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+          <svg class="${size} fill-current" viewBox="0 0 96 60">
+            <polygon points="36,21 16,14 12,19 35,25" />
+            <polygon points="35,27 12,25 8,30 33,33" />
+            <polygon points="34,35 16,37 14,42 35,40" />
+            <polygon points="60,21 80,14 84,19 61,25" />
+            <polygon points="61,27 84,25 88,30 63,33" />
+            <polygon points="62,35 80,37 82,42 61,40" />
+            <polygon points="41,18 44,28 48,22 52,28 55,18 57,36 39,36" />
+            <rect x="39" y="38" width="18" height="3" rx="1" />
+            <circle cx="41" cy="16" r="1.5" />
+            <circle cx="48" cy="20" r="1.5" />
+            <circle cx="55" cy="16" r="1.5" />
           </svg>
         `,
         getTier: (info) => getOperationsTier(info.completedCount),
@@ -1177,10 +1365,16 @@
         name: "Alta Complejidad",
         descShort: "Trabajos de dificultad alta terminados.",
         iconSvg: (size = "w-10 h-10") => `
-          <svg class="${size} stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3.34 19a10 10 0 1 1 17.32 0" />
-            <path d="m12 14 4.5-4.5" stroke-width="2.5" />
-            <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+          <svg class="${size} fill-current" viewBox="0 0 96 60">
+            <polygon points="36,21 16,14 12,19 35,25" />
+            <polygon points="35,27 12,25 8,30 33,33" />
+            <polygon points="34,35 16,37 14,42 35,40" />
+            <polygon points="60,21 80,14 84,19 61,25" />
+            <polygon points="61,27 84,25 88,30 63,33" />
+            <polygon points="62,35 80,37 82,42 61,40" />
+            <path d="M37,36 A11,11 0 1,1 59,36" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" />
+            <line x1="48" y1="34" x2="54" y2="24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            <circle cx="48" cy="34" r="2.5" />
           </svg>
         `,
         getTier: (info) => getHighComplexityTier(info.highDifficultyCount),
@@ -1359,7 +1553,7 @@
       selectedCalendarDayKey = dateKey;
       renderCenterCalendar();
       renderCalendarRightPanel(dateKey);
-      if (isRightPanelCollapsed) toggleRightPanelCollapse();
+      openRightPanelMobile();
     }
 
     function renderCenterCalendar() {
@@ -1416,29 +1610,28 @@
         let circleHtml = "";
         if (count > 0) {
           const clamped = Math.min(10, count);
-          const sizePx = Math.round(22 + (clamped - 1) * (18 / 9));
-          const opacity = (0.4 + (clamped - 1) * (0.6 / 9)).toFixed(2);
-          const glowPx = Math.round(6 + clamped * 2);
+          const pct = Math.round(70 + (clamped - 1) * (22 / 9));
+          const opacity = (0.45 + (clamped - 1) * (0.55 / 9)).toFixed(2);
+          const glowPx = Math.round(8 + clamped * 2);
           const rgb = isWeekend ? "239, 68, 68" : "217, 70, 239";
 
           circleHtml = `
             <div class="absolute rounded-full pointer-events-none transition-all duration-300"
-                 style="width: ${sizePx}px; height: ${sizePx}px; background-color: rgb(${rgb}); opacity: ${opacity}; box-shadow: 0 0 ${glowPx}px rgba(${rgb}, 0.8);">
+                 style="width: ${pct}%; height: ${pct}%; background-color: rgb(${rgb}); opacity: ${opacity}; box-shadow: 0 0 ${glowPx}px rgba(${rgb}, 0.85);">
             </div>
           `;
         }
 
         const todayRing = isToday ? "ring-1 ring-cyan-400" : "";
         const selectedBorder = isSelected 
-          ? "border-2 border-white bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105 z-20" 
+          ? "border-2 border-white bg-white/[0.08] shadow-[0_0_20px_rgba(255,255,255,0.25)] scale-105 z-20" 
           : "border border-white/[0.05] bg-dark-850/60 hover:bg-dark-800/90 hover:border-cyan-400/40";
 
         html += `
           <div onclick="selectCalendarDay('${dateKey}')"
-               class="w-full h-14 sm:h-16 rounded-2xl flex flex-col items-center justify-center relative cursor-pointer select-none transition-all duration-200 ${todayRing} ${selectedBorder}">
+               class="w-full h-16 sm:h-20 rounded-2xl flex items-center justify-center relative cursor-pointer select-none transition-all duration-200 ${todayRing} ${selectedBorder}">
             ${circleHtml}
-            <span class="relative z-10 text-xs sm:text-sm font-black ${count > 0 ? "text-white" : (isWeekend ? "text-rose-300/80" : "text-slate-300")}">${d}</span>
-            ${count > 0 ? `<span class="relative z-10 text-[9px] font-extrabold text-white/90 drop-shadow mt-0.5">${count} ${count === 1 ? "fin" : "fins"}</span>` : ""}
+            <span class="relative z-10 text-sm sm:text-base font-black ${count > 0 ? "text-white" : (isWeekend ? "text-rose-300/80" : "text-slate-300")}">${d}</span>
           </div>
         `;
       }
@@ -1461,6 +1654,18 @@
         }
       });
 
+      // Actualizar botones de navegación móvil inferior
+      tabs.forEach(t => {
+        const mBtn = document.getElementById(`mobileNav${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (mBtn) {
+          if (t === tabName) {
+            mBtn.className = "flex flex-col items-center gap-0.5 text-cyan-400 py-1 px-2.5 rounded-xl bg-cyan-500/15";
+          } else {
+            mBtn.className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-white py-1 px-2.5 rounded-xl";
+          }
+        }
+      });
+
       if (tabName === 'tasks') {
         renderTable();
         if (selectedTaskId) renderTaskRightPanel(selectedTaskId);
@@ -1474,6 +1679,8 @@
         else renderEmptyCompanyRightPanel();
       } else if (tabName === 'achievements') {
         renderAchievementsMatrix();
+        const curInfo = getUserGamification(getActiveUserId());
+        renderRanksHorizontalList(curInfo.level);
         if (selectedAchievementKey && selectedAchievementTier) {
           renderAchievementRightPanel(selectedAchievementKey, selectedAchievementTier);
         } else {
@@ -1502,6 +1709,39 @@
         if (titleLabel) titleLabel.classList.remove('hidden');
         if (icon) icon.style.transform = 'rotate(0deg)';
       }
+    }
+
+    
+    function openRightPanelMobile() {
+      const panel = document.getElementById('rightPanel');
+      const backdrop = document.getElementById('rightPanelBackdrop');
+      if (panel) {
+        panel.classList.remove('hidden');
+        panel.classList.add('flex');
+      }
+      if (backdrop && window.innerWidth < 768) backdrop.classList.remove('hidden');
+    }
+
+    function closeRightPanelMobile() {
+      const panel = document.getElementById('rightPanel');
+      const backdrop = document.getElementById('rightPanelBackdrop');
+      if (window.innerWidth < 768) {
+        if (panel) {
+          panel.classList.add('hidden');
+          panel.classList.remove('flex');
+        }
+        if (backdrop) backdrop.classList.add('hidden');
+      } else {
+        toggleRightPanelCollapse();
+      }
+    }
+
+    function openMobileMoreModal() {
+      document.getElementById('mobileMoreModal').classList.remove('hidden');
+    }
+
+    function closeMobileMoreModal() {
+      document.getElementById('mobileMoreModal').classList.add('hidden');
     }
 
     function toggleRightPanelCollapse() {
@@ -1537,7 +1777,7 @@
     function openNewTaskInRightPanel() {
       selectedTaskId = null;
       renderTable();
-      if (isRightPanelCollapsed) toggleRightPanelCollapse();
+      openRightPanelMobile();
 
       const title = document.getElementById('rightPanelHeaderTitle');
       const body = document.getElementById('rightPanelBody');
@@ -1851,7 +2091,7 @@
 
     function renderCompanyRightPanel(compName) {
       selectedCompanyForEdit = compName;
-      if (isRightPanelCollapsed) toggleRightPanelCollapse();
+      openRightPanelMobile();
 
       const title = document.getElementById("rightPanelHeaderTitle");
       const body = document.getElementById("rightPanelBody");
@@ -2103,6 +2343,52 @@
       }
     }
 
+    
+    const RANKS_LIST = [
+      { level: 1, name: "Recluta Creativo", shortName: "Recluta" },
+      { level: 5, name: "Cadete de Diseño", shortName: "Cadete" },
+      { level: 10, name: "Diseñador Junior", shortName: "Junior" },
+      { level: 15, name: "Diseñador Operativo", shortName: "Operativo" },
+      { level: 20, name: "Diseñador Senior", shortName: "Senior" },
+      { level: 25, name: "Especialista Creativo", shortName: "Especialista" },
+      { level: 30, name: "Oficial de Diseño", shortName: "Oficial" },
+      { level: 35, name: "Director Creativo", shortName: "Director" },
+      { level: 40, name: "Comandante Creativo", shortName: "Comandante" },
+      { level: 45, name: "Estratega Visual", shortName: "Estratega" },
+      { level: 50, name: "Director de Operaciones", shortName: "Operaciones" },
+      { level: 55, name: "Maestro de Arte", shortName: "Maestro" }
+    ];
+
+    function renderRanksHorizontalList(userLevel) {
+      const container = document.getElementById("ranksHorizontalScrollList");
+      if (!container) return;
+
+      container.innerHTML = RANKS_LIST.map(r => {
+        const isUnlocked = userLevel >= r.level;
+        const isCurrent = userLevel >= r.level && (r.level === 55 || userLevel < r.level + (r.level === 1 ? 4 : 5));
+        
+        let cardStyle = isUnlocked
+          ? "border-cyan-400/80 bg-cyan-500/15 text-cyan-300 shadow-[0_0_18px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400/40"
+          : "border-slate-800/80 bg-dark-900/60 text-slate-500 opacity-45 hover:opacity-100 hover:filter grayscale transition-all";
+
+        return `
+          <div class="p-2.5 sm:p-3 rounded-2xl border flex items-center gap-3 shrink-0 min-w-[170px] sm:min-w-[190px] select-none transition-all ${cardStyle}">
+            <div class="w-10 h-10 rounded-xl bg-dark-900/80 border border-white/10 flex items-center justify-center shrink-0">
+              ${getRankInsigniaSvg(r.level, "w-6 h-6")}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9px] font-black uppercase px-1.5 py-0.2 rounded ${isUnlocked ? 'bg-cyan-400 text-dark-950' : 'bg-slate-800 text-slate-400'}">Nv ${r.level}</span>
+                ${isCurrent ? '<span class="text-[8px] font-black uppercase text-fuchsia-300 bg-fuchsia-500/20 px-1 rounded">Actual</span>' : ''}
+              </div>
+              <div class="text-xs font-bold text-white truncate mt-0.5">${r.name}</div>
+              <span class="text-[9px] ${isUnlocked ? 'text-cyan-300' : 'text-slate-500'} font-semibold">${isUnlocked ? 'Desbloqueado' : 'Bloqueado'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     function renderAchievementsMatrix() {
       const container = document.getElementById("achievementsMatrixContainer");
       if (!container) return;
@@ -2168,7 +2454,7 @@
       selectedAchievementTier = tierKey;
       renderAchievementsMatrix();
       renderAchievementRightPanel(achKey, tierKey);
-      if (isRightPanelCollapsed) toggleRightPanelCollapse();
+      openRightPanelMobile();
     }
 
     function renderAchievementRightPanel(achKey, tierKey) {
@@ -2411,6 +2697,7 @@
       }
 
       renderProfileSmallAchievements(info);
+      renderRanksHorizontalList(info.level);
     }
 
     function renderProfileSmallAchievements(info) {
@@ -2652,8 +2939,10 @@
     }
 
     function onTaskRowClick(id) {
+      selectedTaskId = id;
       renderTaskRightPanel(id);
       renderTable();
+      openRightPanelMobile();
     }
 
     async function deleteTask(id) {
@@ -3050,6 +3339,7 @@
 
       const info = getUserGamification(currentUser.id);
       renderProfileSmallAchievements(info);
+      renderRanksHorizontalList(info.level);
       document.getElementById("userProfileModal").classList.remove("hidden");
     }
 

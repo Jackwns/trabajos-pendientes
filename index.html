@@ -325,6 +325,24 @@
       justify-content: center !important;
     }
 
+    /* Compresión fluida del contenido central por el menú izquierdo y el menú derecho */
+    @media (min-width: 768px) {
+      #centerPanel {
+        width: auto !important;
+        margin-left: 14rem;
+        margin-right: 20rem;
+      }
+      #leftSidebar.w-16 ~ * #centerPanel,
+      #leftSidebar.w-16 ~ #centerPanel {
+        margin-left: 4rem;
+      }
+    }
+    @media (min-width: 1024px) {
+      #centerPanel {
+        margin-right: 24rem;
+      }
+    }
+
     /* Indicador celeste en la izquierda del ítem seleccionado */
     .table-row-card.selected-row {
       background: rgba(6, 182, 212, 0.12) !important;
@@ -596,7 +614,7 @@
       </aside>
 
       <!-- 3. PANEL CENTRAL -->
-      <main id="centerPanel" class="w-full h-full overflow-y-auto custom-scroll p-4 sm:p-5 relative z-10 transition-all duration-300 pt-20 pb-20 md:pb-6 md:ml-56 md:mr-80 lg:mr-96">
+      <main id="centerPanel" class="h-full overflow-y-auto custom-scroll p-4 sm:p-5 relative z-10 transition-all duration-300 pt-20 pb-20 md:pb-6 md:ml-56 md:mr-80 lg:mr-96">
 
         <!-- SECCIÓN 1: VISTA TAREAS -->
         <div id="viewTasks" class="space-y-4">
@@ -1326,7 +1344,16 @@
 
       if (leftSidebar) leftSidebar.style.top = `${topPx}px`;
       if (rightPanel && window.innerWidth >= 768) rightPanel.style.top = `${topPx}px`;
-      if (centerPanel) centerPanel.style.paddingTop = `${topPx + 16}px`;
+      if (centerPanel) {
+        centerPanel.style.paddingTop = `${topPx + 16}px`;
+        if (window.innerWidth < 768) {
+          centerPanel.style.marginLeft = '0px';
+          centerPanel.style.marginRight = '0px';
+        } else {
+          centerPanel.style.marginLeft = isSidebarCollapsed ? '4rem' : '14rem';
+          centerPanel.style.marginRight = isRightPanelCollapsed ? '4rem' : (window.innerWidth >= 1024 ? '24rem' : '20rem');
+        }
+      }
     }
 
     let currentNavTab = 'tasks';
@@ -1911,6 +1938,7 @@
         if (titleLabel) titleLabel.classList.remove('hidden');
         if (icon) icon.style.transform = 'rotate(0deg)';
       }
+      updateFixedLayout();
     }
 
     
@@ -2088,6 +2116,7 @@
         }
         if (body) body.classList.remove('hidden');
       }
+      updateFixedLayout();
     }
 
     function openRightPanel() {
@@ -2129,6 +2158,7 @@
         }
         if (body) body.classList.remove('hidden');
       }
+      updateFixedLayout();
     }
     const openRightPanelMobile = openRightPanel;
 

@@ -35,11 +35,33 @@
     * { box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
-      width: 100%; min-height: 100vh;
-      overflow-x: hidden;
+      width: 100%; height: 100%;
+      overflow: hidden;
       background-color: #070A12;
       color: #E2E8F0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Date picker inputs high-contrast styling */
+    input[type="date"] {
+      color-scheme: dark;
+      font-weight: 600;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.9) sepia(100%) saturate(300%) hue-rotate(150deg) brightness(1.3);
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 3px 5px;
+      margin-left: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      background: rgba(6, 182, 212, 0.35);
+      border-color: #06B6D4;
+      filter: invert(1) brightness(1.5) drop-shadow(0 0 6px #06B6D4);
+      transform: scale(1.08);
     }
     .fluid-bg-container {
       position: fixed; inset: 0; overflow: hidden;
@@ -381,10 +403,12 @@
   </div>
 
   <!-- APLICACIÓN PRINCIPAL -->
-  <div id="appMainView" class="hidden min-h-screen flex flex-col w-full pb-16 md:pb-0">
+  <div id="appMainView" class="hidden h-screen w-full overflow-hidden flex flex-col relative">
 
-    <!-- 1. HEADER (ANCHO COMPLETO CON NIVELES, EXP Y TRABAJOS HECHOS) -->
-    <header class="sticky top-0 z-40 glass-panel border-b border-white/[0.06] w-full shrink-0">
+    <!-- CONTENEDOR SUPERIOR FIJO (HEADER + CONSOLA VIEWER) -->
+    <div id="topFixedNavContainer" class="fixed top-0 left-0 right-0 z-40 w-full flex flex-col">
+      <!-- 1. HEADER (ANCHO COMPLETO FIJO) -->
+      <header id="mainNavbarHeader" class="glass-panel border-b border-white/[0.06] w-full h-16 shrink-0">
       <div class="w-full px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
         
         <!-- Bloque Izquierdo: Logo + TaskFlow + Presencia Ojo + Gamificación (Hoy hechos a la izquierda de Nivel) -->
@@ -474,21 +498,22 @@
       </div>
     </header>
 
-    <!-- CONSOLA VIEWER -->
-    <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2 px-4 w-full z-30 shadow-xl">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-          Viewer: Supervisión en vivo
+      <!-- CONSOLA VIEWER FIJA -->
+      <div id="viewerConsoleBar" class="hidden glass-panel border-b border-white/[0.06] py-2 px-4 w-full shadow-xl">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+            Viewer: Supervisión en vivo
+          </div>
+          <div id="viewerProfilesSelector" class="flex items-center gap-2 overflow-x-auto no-scrollbar"></div>
         </div>
-        <div id="viewerProfilesSelector" class="flex items-center gap-2 overflow-x-auto no-scrollbar"></div>
       </div>
     </div>
 
-    <!-- 3 COLUMNAS: IZQUIERDA, CENTRAL, DERECHA -->
-    <div class="flex-1 flex overflow-hidden w-full relative">
+    <!-- 3 COLUMNAS: IZQUIERDA (FIXED), CENTRAL (SCROLL), DERECHA (FIXED) -->
+    <div class="flex-1 w-full h-full relative overflow-hidden">
 
-      <!-- 2. PANEL IZQUIERDO: MENÚ VERTICAL -->
-      <aside id="leftSidebar" class="hidden md:flex shrink-0 transition-all duration-300 glass-panel border-r border-white/[0.06] flex-col justify-between z-20 w-56">
+      <!-- 2. PANEL IZQUIERDO: MENÚ VERTICAL (FIXED) -->
+      <aside id="leftSidebar" class="hidden md:flex fixed top-16 bottom-0 left-0 z-20 shrink-0 transition-all duration-300 glass-panel border-r border-white/[0.06] flex-col justify-between overflow-y-auto custom-scroll w-56">
         <div class="p-3 space-y-1.5">
           <div class="flex items-center justify-between px-2 py-1 mb-2 text-slate-400">
             <span id="sidebarTitleLabel" class="text-[10px] uppercase font-extrabold tracking-wider text-slate-500">Menú</span>
@@ -571,7 +596,7 @@
       </aside>
 
       <!-- 3. PANEL CENTRAL -->
-      <main id="centerPanel" class="flex-1 min-w-0 overflow-y-auto custom-scroll p-4 sm:p-5 relative z-10">
+      <main id="centerPanel" class="w-full h-full overflow-y-auto custom-scroll p-4 sm:p-5 relative z-10 transition-all duration-300 pt-20 pb-20 md:pb-6 md:ml-56 md:mr-80 lg:mr-96">
 
         <!-- SECCIÓN 1: VISTA TAREAS -->
         <div id="viewTasks" class="space-y-4">
@@ -670,6 +695,7 @@
                     <th class="py-3.5 px-4">Finalización</th>
                     <th class="py-3.5 px-4 text-center w-24">Días</th>
                     <th class="py-3.5 px-4">Detalles</th>
+                    <th id="thFinalizeAction" class="py-3.5 px-4 text-center w-28 whitespace-nowrap">Finalizar</th>
                   </tr>
                 </thead>
                 <tbody id="tasksTableBody" class="divide-y divide-white/[0.03] text-sm"></tbody>
@@ -794,10 +820,10 @@
 
       </main>
 
-      <!-- 4. PANEL DERECHO (DESKTOP DESPLEGABLE w-80/w-16, MÓVIL DESLIZANTE SOLO AL HACER CLIC) -->
+      <!-- 4. PANEL DERECHO (DESKTOP FIXED, MÓVIL DRAWER) -->
       <div id="rightPanelBackdrop" onclick="closeRightPanelMobile()" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"></div>
 
-      <aside id="rightPanel" class="hidden md:flex fixed md:static inset-y-0 right-0 z-50 md:z-20 shrink-0 transition-all duration-300 glass-panel border-l border-white/[0.06] flex-col w-80 lg:w-96 overflow-y-auto custom-scroll shadow-2xl md:shadow-none">
+      <aside id="rightPanel" class="hidden md:flex fixed top-16 bottom-0 right-0 z-30 md:z-20 shrink-0 transition-all duration-300 glass-panel border-l border-white/[0.06] flex-col w-80 lg:w-96 overflow-y-auto custom-scroll shadow-2xl max-md:top-0 max-md:bottom-0 max-md:z-50 max-md:w-80 max-md:sm:w-96">
         <div id="rightPanelHeader" class="p-3 border-b border-white/[0.06] flex items-center justify-between shrink-0">
           <div id="rightPanelToggleGroup" class="flex items-center gap-1 shrink-0">
             <button id="rightPanelToggleBtn" onclick="toggleRightPanelCollapse()" title="Colapsar / Expandir panel" class="p-1 rounded-lg hover:bg-white/[0.05] text-slate-400 hover:text-white transition-all text-xs flex items-center justify-center cursor-pointer">
@@ -1154,6 +1180,154 @@
     let tasks = JSON.parse(localStorage.getItem('taskflow_tasks_unified')) || PATRICIO_INITIAL_TASKS;
     let selectedObservedUserId = "patricio";
     let activeStatusFilter = "";
+
+    
+    // OPCIONES Y ESTILOS CON ÍCONOS Y RESPECTIVOS COLORES PARA ESTADO / PRIORIDAD / DIFICULTAD
+    const STATUS_OPTIONS = [
+      { name: "Pendiente", colorClass: "text-slate-300", iconClass: "text-slate-400", bgClass: "bg-slate-500/10 border-slate-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` },
+      { name: "Proceso", colorClass: "text-yellow-400", iconClass: "text-yellow-400", bgClass: "bg-yellow-500/10 border-yellow-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>` },
+      { name: "Revisión", colorClass: "text-lime-400", iconClass: "text-lime-400", bgClass: "bg-lime-500/10 border-lime-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>` },
+      { name: "Aprobado", colorClass: "text-emerald-400", iconClass: "text-emerald-400", bgClass: "bg-emerald-500/10 border-emerald-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` },
+      { name: "Finalizado", colorClass: "text-cyan-400", iconClass: "text-cyan-400", bgClass: "bg-cyan-500/10 border-cyan-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` }
+    ];
+
+    const PRIORITY_OPTIONS = [
+      { name: "Máxima", colorClass: "text-rose-400", iconClass: "text-rose-400", bgClass: "bg-rose-500/10 border-rose-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17l6-5 6 5"/><path d="M6 12l6-5 6 5"/><path d="M6 7l6-5 6 5"/></svg>` },
+      { name: "Media", colorClass: "text-amber-400", iconClass: "text-amber-400", bgClass: "bg-amber-500/10 border-amber-500/30", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-5 6 5"/><path d="M6 10l6-5 6 5"/></svg>` },
+      { name: "Mínima", colorClass: "text-slate-400", iconClass: "text-slate-400", bgClass: "bg-slate-800/60 border-slate-700/50", svg: `<svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l6-5 6 5"/></svg>` }
+    ];
+
+    const DIFFICULTY_OPTIONS = [
+      { name: "Baja", colorClass: "text-emerald-400", iconClass: "text-emerald-400", bgClass: "bg-emerald-500/10 border-emerald-500/30", svg: `<svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.34 19a10 10 0 1 1 17.32 0" /><path d="m12 14-4.5-4.5" stroke-width="2.5" /><circle cx="12" cy="14" r="1.5" fill="currentColor" /></svg>` },
+      { name: "Media", colorClass: "text-amber-400", iconClass: "text-amber-400", bgClass: "bg-amber-500/10 border-amber-500/30", svg: `<svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.34 19a10 10 0 1 1 17.32 0" /><line x1="12" y1="14" x2="12" y2="7" stroke-width="2.5" /><circle cx="12" cy="14" r="1.5" fill="currentColor" /></svg>` },
+      { name: "Alta", colorClass: "text-rose-400", iconClass: "text-rose-400", bgClass: "bg-rose-500/10 border-rose-500/30", svg: `<svg class="w-4 h-4 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.34 19a10 10 0 1 1 17.32 0" /><path d="m12 14 4.5-4.5" stroke-width="2.5" /><circle cx="12" cy="14" r="1.5" fill="currentColor" /></svg>` }
+    ];
+
+    function renderCustomSelect(type, selectedVal, isViewer) {
+      let options = [];
+      let inputId = '';
+      let labelText = '';
+      if (type === 'status') {
+        options = STATUS_OPTIONS;
+        inputId = 'rpTaskStatus';
+        labelText = 'Estado';
+      } else if (type === 'priority') {
+        options = PRIORITY_OPTIONS;
+        inputId = 'rpTaskPriority';
+        labelText = 'Prioridad';
+      } else if (type === 'difficulty') {
+        options = DIFFICULTY_OPTIONS;
+        inputId = 'rpTaskDifficulty';
+        labelText = 'Dificultad';
+      }
+
+      const curOpt = options.find(o => o.name === selectedVal) || options[0];
+
+      return `
+        <div class="relative custom-dropdown-group" id="group_${inputId}">
+          <label class="block font-semibold text-slate-300 mb-1">${labelText}</label>
+          <input type="hidden" id="${inputId}" name="${inputId}" value="${curOpt.name}">
+          <button type="button"
+                  ${isViewer ? 'disabled' : `onclick="toggleCustomDropdownMenu('${inputId}')"`}
+                  id="trigger_${inputId}"
+                  class="w-full flex items-center justify-between text-xs border-2 border-slate-700/80 hover:border-cyan-400/80 focus:border-cyan-400 rounded-xl px-2.5 py-2 bg-dark-800 text-white outline-none shadow-sm transition-all ${isViewer ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}">
+            <span id="label_${inputId}" class="font-bold truncate ${curOpt.colorClass}">${curOpt.name}</span>
+            <div class="flex items-center gap-1.5 shrink-0 ml-1">
+              <span id="icon_${inputId}" class="${curOpt.iconClass}">${curOpt.svg}</span>
+              <span class="text-[9px] text-slate-400 transition-transform duration-200" id="arrow_${inputId}">▼</span>
+            </div>
+          </button>
+
+          <!-- Menú desplegable flotante con ícono atrás del texto y su respectivo color -->
+          <div id="menu_${inputId}"
+               class="hidden absolute top-full left-0 right-0 mt-1.5 z-50 bg-dark-900 border border-white/15 rounded-xl shadow-2xl p-1.5 space-y-1 backdrop-blur-xl animate-modal-pop">
+            ${options.map(opt => `
+              <div onclick="selectCustomDropdownOption('${type}', '${opt.name}')"
+                   class="flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-white/[0.08] cursor-pointer transition-all ${opt.name === curOpt.name ? 'bg-white/[0.06] border border-white/10' : ''}">
+                <span class="font-bold text-xs ${opt.colorClass}">${opt.name}</span>
+                <span class="${opt.iconClass} shrink-0 ml-2">${opt.svg}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleCustomDropdownMenu(inputId) {
+      const menu = document.getElementById(`menu_${inputId}`);
+      const arrow = document.getElementById(`arrow_${inputId}`);
+      if (!menu) return;
+
+      ['rpTaskStatus', 'rpTaskPriority', 'rpTaskDifficulty'].forEach(id => {
+        if (id !== inputId) {
+          const otherMenu = document.getElementById(`menu_${id}`);
+          const otherArrow = document.getElementById(`arrow_${id}`);
+          if (otherMenu) otherMenu.classList.add('hidden');
+          if (otherArrow) otherArrow.style.transform = 'rotate(0deg)';
+        }
+      });
+
+      const isHidden = menu.classList.contains('hidden');
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+      } else {
+        menu.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    function selectCustomDropdownOption(type, value) {
+      let options = [];
+      let inputId = '';
+      if (type === 'status') {
+        options = STATUS_OPTIONS;
+        inputId = 'rpTaskStatus';
+      } else if (type === 'priority') {
+        options = PRIORITY_OPTIONS;
+        inputId = 'rpTaskPriority';
+      } else if (type === 'difficulty') {
+        options = DIFFICULTY_OPTIONS;
+        inputId = 'rpTaskDifficulty';
+      }
+
+      const opt = options.find(o => o.name === value) || options[0];
+      const input = document.getElementById(inputId);
+      const label = document.getElementById(`label_${inputId}`);
+      const icon = document.getElementById(`icon_${inputId}`);
+      const menu = document.getElementById(`menu_${inputId}`);
+      const arrow = document.getElementById(`arrow_${inputId}`);
+
+      if (input) input.value = opt.name;
+      if (label) {
+        label.innerText = opt.name;
+        label.className = `font-bold truncate ${opt.colorClass}`;
+      }
+      if (icon) {
+        icon.innerHTML = opt.svg;
+        icon.className = opt.iconClass;
+      }
+      if (menu) menu.classList.add('hidden');
+      if (arrow) arrow.style.transform = 'rotate(0deg)';
+
+      if (type === 'status') {
+        handleRpStatusChange(opt.name);
+      }
+    }
+
+    function updateFixedLayout() {
+      const viewerBar = document.getElementById('viewerConsoleBar');
+      const isViewerBarVisible = viewerBar && !viewerBar.classList.contains('hidden');
+      const topPx = isViewerBarVisible ? 104 : 64;
+
+      const leftSidebar = document.getElementById('leftSidebar');
+      const rightPanel = document.getElementById('rightPanel');
+      const centerPanel = document.getElementById('centerPanel');
+
+      if (leftSidebar) leftSidebar.style.top = `${topPx}px`;
+      if (rightPanel && window.innerWidth >= 768) rightPanel.style.top = `${topPx}px`;
+      if (centerPanel) centerPanel.style.paddingTop = `${topPx + 16}px`;
+    }
 
     let currentNavTab = 'tasks';
     let selectedTaskId = null;
@@ -1713,17 +1887,26 @@
       const icon = document.getElementById('sidebarToggleIcon');
       const labels = document.querySelectorAll('.nav-btn-label');
       const titleLabel = document.getElementById('sidebarTitleLabel');
+      const centerPanel = document.getElementById('centerPanel');
 
       isSidebarCollapsed = !isSidebarCollapsed;
       if (isSidebarCollapsed) {
         sidebar.classList.remove('w-56');
         sidebar.classList.add('w-16');
+        if (centerPanel) {
+          centerPanel.classList.remove('md:ml-56');
+          centerPanel.classList.add('md:ml-16');
+        }
         labels.forEach(l => l.classList.add('hidden'));
         if (titleLabel) titleLabel.classList.add('hidden');
         if (icon) icon.style.transform = 'rotate(180deg)';
       } else {
         sidebar.classList.remove('w-16');
         sidebar.classList.add('w-56');
+        if (centerPanel) {
+          centerPanel.classList.remove('md:ml-16');
+          centerPanel.classList.add('md:ml-56');
+        }
         labels.forEach(l => l.classList.remove('hidden'));
         if (titleLabel) titleLabel.classList.remove('hidden');
         if (icon) icon.style.transform = 'rotate(0deg)';
@@ -1854,6 +2037,7 @@
       const header = document.getElementById('rightPanelHeader');
       const body = document.getElementById('rightPanelBody');
       const miniIcons = document.getElementById('rightPanelMiniIcons');
+      const centerPanel = document.getElementById('centerPanel');
 
       if (!panel) return;
 
@@ -1867,6 +2051,10 @@
       if (isRightPanelCollapsed) {
         panel.classList.remove('w-80', 'lg:w-96');
         panel.classList.add('w-16');
+        if (centerPanel) {
+          centerPanel.classList.remove('md:mr-80', 'lg:mr-96');
+          centerPanel.classList.add('md:mr-16');
+        }
         if (titleGroup) titleGroup.classList.add('hidden');
         if (closeBtn) closeBtn.classList.add('hidden');
         if (header) {
@@ -1883,6 +2071,10 @@
       } else {
         panel.classList.remove('w-16');
         panel.classList.add('w-80', 'lg:w-96');
+        if (centerPanel) {
+          centerPanel.classList.remove('md:mr-16');
+          centerPanel.classList.add('md:mr-80', 'lg:mr-96');
+        }
         if (titleGroup) titleGroup.classList.remove('hidden');
         if (closeBtn) closeBtn.classList.remove('hidden');
         if (header) {
@@ -1907,6 +2099,7 @@
       const header = document.getElementById('rightPanelHeader');
       const body = document.getElementById('rightPanelBody');
       const miniIcons = document.getElementById('rightPanelMiniIcons');
+      const centerPanel = document.getElementById('centerPanel');
 
       if (!panel) return;
 
@@ -1919,6 +2112,10 @@
         isRightPanelCollapsed = false;
         panel.classList.remove('w-16');
         panel.classList.add('w-80', 'lg:w-96');
+        if (centerPanel) {
+          centerPanel.classList.remove('md:mr-16');
+          centerPanel.classList.add('md:mr-80', 'lg:mr-96');
+        }
         if (titleGroup) titleGroup.classList.remove('hidden');
         if (closeBtn) closeBtn.classList.remove('hidden');
         if (header) {
@@ -2016,44 +2213,44 @@
             <label class="block font-semibold text-slate-300 mb-1">Descripción del Trabajo</label>
             <textarea id="rpTaskDesc" required rows="3" placeholder="Ej: Diseñar placas..." class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400"></textarea>
           </div>
+
+          <!-- Selectores con ícono atrás del texto y su respectivo color -->
           <div class="grid grid-cols-3 gap-2">
+            ${renderCustomSelect('status', 'Pendiente', false)}
+            ${renderCustomSelect('priority', 'Media', false)}
+            ${renderCustomSelect('difficulty', 'Media', false)}
+          </div>
+
+          <!-- Fechas con botones claros, visibles y con alto contraste -->
+          <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block font-semibold text-slate-300 mb-1">Estado</label>
-              <select id="rpTaskStatus" onchange="handleRpStatusChange(this.value)" required class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
-                ${config.statuses.map(s => `<option value="${s.name}">${s.name}</option>`).join('')}
-              </select>
+              <label class="block font-bold text-slate-200 mb-1.5 flex items-center gap-1.5 text-xs">
+                <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Fecha de Ingreso</span>
+              </label>
+              <input type="date" id="rpTaskDate" value="${toYYYYMMDD(new Date())}"
+                class="w-full text-xs font-semibold text-white bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 hover:border-cyan-400 focus:border-cyan-400 rounded-xl px-3 py-2.5 shadow-md shadow-black/40 outline-none transition-all cursor-pointer">
             </div>
             <div>
-              <label class="block font-semibold text-slate-300 mb-1">Prioridad</label>
-              <select id="rpTaskPriority" required class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
-                ${config.priorities.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Dificultad</label>
-              <select id="rpTaskDifficulty" required class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
-                <option value="Baja">Baja</option>
-                <option value="Media" selected>Media</option>
-                <option value="Alta">Alta</option>
-              </select>
+              <label class="block font-bold text-slate-200 mb-1.5 flex items-center gap-1.5 text-xs">
+                <svg class="w-3.5 h-3.5 text-emerald-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Fecha Finalización</span>
+              </label>
+              <input type="date" id="rpTaskCompletedDate" value=""
+                class="w-full text-xs font-semibold text-white bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 hover:border-cyan-400 focus:border-cyan-400 rounded-xl px-3 py-2.5 shadow-md shadow-black/40 outline-none transition-all cursor-pointer">
             </div>
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
-              <input type="date" id="rpTaskDate" value="${toYYYYMMDD(new Date())}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Fecha Finalización</label>
-              <input type="date" id="rpTaskCompletedDate" value="" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
-            </div>
-          </div>
+
           <div>
             <label class="block font-semibold text-slate-300 mb-1">Detalles / Observaciones</label>
             <input type="text" id="rpTaskDetails" placeholder="Notas adicionales..." class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400">
           </div>
           <div class="pt-3 border-t border-white/[0.06] flex items-center justify-end gap-2">
-            <button type="button" onclick="renderEmptyTaskRightPanel()" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white">Cancelar</button>
+            <button type="button" onclick="renderEmptyTaskRightPanel(); if (window.innerWidth < 768) closeRightPanelMobile();" class="px-3 py-2 rounded-xl text-slate-400 hover:text-white">Cancelar</button>
             <button type="submit" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all">Crear Trabajo</button>
           </div>
         </form>
@@ -2101,37 +2298,34 @@
             <textarea id="rpTaskDesc" ${isViewer ? 'readonly' : 'required'} rows="3" class="w-full text-xs border border-white/[0.08] rounded-xl px-3 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">${task.desc}</textarea>
           </div>
 
+          <!-- Selectores con ícono atrás del texto y su respectivo color -->
           <div class="grid grid-cols-3 gap-2">
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Estado</label>
-              <select id="rpTaskStatus" onchange="handleRpStatusChange(this.value)" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
-                ${config.statuses.map(s => `<option value="${s.name}" ${s.name === task.status ? "selected" : ""}>${s.name}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Prioridad</label>
-              <select id="rpTaskPriority" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
-                ${config.priorities.map(p => `<option value="${p.name}" ${p.name === task.priority ? "selected" : ""}>${p.name}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1">Dificultad</label>
-              <select id="rpTaskDifficulty" ${isViewer ? 'disabled' : 'required'} class="w-full text-xs border border-white/[0.08] rounded-xl px-2 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
-                <option value="Baja" ${task.difficulty === "Baja" ? "selected" : ""}>Baja</option>
-                <option value="Media" ${task.difficulty === "Media" ? "selected" : ""}>Media</option>
-                <option value="Alta" ${task.difficulty === "Alta" ? "selected" : ""}>Alta</option>
-              </select>
-            </div>
+            ${renderCustomSelect('status', task.status || 'Pendiente', isViewer)}
+            ${renderCustomSelect('priority', task.priority || 'Media', isViewer)}
+            ${renderCustomSelect('difficulty', task.difficulty || 'Media', isViewer)}
           </div>
 
-          <div class="grid grid-cols-2 gap-2">
+          <!-- Fechas con botones claros, visibles y con alto contraste -->
+          <div class="grid grid-cols-2 gap-2.5">
             <div>
-              <label class="block font-semibold text-slate-300 mb-1">Fecha de Ingreso</label>
-              <input type="date" id="rpTaskDate" ${isViewer ? 'readonly' : ''} value="${toYYYYMMDD(task.date)}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
+              <label class="block font-bold text-slate-200 mb-1.5 flex items-center gap-1.5 text-xs">
+                <svg class="w-3.5 h-3.5 text-cyan-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Fecha de Ingreso</span>
+              </label>
+              <input type="date" id="rpTaskDate" ${isViewer ? 'readonly' : ''} value="${toYYYYMMDD(task.date)}"
+                class="w-full text-xs font-semibold text-white bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 hover:border-cyan-400 focus:border-cyan-400 rounded-xl px-3 py-2.5 shadow-md shadow-black/40 outline-none transition-all ${isViewer ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}">
             </div>
             <div>
-              <label class="block font-semibold text-slate-300 mb-1">Fecha Finalización</label>
-              <input type="date" id="rpTaskCompletedDate" ${isViewer ? 'readonly' : ''} value="${toYYYYMMDD(task.completedDate || task.completedAt)}" class="w-full text-xs border border-white/[0.08] rounded-xl px-2.5 py-2 bg-dark-850 text-white outline-none focus:border-cyan-400 ${isViewer ? 'opacity-70 cursor-not-allowed' : ''}">
+              <label class="block font-bold text-slate-200 mb-1.5 flex items-center gap-1.5 text-xs">
+                <svg class="w-3.5 h-3.5 text-emerald-400 stroke-current shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>Fecha Finalización</span>
+              </label>
+              <input type="date" id="rpTaskCompletedDate" ${isViewer ? 'readonly' : ''} value="${toYYYYMMDD(task.completedDate || task.completedAt)}"
+                class="w-full text-xs font-semibold text-white bg-slate-800/90 hover:bg-slate-700/90 border-2 border-slate-600 hover:border-cyan-400 focus:border-cyan-400 rounded-xl px-3 py-2.5 shadow-md shadow-black/40 outline-none transition-all ${isViewer ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}">
             </div>
           </div>
 
@@ -2147,7 +2341,7 @@
               </button>
             `}
             <div class="flex items-center gap-2">
-              <button type="button" onclick="deselectTask()" class="px-3 py-2 text-slate-400 hover:text-white">Cerrar</button>
+              <button type="button" onclick="deselectTask(); if (window.innerWidth < 768) closeRightPanelMobile();" class="px-3 py-2 text-slate-400 hover:text-white">Cerrar</button>
               ${isViewer ? '' : `
                 <button type="submit" class="px-4 py-2 font-bold text-white bg-gradient-to-r from-sky-500 to-cyan-500 rounded-xl shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all">
                   Guardar
@@ -2221,6 +2415,9 @@
       renderTaskRightPanel(id);
       await saveToCloud();
       showToast("Trabajo guardado con éxito");
+      if (window.innerWidth < 768) {
+        closeRightPanelMobile();
+      }
     }
 
     function renderCalendarRightPanel(dateKey) {
@@ -2392,16 +2589,23 @@
             ` : `
               <div class="space-y-2 max-h-56 overflow-y-auto custom-scroll pr-1">
                 ${companyTasks.map(t => `
-                  <div onclick="switchNavTab('tasks'); onTaskRowClick('${t.id}')" class="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] cursor-pointer transition-all">
-                    <div class="flex items-center justify-between gap-1 mb-0.5">
-                      <span class="font-bold text-slate-200 truncate">${t.desc}</span>
-                      <span class="text-[9px] font-bold text-cyan-400 shrink-0">${t.status}</span>
+                  <div onclick="switchNavTab('tasks'); onTaskRowClick('${t.id}')" class="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.04] cursor-pointer transition-all flex items-center justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-1 mb-0.5">
+                        <span class="font-bold text-slate-200 truncate">${t.desc}</span>
+                        <span class="text-[9px] font-bold text-cyan-400 shrink-0">${t.status}</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                        <span>Ingreso: ${t.date || "-"}</span>
+                        <span>•</span>
+                        <span>Fin: ${t.completedDate || "-"}</span>
+                      </div>
                     </div>
-                    <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                      <span>Ingreso: ${t.date || "-"}</span>
-                      <span>•</span>
-                      <span>Fin: ${t.completedDate || "-"}</span>
-                    </div>
+                    ${(!isViewer && t.status !== "Finalizado" && (!t.progress || t.progress < 100)) ? `
+                      <button onclick="event.stopPropagation(); quickFinalizeTask('${t.id}')" title="Finalizar tarea" class="px-2 py-1 text-[10px] font-bold rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 shrink-0 cursor-pointer active:scale-95 transition-all">
+                        Finalizar
+                      </button>
+                    ` : ''}
                   </div>
                 `).join("")}
               </div>
@@ -3063,11 +3267,47 @@
       }
     }
 
+    async function quickFinalizeTask(taskId) {
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      if (currentUser && (currentUser.id === 'viewer' || currentUser.isViewer)) return;
+
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      task.status = "Finalizado";
+      task.progress = 100;
+      task.completedDate = toDDMMYYYY(new Date());
+      task.completedAt = Date.now();
+      task.updatedAt = Date.now();
+
+      saveLocalState();
+      renderKPIs();
+      renderTable();
+      updateGamificationUI();
+      if (selectedTaskId === taskId) {
+        renderTaskRightPanel(taskId);
+      }
+      if (currentNavTab === "companies" && selectedCompanyForEdit) {
+        renderCompanyRightPanel(selectedCompanyForEdit);
+      }
+      await saveToCloud();
+      showToast("¡Trabajo finalizado!");
+    }
+
     function renderTable() {
       const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
       const compFilter = document.getElementById("filterCompany")?.value || "";
       const prioFilter = document.getElementById("filterPriority")?.value || "";
       const diffFilter = document.getElementById("filterDifficulty")?.value || "";
+
+      const currentUser = profiles.find(p => p.id === currentUserId);
+      const isViewer = Boolean(currentUser && (currentUser.id === "viewer" || currentUser.isViewer));
+
+      const thFinalize = document.getElementById("thFinalizeAction");
+      if (thFinalize) {
+        if (isViewer) thFinalize.classList.add("hidden");
+        else thFinalize.classList.remove("hidden");
+      }
 
       const userTasks = getActiveTasks();
       let filtered = userTasks.filter(t => {
@@ -3204,6 +3444,23 @@
             <td class="py-3 px-4 text-xs text-slate-400 max-w-xs truncate">
               ${detailsHtml}
             </td>
+            ${(!isViewer) ? `
+              <td class="py-3 px-4 text-center whitespace-nowrap" onclick="event.stopPropagation()">
+                ${(task.status === "Finalizado" || (task.progress !== undefined && task.progress >= 100)) ? `
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 select-none shadow-sm" title="Trabajo finalizado">
+                    <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <span>Listo</span>
+                  </span>
+                ` : `
+                  <button onclick="event.stopPropagation(); quickFinalizeTask('${task.id}')"
+                          title="Finalizar tarea inmediatamente"
+                          class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 hover:from-emerald-500/35 hover:to-cyan-500/35 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-300 shadow-sm transition-all active:scale-95 cursor-pointer">
+                    <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <span>Finalizar</span>
+                  </button>
+                `}
+              </td>
+            ` : ''}
           </tr>
         `;
       }).join("");
@@ -3239,6 +3496,9 @@
         renderTable();
         updateGamificationUI();
         renderEmptyTaskRightPanel();
+        if (window.innerWidth < 768) {
+          closeRightPanelMobile();
+        }
         await saveToCloud();
         showToast("Trabajo eliminado");
       }
@@ -3541,6 +3801,7 @@
       renderKPIs();
       switchNavTab(currentNavTab || "tasks");
       updateGamificationUI();
+      updateFixedLayout();
 
       const hasPendingReset = (currentUser.id === "patricio") && profiles.some(p => p && p.resetRequested && p.id !== "patricio" && p.id !== "viewer");
       const alertDot = document.getElementById("navbarResetAlertDot");
@@ -4000,6 +4261,41 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         handleRightPanelCloseOrDeselect();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-dropdown-group')) {
+        ['rpTaskStatus', 'rpTaskPriority', 'rpTaskDifficulty'].forEach(id => {
+          const menu = document.getElementById(`menu_${id}`);
+          const arrow = document.getElementById(`arrow_${id}`);
+          if (menu) menu.classList.add('hidden');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        });
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      updateFixedLayout();
+      const centerPanel = document.getElementById('centerPanel');
+      if (!centerPanel) return;
+      if (window.innerWidth < 768) {
+        centerPanel.classList.remove('md:ml-56', 'md:ml-16', 'md:mr-80', 'lg:mr-96', 'md:mr-16');
+      } else {
+        if (isSidebarCollapsed) {
+          centerPanel.classList.remove('md:ml-56');
+          centerPanel.classList.add('md:ml-16');
+        } else {
+          centerPanel.classList.remove('md:ml-16');
+          centerPanel.classList.add('md:ml-56');
+        }
+        if (isRightPanelCollapsed) {
+          centerPanel.classList.remove('md:mr-80', 'lg:mr-96');
+          centerPanel.classList.add('md:mr-16');
+        } else {
+          centerPanel.classList.remove('md:mr-16');
+          centerPanel.classList.add('md:mr-80', 'lg:mr-96');
+        }
       }
     });
 
